@@ -1,0 +1,1 @@
+系统卡住，当遥控器先于飞控开机，会导致飞控卡在telem_init后，代码请见ss_test_hal_sys.cpp
