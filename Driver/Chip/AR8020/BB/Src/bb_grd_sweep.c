@@ -49,58 +49,56 @@ extern STRU_GRD_STATUS stru_grdstatus;
 extern void BB_grd_NotifyItFreqByCh(ENUM_RF_BAND band, uint8_t u8_ch);
 
 
-typedef struct
-{
-    ENUM_RF_BAND e_bandsupport;
+//typedef struct
+//{
+    //ENUM_RF_BAND e_bandsupport;
 
     //////////////////
-    int32_t      i32_rf0Pwr[SWEEP_FREQ_BLOCK_ROWS][MAX_IT_FRQ_SIZE];
-    int32_t      i32_rf0PwrAvr[MAX_IT_FRQ_SIZE];
-	int32_t		 i32_rf0psnr[MAX_IT_FRQ_SIZE];
+    //int32_t      i32_rf0PwrAvr[MAX_IT_FRQ_SIZE];
+	//int32_t		 i32_rf0psnr[MAX_IT_FRQ_SIZE];
     //////////////////
-    int32_t      i32_rf1Pwr[SWEEP_FREQ_BLOCK_ROWS][MAX_IT_FRQ_SIZE];
-    int32_t      i32_rf1PwrAvr[MAX_IT_FRQ_SIZE];
-	int32_t 	 i32_rf1psnr[MAX_IT_FRQ_SIZE];
+    //int32_t      i32_rf1Pwr[SWEEP_FREQ_BLOCK_ROWS][MAX_IT_FRQ_SIZE];
+    //int32_t      i32_rf1PwrAvr[MAX_IT_FRQ_SIZE];
+	//int32_t 	 i32_rf1psnr[MAX_IT_FRQ_SIZE];
 
-    ENUM_RF_BAND e_curBand;
-    ENUM_CH_BW   e_bw;
+    //ENUM_CH_BW   e_bw;
 
-    uint8_t      u8_mainCh;          //current VT channel
-    uint8_t      u8_mainSweepRow;
-    uint8_t      u8_mainSweepCh;
+    //uint8_t      u8_mainCh;          //current VT channel
+    //uint8_t      u8_mainSweepRow;
+    //uint8_t      u8_mainSweepCh;
 
-    uint8_t      u8_optCh;           //optional VT channel
-    uint8_t      u8_optSweepRow;
-    uint8_t      u8_optSweepCh;
-    uint8_t      u8_bestBb1ChCnt[MAX_IT_FRQ_SIZE];
-    uint8_t      u8_bestBb2ChCnt[MAX_IT_FRQ_SIZE];
+    //uint8_t      u8_optCh;           //optional VT channel
+    //uint8_t      u8_optSweepRow;
+    //uint8_t      u8_optSweepCh;
+    //uint8_t      u8_bestBb1ChCnt[MAX_IT_FRQ_SIZE];
+    //uint8_t      u8_bestBb2ChCnt[MAX_IT_FRQ_SIZE];
 
-    uint8_t      u8_spareSweepCh;       //channel number
-    uint8_t      u8_optBandSweepCh;     //use to sweep another band channel.
+    //uint8_t      u8_spareSweepCh;       //channel number
+    //uint8_t      u8_optBandSweepCh;     //use to sweep another band channel.
 
-    uint8_t      u8_curBb1Row;
-    uint8_t      u8_curBb2Row;
-    ENUM_RF_BAND e_prevSweepBand;       //previous sweep band
-    uint8_t      u8_prevSweepCh;        //previous sweep channel, main channel and optional channel may change
+    //uint8_t      u8_curBb1Row;
+    //uint8_t      u8_curBb2Row;
+    //ENUM_RF_BAND e_prevSweepBand;       //previous sweep band
+    //uint8_t      u8_prevSweepCh;        //previous sweep channel, main channel and optional channel may change
 
-    uint8_t      u8_cycleCnt;
-    uint8_t      u8_totalCyc;
-    uint8_t      u8_preMainCh;
-    uint16_t     u16_preMainCount;      //if cycle >= u16_preMainCount, clear the u8_preMainCh
+    //uint8_t      u8_cycleCnt;
+    //uint8_t      u8_totalCyc;
+    //uint8_t      u8_preMainCh;
+    //uint16_t     u16_preMainCount;      //if cycle >= u16_preMainCount, clear the u8_preMainCh
 
-    ENUM_RF_select band_sel[15];
-    uint8_t      u8_bandSelCnt;
-    uint8_t      u8_isFull;
-    uint8_t      u8_bb1ItFrqSize;
-    uint8_t      u8_bb2ItFrqSize;
+    //ENUM_RF_select band_sel[15];
+    //uint8_t      u8_bandSelCnt;
+    //uint8_t      u8_isFull;
+    //uint8_t      u8_bb1ItFrqSize;
+    //uint8_t      u8_bb2ItFrqSize;
 
-    uint8_t      u8_cmdSweep;
+    //uint8_t      u8_cmdSweep;
 
-    ENUM_RF_SIGNAL_BLOCK    flag_signalBlock;
-} STRU_SWEEP_NOISE_POWER;
+    //ENUM_RF_SIGNAL_BLOCK    flag_signalBlock;
+//} STRU_SWEEP_NOISE_POWER;
 
 
-STRU_SWEEP_NOISE_POWER stru_sweepPower = {0};
+//STRU_SWEEP_NOISE_POWER stru_sweepPower = {0};
 uint8_t sweep_with_filter = 1;
 
 
@@ -108,7 +106,7 @@ static int calc_power_db(ENUM_RF_BAND e_rfBand, uint8_t bw, uint32_t power_td,
                          int16_t *power_fd, int32_t *power_sum, 
                          uint8_t cnt, uint8_t sweep_ch, int flaglog);
 
-static void calc_average_and_fluct(ENUM_RF_BAND e_rfBand, uint8_t u8_ItCh);
+//static void calc_average_and_fluct(ENUM_RF_BAND e_rfBand, uint8_t u8_ItCh);
 
 static uint8_t BB_GetSweepTotalCh(ENUM_RF_BAND e_rfBand, ENUM_CH_BW e_bw);
 
@@ -120,7 +118,7 @@ static void BB_GetItMinMaxCh(ENUM_RF_BAND e_rfBand, ENUM_CH_BW e_bw, uint8_t *mi
 
 static void BB_GetItAdjacentFrequency(uint8_t ch, uint8_t *pre, uint8_t *next);
 
-ENUM_RF_select BB_grd_cmpBandNoise( void );
+//ENUM_RF_select BB_grd_cmpBandNoise( void );
 
 
 
@@ -129,26 +127,26 @@ ENUM_RF_select BB_grd_cmpBandNoise( void );
  */
 void __attribute__ ((section(".h264"))) BB_SweepStart(ENUM_RF_BAND e_bandsupport, ENUM_CH_BW e_bw)
 {
-    memset((uint8_t *)(&stru_sweepPower), 0x00, sizeof(STRU_SWEEP_NOISE_POWER));
+    //memset((uint8_t *)(&stru_sweepPower), 0x00, sizeof(STRU_SWEEP_NOISE_POWER));
     
-    stru_sweepPower.u8_preMainCh  =  0xff;
-    stru_sweepPower.u8_mainCh     =  0xff;
-    stru_sweepPower.e_bw          =  e_bw;
-    stru_sweepPower.u8_cmdSweep = 0;
+    context.rf_info.u8_preMainCh  =  0xff;
+    context.rf_info.u8_mainCh     =  0xff;
+    context.rf_info.e_bw          =  e_bw;
+    context.rf_info.u8_cmdSweep = 0;
 
-    stru_sweepPower.e_bandsupport = context.st_bandMcsOpt.e_bandsupport;
+    context.rf_info.e_bandsupport = context.st_bandMcsOpt.e_bandsupport;
     
     #ifdef RF_9363
     //if(RF_600M == context.e_curBand)
     {
-        stru_sweepPower.u8_totalCyc   = 2;
+        context.rf_info.u8_totalCyc   = 2;
         if(0 == sweep_with_filter)
         {
             BB_FilterSet(FILTER_NONE, 1); // set filter none.
         }
         else
         {
-            BB_FilterSet(BB_GetFilterByVtFrqCh(stru_sweepPower.u8_prevSweepCh), 0);
+            BB_FilterSet(BB_GetFilterByVtFrqCh(context.rf_info.u8_prevSweepCh), 0);
         }
     }
     #endif
@@ -156,7 +154,7 @@ void __attribute__ ((section(".h264"))) BB_SweepStart(ENUM_RF_BAND e_bandsupport
     #ifdef RF_8003X
     //else
     {
-        stru_sweepPower.u8_totalCyc   = (stru_sweepPower.e_bandsupport == RF_2G_5G) ? 0x04 : 0x03;
+        context.rf_info.u8_totalCyc   = (context.rf_info.e_bandsupport == RF_2G_5G) ? 0x04 : 0x03;
     }
     #endif
 
@@ -165,34 +163,34 @@ void __attribute__ ((section(".h264"))) BB_SweepStart(ENUM_RF_BAND e_bandsupport
 #ifdef RF_9363
     //if (RF_600M == e_bandsupport)
     {
-        stru_sweepPower.u8_bb1ItFrqSize = BB_GetItFrqNum(RF_600M);
-        stru_sweepPower.e_curBand   =  RF_600M;
+        context.rf_info.u8_bb1ItFrqSize = BB_GetItFrqNum(RF_600M);
+        context.e_curBand   =  RF_600M;
     }
 #endif
 
 #ifdef RF_8003X
     if (RF_2G_5G == e_bandsupport)
     {
-        stru_sweepPower.u8_bb1ItFrqSize = BB_GetItFrqNum(RF_2G);
-        stru_sweepPower.u8_bb2ItFrqSize = BB_GetItFrqNum(RF_5G);
-        stru_sweepPower.e_curBand = RF_2G;
+        context.rf_info.u8_bb1ItFrqSize = BB_GetItFrqNum(RF_2G);
+        context.rf_info.u8_bb2ItFrqSize = BB_GetItFrqNum(RF_5G);
+        context.e_curBand = RF_2G;
     }
     else if (RF_5G == e_bandsupport)
     {
-        stru_sweepPower.u8_bb1ItFrqSize = BB_GetItFrqNum(RF_5G);
-        stru_sweepPower.e_curBand = RF_5G;
+        context.rf_info.u8_bb1ItFrqSize = BB_GetItFrqNum(RF_5G);
+        context.e_curBand = RF_5G;
     }
     else if (RF_2G == e_bandsupport)
     {
-        stru_sweepPower.u8_bb1ItFrqSize = BB_GetItFrqNum(RF_2G);
-        stru_sweepPower.e_curBand = RF_2G;
+        context.rf_info.u8_bb1ItFrqSize = BB_GetItFrqNum(RF_2G);
+        context.e_curBand = RF_2G;
     }
 #endif
-    stru_sweepPower.flag_signalBlock = RF_SIGNAL_UNKNOWN_MODE;
-    BB_WriteRegMask(PAGE2, GRD_SKY_IT_CH_SYNC, (stru_sweepPower.flag_signalBlock << 6), GRD_SKY_BLOCK_MODE_MASK);
+    context.rf_info.flag_signalBlock = RF_SIGNAL_UNKNOWN_MODE;
+    BB_WriteRegMask(PAGE2, GRD_SKY_IT_CH_SYNC, (context.rf_info.flag_signalBlock << 6), GRD_SKY_BLOCK_MODE_MASK);
 
-    stru_sweepPower.e_prevSweepBand  = stru_sweepPower.e_curBand;
-    BB_set_SweepFrq(stru_sweepPower.e_curBand, e_bw, 0);
+    context.rf_info.e_prevSweepBand  = context.e_curBand;
+    BB_set_SweepFrq(context.e_curBand, e_bw, 0);
 
     context.u_bandSwitchParam = (UNION_BandSwitchParm *)CFGBIN_GetNodeAndData((STRU_cfgBin *)SRAM_CONFIGURE_MEMORY_ST_ADDR, RF_GRD_BAND_SWITCH_CFG_ID, NULL);
 }
@@ -204,20 +202,20 @@ void __attribute__ ((section(".h264"))) BB_GetSweepNoise(int16_t *ptr_noise_powe
     uint8_t i;
     int16_t value;
 
-    for(col = 0; col < stru_sweepPower.u8_bb1ItFrqSize; col++)
+    for(col = 0; col < context.rf_info.u8_bb1ItFrqSize; col++)
     {
         if(col >= max)
         {
             return;
         }
 
-        if (RF_5G == stru_sweepPower.e_bandsupport)
+        if (RF_5G == context.rf_info.e_bandsupport)
         {
-            value = (int16_t)(stru_sweepPower.i32_rf1PwrAvr[col]);
+            value = (int16_t)(context.rf_info.sweep_pwr_avrg_value[col].value);
         }
         else
         {
-            value = (int16_t)(stru_sweepPower.i32_rf0PwrAvr[col]);
+            value = (int16_t)(context.rf_info.sweep_pwr_avrg_value[col].value);
         }
 
         for(i = 0; i < 8; i++)
@@ -226,16 +224,16 @@ void __attribute__ ((section(".h264"))) BB_GetSweepNoise(int16_t *ptr_noise_powe
         }
     }
 
-    for(col = 0; col < stru_sweepPower.u8_bb2ItFrqSize; col++)
+    for(col = 0; col < context.rf_info.u8_bb2ItFrqSize; col++)
     {
-        if((col + stru_sweepPower.u8_bb1ItFrqSize) >= max)
+        if((col + context.rf_info.u8_bb1ItFrqSize) >= max)
         {
             return;
         }
-        value = (int16_t)(stru_sweepPower.i32_rf1PwrAvr[col]);
+        value = (int16_t)(context.rf_info.sweep_pwr_avrg_value[col].value);
         for(i = 0; i < 8; i++)
         {
-            ptr_noise_power[(col + stru_sweepPower.u8_bb1ItFrqSize) * 8 + i] = value;
+            ptr_noise_power[(col + context.rf_info.u8_bb1ItFrqSize) * 8 + i] = value;
         }
     }
 }
@@ -247,7 +245,7 @@ int grd_lna_check_sweep_power(uint8_t ch,int32_t spower_data)
     static uint32_t   swp_lna_switch_all_cnt = 0;
     static uint8_t    swp_recyles_cnt = 0,swp_watch_window_size = 0;
 
-    if(stru_sweepPower.e_prevSweepBand == RF_2G && ch != context.cur_IT_ch )
+    if(context.rf_info.e_prevSweepBand == RF_2G && ch != context.cur_IT_ch )
     {
         swp_watch_window_size++;
         if(spower_data > GRD_SWEEP_LNA_SWITCH_THRESHOLD)
@@ -296,7 +294,7 @@ int grd_lna_check_sweep_power(uint8_t ch,int32_t spower_data)
 
     }
 
-    //DLOG_Warning("sw-b %d wk-b %d sw-c %d p %d",stru_sweepPower.e_prevSweepBand,context.e_curBand,ch,spower_data);
+    //DLOG_Warning("sw-b %d wk-b %d sw-c %d p %d",context.rf_info.e_prevSweepBand,context.e_curBand,ch,spower_data);
 }
 
 
@@ -308,68 +306,42 @@ int grd_lna_check_sweep_power(uint8_t ch,int32_t spower_data)
 static uint8_t __attribute__ ((section(".h264"))) BB_GetSweepPower(ENUM_RF_BAND e_rfBand, uint8_t bw, uint8_t row, uint8_t sweep_ch, uint8_t flag)
 {
     uint8_t  num = 0;
-    uint8_t  i   = 0;
     uint8_t  ret = 0;
     uint8_t  offset = sweep_ch;
-
-    uint16_t ch_fd_power[16];
-    uint8_t  power_fd_addr = 0x60;
     uint8_t  u8_maxCh = BB_GetSweepTotalCh(e_rfBand, bw);
-
     if(sweep_ch >= u8_maxCh)
     {
         DLOG_Error("Ch overflow:%d %d %d", e_rfBand, sweep_ch, u8_maxCh);
 		
     }
 
-    //get the time domain noise power
-    uint32_t power_td =  (((uint32_t)(BB_ReadReg(PAGE2, SWEEP_ENERGY_HIGH)) << 16) |
-                                     (BB_ReadReg(PAGE2, SWEEP_ENERGY_MID) << 8)  |
-                                     (BB_ReadReg(PAGE2, SWEEP_ENERGY_LOW)));
-
-    if(power_td == 0)
-    {
+	int i=0,j=0; 
+	
+	static int tx_sweep=0;
+    int32_t power = BB_SweepEnergy();
+	signed char data = int2char(power);
+    if (data == 0){
         return 0;
     }
+    grd_lna_check_sweep_power(sweep_ch,data);
 
-    num = ((bw == BW_10M) ? BW_10M_MAX_CH_CNT : BW_20M_MAX_CH_CNT);
-    power_fd_addr += ( ((bw == BW_10M) ? BW_10M_END_TH : BW_20M_END_TH ) * 2 /*2 byts each snr */ );
+	GetSweepCh_normalsweep(context.rf_info.curBandIdx,sweep_ch,data,BB_GRD_MODE);
 
-    for(i = 0; i < num; i++)
-    {
-        ch_fd_power[i] = (((uint16_t)BB_ReadReg(PAGE3, power_fd_addr) << 8) | BB_ReadReg(PAGE3, power_fd_addr+1));
-        power_fd_addr -= 2;
-        if(ch_fd_power[i] == 0)
-        {
-            return 0;
-        }
-    }
-
-    flaglog = 0;
-
-    int32_t *ps32_power = (e_rfBand == RF_5G) ? stru_sweepPower.i32_rf1Pwr[row] : stru_sweepPower.i32_rf0Pwr[row];
-                                                     
-    ret = calc_power_db(e_rfBand, bw, power_td, ch_fd_power,  ps32_power, num, sweep_ch, flag);
-
-    num = BB_GetItFrqNum(e_rfBand);
+	CalcAverageSweepPower(sweep_ch);
 	
-    //for(i = 0; i < num; i++)
-   // {
-        calc_average_and_fluct(e_rfBand, sweep_ch);
-   // }
-
-    return ret;
+	return 1;
 }
 
 
 int32_t __attribute__ ((section(".h264"))) BB_Sweep_updateCh(ENUM_RF_BAND e_rfBand, uint8_t mainch)
 {
     uint8_t opt;
-    stru_sweepPower.u8_preMainCh     = stru_sweepPower.u8_mainCh;
-    stru_sweepPower.u16_preMainCount = 0; //clear after 1000 cycles
+	int i=0;
+    context.rf_info.u8_preMainCh     = context.rf_info.u8_mainCh;
+    context.rf_info.u16_preMainCount = 0; //clear after 1000 cycles
 
-    stru_sweepPower.u8_mainSweepCh = mainch;
-    stru_sweepPower.u8_mainCh      = mainch;
+    context.rf_info.u8_mainSweepCh = mainch;
+    context.rf_info.u8_mainCh      = mainch;
 
 #ifdef RF_9363
     //if(RF_600M == context.e_curBand)
@@ -386,65 +358,64 @@ int32_t __attribute__ ((section(".h264"))) BB_Sweep_updateCh(ENUM_RF_BAND e_rfBa
     }
 #endif
 
-    stru_sweepPower.u8_optCh = opt;
-    stru_sweepPower.u8_optSweepCh = opt;
-
-    memset(stru_sweepPower.u8_bestBb1ChCnt, 0, sizeof(stru_sweepPower.u8_bestBb1ChCnt));
-    memset(stru_sweepPower.u8_bestBb2ChCnt, 0, sizeof(stru_sweepPower.u8_bestBb2ChCnt));
- 
+    context.rf_info.u8_optCh = opt;
+    context.rf_info.u8_optSweepCh = opt;
+	for(i=0;i<MAX_IT_FRQ_SIZE;i++)context.rf_info.u8_bestBb1ChCnt[i]=0;
+	for(i=0;i<MAX_IT_FRQ_SIZE;i++)context.rf_info.u8_bestBb2ChCnt[i]=0;
+    
     return 0;
 }
 
 void __attribute__ ((section(".h264"))) BB_CmdSweepStart(ENUM_RF_BAND e_bandsupport, ENUM_CH_BW e_bw)
 {
-    stru_sweepPower.u8_curBb1Row = 0;
-    stru_sweepPower.u8_prevSweepCh = 0;
-    BB_set_SweepFrq(stru_sweepPower.e_curBand, e_bw, 0);
-    stru_sweepPower.u8_cmdSweep = 1;
+    context.rf_info.u8_curBb1Row = 0;
+    context.rf_info.u8_prevSweepCh = 0;
+    BB_set_SweepFrq(context.e_curBand, e_bw, 0);
+    context.rf_info.u8_cmdSweep = 1;
     if(0 == sweep_with_filter)
     {
         BB_FilterSet(FILTER_NONE, 1); // set filter none.
     }
     else
     {
-        BB_FilterSet(BB_GetFilterByVtFrqCh(stru_sweepPower.u8_prevSweepCh), 0);
+        BB_FilterSet(BB_GetFilterByVtFrqCh(context.rf_info.u8_prevSweepCh), 0);
     }
 }
 
 static int __attribute__ ((section(".h264"))) BB_CmdSweep( void )
 {
-    uint8_t u8_maxCh = BB_GetSweepTotalCh( stru_sweepPower.e_curBand, stru_sweepPower.e_bw);
+    uint8_t u8_maxCh = BB_GetSweepTotalCh( context.e_curBand, context.rf_info.e_bw);
     uint8_t result = 0;
-    uint8_t curRow = stru_sweepPower.u8_curBb1Row;
+    uint8_t curRow = context.rf_info.u8_curBb1Row;
 
-    result   = BB_GetSweepPower( stru_sweepPower.e_curBand,
-                                 stru_sweepPower.e_bw,
+    result   = BB_GetSweepPower( context.e_curBand,
+                                 context.rf_info.e_bw,
                                  curRow,
-                                 stru_sweepPower.u8_prevSweepCh,
+                                 context.rf_info.u8_prevSweepCh,
                                  0 );
 
     if( result )
     {
-        uint8_t nextch = NEXT_NUM(stru_sweepPower.u8_prevSweepCh, u8_maxCh);
-        if ( nextch < stru_sweepPower.u8_prevSweepCh )
+        uint8_t nextch = NEXT_NUM(context.rf_info.u8_prevSweepCh, u8_maxCh);
+        if ( nextch < context.rf_info.u8_prevSweepCh )
         {
-            stru_sweepPower.u8_curBb1Row = NEXT_NUM(stru_sweepPower.u8_curBb1Row, SWEEP_FREQ_BLOCK_ROWS);
-            if ( stru_sweepPower.u8_curBb1Row == 0)
+            context.rf_info.u8_curBb1Row = NEXT_NUM(context.rf_info.u8_curBb1Row, SWEEP_FREQ_BLOCK_ROWS);
+            if ( context.rf_info.u8_curBb1Row == 0)
             {
-                stru_sweepPower.u8_cmdSweep = 0;
+                context.rf_info.u8_cmdSweep = 0;
                 BB_FilterSet(BB_GetFilterByVtFrqCh(context.cur_IT_ch), 1); // recover filter
                 BB_Sweep_updateCh(context.e_curBand, context.cur_IT_ch );
                 return 0;
             }
         }
         
-        stru_sweepPower.u8_prevSweepCh = nextch;
+        context.rf_info.u8_prevSweepCh = nextch;
 
-        BB_set_SweepFrq(stru_sweepPower.e_curBand, stru_sweepPower.e_bw, stru_sweepPower.u8_prevSweepCh);
-        //DLOG_Warning("%d %d", stru_sweepPower.u8_curBb1Row, stru_sweepPower.u8_prevSweepCh);
+        BB_set_SweepFrq(context.e_curBand, context.rf_info.e_bw, context.rf_info.u8_prevSweepCh);
+        //DLOG_Warning("%d %d", context.rf_info.u8_curBb1Row, context.rf_info.u8_prevSweepCh);
         if(1 == sweep_with_filter)
         {
-            BB_FilterSet(BB_GetFilterByVtFrqCh(stru_sweepPower.u8_prevSweepCh), 0);
+            BB_FilterSet(BB_GetFilterByVtFrqCh(context.rf_info.u8_prevSweepCh), 0);
         }
     }
 
@@ -475,69 +446,69 @@ int __attribute__ ((section(".h264"))) BB_SetNewItCh_600m( uint8_t ch )
 
 static int __attribute__ ((section(".h264"))) BB_SweepBeforeFull( void )
 {
-    uint8_t u8_maxCh = BB_GetSweepTotalCh( stru_sweepPower.e_curBand, stru_sweepPower.e_bw);
+    uint8_t u8_maxCh = BB_GetSweepTotalCh( context.e_curBand, context.rf_info.e_bw);
     uint8_t result = 0;
-    uint8_t curRow = (stru_sweepPower.e_curBand == RF_5G) ? (stru_sweepPower.u8_curBb2Row) : (stru_sweepPower.u8_curBb1Row);
+    uint8_t curRow = (context.e_curBand == RF_5G) ? (context.rf_info.u8_curBb2Row) : (context.rf_info.u8_curBb1Row);
 
 #if(FULL_BAND_SWEEP_EN)
     static uint8_t full_band_sw_flag = 0;
-    DLOG_Warning("before sw,chn %d,maxch %u\n", stru_sweepPower.u8_prevSweepCh, u8_maxCh);
+    DLOG_Warning("before sw,chn %d,maxch %u\n", context.rf_info.u8_prevSweepCh, u8_maxCh);
 #endif
 
-    result   = BB_GetSweepPower( stru_sweepPower.e_curBand,
-                                 stru_sweepPower.e_bw,
+    result   = BB_GetSweepPower( context.e_curBand,
+                                 context.rf_info.e_bw,
                                  curRow,
-                                 stru_sweepPower.u8_prevSweepCh,
+                                 context.rf_info.u8_prevSweepCh,
                                  0 );
 
     if( result )
     {
-        uint8_t nextch = NEXT_NUM(stru_sweepPower.u8_prevSweepCh, u8_maxCh);
-        if ( nextch < stru_sweepPower.u8_prevSweepCh )
+        uint8_t nextch = NEXT_NUM(context.rf_info.u8_prevSweepCh, u8_maxCh);
+        if ( nextch < context.rf_info.u8_prevSweepCh )
         {
             uint8_t flag = 0;
-            if ( stru_sweepPower.e_curBand == RF_5G )
+            if ( context.e_curBand == RF_5G )
             {
-                stru_sweepPower.u8_curBb2Row = NEXT_NUM(stru_sweepPower.u8_curBb2Row, SWEEP_FREQ_BLOCK_ROWS);
-                if ( stru_sweepPower.u8_curBb2Row == 0)
+                context.rf_info.u8_curBb2Row = NEXT_NUM(context.rf_info.u8_curBb2Row, SWEEP_FREQ_BLOCK_ROWS);
+                if ( context.rf_info.u8_curBb2Row == 0)
                 {
-                    stru_sweepPower.u8_isFull |= 0x01;
+                    context.rf_info.u8_isFull |= 0x01;
                 }
             }
             else
             {
-                stru_sweepPower.u8_curBb1Row = NEXT_NUM(stru_sweepPower.u8_curBb1Row, SWEEP_FREQ_BLOCK_ROWS);
-                if ( stru_sweepPower.u8_curBb1Row == 0)
+                context.rf_info.u8_curBb1Row = NEXT_NUM(context.rf_info.u8_curBb1Row, SWEEP_FREQ_BLOCK_ROWS);
+                if ( context.rf_info.u8_curBb1Row == 0)
                 {
-                    stru_sweepPower.u8_isFull |= 0x01;
+                    context.rf_info.u8_isFull |= 0x01;
                 }
             }
 
 #if(FULL_BAND_SWEEP_EN)
-            if( stru_sweepPower.u8_isFull ){
+            if( context.rf_info.u8_isFull ){
                 //if(context.st_bandMcsOpt.e_rfbandMode == AUTO && context.st_bandMcsOpt.e_bandsupport == RF_2G_5G){
                 if( context.st_bandMcsOpt.e_bandsupport == RF_2G_5G ){
                     if(!full_band_sw_flag){
-                        stru_sweepPower.e_curBand = RF_5G;
-                        stru_sweepPower.u8_isFull = 0;
+                        context.e_curBand = RF_5G;
+                        context.rf_info.u8_isFull = 0;
                         full_band_sw_flag = 1;
                         DLOG_Warning("RF_2G Full, switch to RF_5G\n");
                     }else{
-                        stru_sweepPower.e_curBand == RF_2G;
+                        context.e_curBand == RF_2G;
                     }
                 }
             }
 #endif
 
 
-            if( stru_sweepPower.u8_isFull )
+            if( context.rf_info.u8_isFull )
             {
                 uint8_t mainch = 0, opt = 0;
 
                 #ifdef RF_9363
                 //if(RF_600M == context.e_curBand)
                 {
-                    BB_selectBestCh600m( stru_sweepPower.e_curBand, SELECT_MAIN_OPT, &mainch, &opt, NULL, 0 );
+                    BB_selectBestCh600m( context.e_curBand, SELECT_MAIN_OPT, &mainch, &opt, NULL, 0 );
                     BB_SetNewItCh_600m(mainch);
                 }
                 #endif
@@ -545,15 +516,15 @@ static int __attribute__ ((section(".h264"))) BB_SweepBeforeFull( void )
                 #ifdef RF_8003X
                 //else
                 {
-                    BB_selectBestCh( stru_sweepPower.e_curBand, SELECT_MAIN_OPT, &mainch, &opt, NULL, 0 );
+                    BB_selectBestCh( context.e_curBand, SELECT_MAIN_OPT, &mainch, &opt, NULL, 0 );
 
-                    stru_sweepPower.u8_mainSweepCh = mainch;
-                    stru_sweepPower.u8_mainCh      = mainch;
+                    context.rf_info.u8_mainSweepCh = mainch;
+                    context.rf_info.u8_mainCh      = mainch;
                 
-                    stru_sweepPower.u8_prevSweepCh = stru_sweepPower.u8_mainSweepCh;
+                    context.rf_info.u8_prevSweepCh = context.rf_info.u8_mainSweepCh;
 
-                    stru_sweepPower.u8_optCh = opt;
-                    stru_sweepPower.u8_optSweepCh = opt;
+                    context.rf_info.u8_optCh = opt;
+                    context.rf_info.u8_optSweepCh = opt;
                     context.vtFreqTime[context.cur_IT_ch] = SysTicks_GetTickCount();//save last main ch time value
 
                     context.cur_IT_ch  = mainch;
@@ -563,7 +534,7 @@ static int __attribute__ ((section(".h264"))) BB_SweepBeforeFull( void )
                 }
                 #endif
                 
-                stru_sweepPower.u8_cycleCnt = MAIN_CH_CYCLE;
+                context.rf_info.u8_cycleCnt = MAIN_CH_CYCLE;
                 
                 if(context.freq_band_mode == SUB_BAND)
                 {
@@ -583,20 +554,20 @@ static int __attribute__ ((section(".h264"))) BB_SweepBeforeFull( void )
             }
             else
             {
-                stru_sweepPower.u8_prevSweepCh = nextch;
+                context.rf_info.u8_prevSweepCh = nextch;
             }
         }
         else
         {
-            stru_sweepPower.u8_prevSweepCh = nextch;
+            context.rf_info.u8_prevSweepCh = nextch;
         }
 
-        BB_set_SweepFrq( stru_sweepPower.e_curBand, stru_sweepPower.e_bw, stru_sweepPower.u8_prevSweepCh );
+        BB_set_SweepFrq( context.e_curBand, context.rf_info.e_bw, context.rf_info.u8_prevSweepCh );
 
         #ifdef RF_9363
         if(1 == sweep_with_filter)
         {
-            BB_FilterSet(BB_GetFilterByVtFrqCh(stru_sweepPower.u8_prevSweepCh), 0);
+            BB_FilterSet(BB_GetFilterByVtFrqCh(context.rf_info.u8_prevSweepCh), 0);
         }
         #endif
     }
@@ -609,9 +580,9 @@ static int __attribute__ ((section(".h264"))) BB_set_sweepChannel(void)
 {
     uint8_t shift = 0;
     uint8_t u8_maxCh;
-    uint8_t cycle = (stru_sweepPower.u8_cycleCnt % stru_sweepPower.u8_totalCyc);
-    ENUM_RF_BAND e_curBand = stru_sweepPower.e_curBand;
-    ENUM_CH_BW   e_bw      = stru_sweepPower.e_bw;
+    uint8_t cycle = (context.rf_info.u8_cycleCnt % context.rf_info.u8_totalCyc);
+    ENUM_RF_BAND e_curBand = context.e_curBand;
+    ENUM_CH_BW   e_bw      = context.rf_info.e_bw;
 
     if(cycle == OTHER_CH_CYCLE)
     {
@@ -619,77 +590,77 @@ static int __attribute__ ((section(".h264"))) BB_set_sweepChannel(void)
         uint8_t u8_nextch = 0;
         do
         {
-            u8_nextch = NEXT_NUM(stru_sweepPower.u8_spareSweepCh, u8_maxCh);
-            if( u8_nextch < stru_sweepPower.u8_spareSweepCh )
+            u8_nextch = NEXT_NUM(context.rf_info.u8_spareSweepCh, u8_maxCh);
+            if( u8_nextch < context.rf_info.u8_spareSweepCh )
             {
                 if ( e_curBand == RF_5G )    //5G mode: switch to 5G next row
                 {
-                    stru_sweepPower.u8_curBb2Row = NEXT_NUM(stru_sweepPower.u8_curBb2Row, SWEEP_FREQ_BLOCK_ROWS);
+                    context.rf_info.u8_curBb2Row = NEXT_NUM(context.rf_info.u8_curBb2Row, SWEEP_FREQ_BLOCK_ROWS);
                 }
                 else
                 {
-                    stru_sweepPower.u8_curBb1Row = NEXT_NUM(stru_sweepPower.u8_curBb1Row, SWEEP_FREQ_BLOCK_ROWS);
+                    context.rf_info.u8_curBb1Row = NEXT_NUM(context.rf_info.u8_curBb1Row, SWEEP_FREQ_BLOCK_ROWS);
                 }
             }
-            stru_sweepPower.u8_spareSweepCh = u8_nextch;
-        } while( u8_nextch == stru_sweepPower.u8_mainSweepCh || u8_nextch == stru_sweepPower.u8_optSweepCh );
+            context.rf_info.u8_spareSweepCh = u8_nextch;
+        } while( u8_nextch == context.rf_info.u8_mainSweepCh || u8_nextch == context.rf_info.u8_optSweepCh );
 
-        stru_sweepPower.e_prevSweepBand  = e_curBand;
-        stru_sweepPower.u8_prevSweepCh = stru_sweepPower.u8_spareSweepCh;
+        context.rf_info.e_prevSweepBand  = e_curBand;
+        context.rf_info.u8_prevSweepCh = context.rf_info.u8_spareSweepCh;
     }
     else if( cycle == MAIN_CH_CYCLE )
     {
-        stru_sweepPower.e_prevSweepBand  = e_curBand;
-        stru_sweepPower.u8_prevSweepCh   = stru_sweepPower.u8_mainSweepCh;
-        stru_sweepPower.u8_mainSweepRow  = NEXT_NUM(stru_sweepPower.u8_mainSweepRow, SWEEP_FREQ_BLOCK_ROWS);
+        context.rf_info.e_prevSweepBand  = e_curBand;
+        context.rf_info.u8_prevSweepCh   = context.rf_info.u8_mainSweepCh;
+        context.rf_info.u8_mainSweepRow  = NEXT_NUM(context.rf_info.u8_mainSweepRow, SWEEP_FREQ_BLOCK_ROWS);
 #ifdef RF_9363
         if(RF_600M == context.e_curBand)
         {
-            BB_FilterSet(BB_GetFilterByVtFrqCh(stru_sweepPower.u8_prevSweepCh), 0);
+            BB_FilterSet(BB_GetFilterByVtFrqCh(context.rf_info.u8_prevSweepCh), 0);
         }
 #endif
     }
     else if( cycle == OPT_CH_CYCLE )
     {
-        stru_sweepPower.e_prevSweepBand  = e_curBand;
-        stru_sweepPower.u8_prevSweepCh   = stru_sweepPower.u8_optSweepCh;
-        stru_sweepPower.u8_optSweepRow   = NEXT_NUM(stru_sweepPower.u8_optSweepRow, SWEEP_FREQ_BLOCK_ROWS);    
+        context.rf_info.e_prevSweepBand  = e_curBand;
+        context.rf_info.u8_prevSweepCh   = context.rf_info.u8_optSweepCh;
+        context.rf_info.u8_optSweepRow   = NEXT_NUM(context.rf_info.u8_optSweepRow, SWEEP_FREQ_BLOCK_ROWS);    
     }
     else if(cycle == OTHER_BAND_CH_CYCLE)  // if RF_2G or RF_5G only, no OTHER_BAND_CH_CYCLE
     {
-        ENUM_RF_BAND newband = OTHER_BAND( stru_sweepPower.e_curBand );
+        ENUM_RF_BAND newband = OTHER_BAND( context.e_curBand );
         u8_maxCh = BB_GetSweepTotalCh(newband, e_bw);
 
-        stru_sweepPower.u8_optBandSweepCh = NEXT_NUM(stru_sweepPower.u8_optBandSweepCh, u8_maxCh);
-        stru_sweepPower.u8_prevSweepCh    = stru_sweepPower.u8_optBandSweepCh;
-        stru_sweepPower.e_prevSweepBand   = newband;
+        context.rf_info.u8_optBandSweepCh = NEXT_NUM(context.rf_info.u8_optBandSweepCh, u8_maxCh);
+        context.rf_info.u8_prevSweepCh    = context.rf_info.u8_optBandSweepCh;
+        context.rf_info.e_prevSweepBand   = newband;
 
-        if ( stru_sweepPower.u8_prevSweepCh == 0 ) //start channel from 0, new row.
+        if ( context.rf_info.u8_prevSweepCh == 0 ) //start channel from 0, new row.
         {
             if ( newband == RF_5G )
             {
-                stru_sweepPower.u8_curBb2Row = NEXT_NUM(stru_sweepPower.u8_curBb2Row, SWEEP_FREQ_BLOCK_ROWS);
+                context.rf_info.u8_curBb2Row = NEXT_NUM(context.rf_info.u8_curBb2Row, SWEEP_FREQ_BLOCK_ROWS);
             }
             else
             {
-                stru_sweepPower.u8_curBb1Row = NEXT_NUM(stru_sweepPower.u8_curBb1Row, SWEEP_FREQ_BLOCK_ROWS);
+                context.rf_info.u8_curBb1Row = NEXT_NUM(context.rf_info.u8_curBb1Row, SWEEP_FREQ_BLOCK_ROWS);
             }
         }
     }
 
-    BB_set_SweepFrq(stru_sweepPower.e_prevSweepBand, e_bw, stru_sweepPower.u8_prevSweepCh);
+    BB_set_SweepFrq(context.rf_info.e_prevSweepBand, e_bw, context.rf_info.u8_prevSweepCh);
 
     {
         STRU_WIRELESS_INFO_DISPLAY *osdptr = (STRU_WIRELESS_INFO_DISPLAY *)(SRAM_BB_STATUS_SHARE_MEMORY_ST_ADDR);
-        if((stru_sweepPower.e_bandsupport == RF_2G_5G) && (e_curBand == RF_5G))
+        if((context.rf_info.e_bandsupport == RF_2G_5G) && (e_curBand == RF_5G))
         {
             shift = BB_GetItFrqNum(RF_2G);
         }
         {
             static uint8_t itch_bak  = 0;
             static uint8_t itopt_bak = 0;
-            osdptr->IT_channel  = stru_sweepPower.u8_mainCh + shift;
-            osdptr->u8_optCh    = stru_sweepPower.u8_optCh  + shift;
+            osdptr->IT_channel  = context.rf_info.u8_mainCh + shift;
+            osdptr->u8_optCh    = context.rf_info.u8_optCh  + shift;
             if ( osdptr->IT_channel != itch_bak ||  osdptr->u8_optCh != itopt_bak )
             {
                 //DLOG_Info("From:(%d %d) To:(%d %d)", itch_bak, itopt_bak, osdptr->IT_channel, osdptr->u8_optCh);
@@ -705,48 +676,48 @@ static int __attribute__ ((section(".h264"))) BB_set_sweepChannel(void)
 
 static int __attribute__ ((section(".h264"))) BB_SweepAfterFull( uint8_t flag )
 {
-    ENUM_RF_BAND e_curBand   = stru_sweepPower.e_curBand;
-    ENUM_RF_BAND e_sweepBand = stru_sweepPower.e_prevSweepBand;
-    ENUM_CH_BW   e_bw = stru_sweepPower.e_bw;
+    ENUM_RF_BAND e_curBand   = context.e_curBand;
+    ENUM_RF_BAND e_sweepBand = context.rf_info.e_prevSweepBand;
+    ENUM_CH_BW   e_bw = context.rf_info.e_bw;
 
     uint8_t result   = 0;
-    uint8_t cycle  = (stru_sweepPower.u8_cycleCnt % stru_sweepPower.u8_totalCyc);
+    uint8_t cycle  = (context.rf_info.u8_cycleCnt % context.rf_info.u8_totalCyc);
     uint8_t flag_checkBandSwitch = 0;
 
-    uint8_t u8_mainSweepCh = stru_sweepPower.u8_mainSweepCh;
-    uint8_t u8_optSweepCh  = stru_sweepPower.u8_optSweepCh;
-    uint8_t u8_prevSweepCh = stru_sweepPower.u8_prevSweepCh;
+    uint8_t u8_mainSweepCh = context.rf_info.u8_mainSweepCh;
+    uint8_t u8_optSweepCh  = context.rf_info.u8_optSweepCh;
+    uint8_t u8_prevSweepCh = context.rf_info.u8_prevSweepCh;
 
     uint8_t u8_sweepRow;
     if( e_sweepBand == e_curBand && u8_prevSweepCh == u8_mainSweepCh )  //main channel sweep result
     {
-        u8_sweepRow = stru_sweepPower.u8_mainSweepRow;    
+        u8_sweepRow = context.rf_info.u8_mainSweepRow;    
     }
     else if ( e_sweepBand == e_curBand && u8_prevSweepCh == u8_optSweepCh ) //opt channel sweep result
     {
-        u8_sweepRow = stru_sweepPower.u8_optSweepRow;    
+        u8_sweepRow = context.rf_info.u8_optSweepRow;    
     }
     else
     {  
         if ( e_sweepBand == RF_5G )
         {
-            u8_sweepRow = stru_sweepPower.u8_curBb2Row;
+            u8_sweepRow = context.rf_info.u8_curBb2Row;
         }
         else
         {
-            u8_sweepRow = stru_sweepPower.u8_curBb1Row;
+            u8_sweepRow = context.rf_info.u8_curBb1Row;
         }
 
         if (e_sweepBand != e_curBand &&  (u8_prevSweepCh + 1) == BB_GetSweepTotalCh(e_sweepBand, e_bw)) //last channel
         {
-            if ( (u8_sweepRow + 1) == SWEEP_FREQ_BLOCK_ROWS && (stru_sweepPower.u8_isFull & 0x10 )!= 0x10) //last row
+            if ( (u8_sweepRow + 1) == SWEEP_FREQ_BLOCK_ROWS && (context.rf_info.u8_isFull & 0x10 )!= 0x10) //last row
             {
-                stru_sweepPower.u8_isFull |= 0x10;
+                context.rf_info.u8_isFull |= 0x10;
                 DLOG_Info("option band sweep is full !!");
             }
 
             //both band sweep is ready, and sweep last channel
-            if ( (stru_sweepPower.u8_isFull & 0x10) && (context.locked) &&
+            if ( (context.rf_info.u8_isFull & 0x10) && (context.locked) &&
                  (!BB_grd_isSearching()) && \
                  context.st_bandMcsOpt.e_rfbandMode == AUTO && context.itHopMode == AUTO && \
                  context.st_bandMcsOpt.e_bandsupport == RF_2G_5G) 
@@ -761,7 +732,7 @@ static int __attribute__ ((section(".h264"))) BB_SweepAfterFull( uint8_t flag )
         return 0;
     }
     BB_UpdateOptCh(e_sweepBand, e_bw, u8_prevSweepCh);
-
+#if 0
     //check if band switch need
     if (flag_checkBandSwitch)
     {
@@ -773,27 +744,27 @@ static int __attribute__ ((section(".h264"))) BB_SweepAfterFull( uint8_t flag )
             return 0;
         }
 
-        stru_sweepPower.band_sel[stru_sweepPower.u8_bandSelCnt] = rf_sel;
-        stru_sweepPower.u8_bandSelCnt ++;
+        context.rf_info.band_sel[context.rf_info.u8_bandSelCnt] = rf_sel;
+        context.rf_info.u8_bandSelCnt ++;
 
         //get enough sweep data for band switch
-        uint8_t cnt = sizeof(stru_sweepPower.band_sel) / sizeof(stru_sweepPower.band_sel[0]);
-        if (stru_sweepPower.u8_bandSelCnt >= cnt)
+        uint8_t cnt = sizeof(context.rf_info.band_sel) / sizeof(context.rf_info.band_sel[0]);
+        if (context.rf_info.u8_bandSelCnt >= cnt)
         {
             uint8_t better_2g_count = 0;
             uint8_t better_5g_count = 0;
 
             for( i = 0; i < cnt; i++)
             {
-                better_2g_count += (stru_sweepPower.band_sel[i] == BETTER_2G);
-                better_5g_count += (stru_sweepPower.band_sel[i] == BETTER_5G);
+                better_2g_count += (context.rf_info.band_sel[i] == BETTER_2G);
+                better_5g_count += (context.rf_info.band_sel[i] == BETTER_5G);
             }
 
-            if (stru_sweepPower.e_curBand == RF_2G && better_5g_count >= cnt * 5/6 )
+            if (context.rf_info.e_curBand == RF_2G && better_5g_count >= cnt * 5/6 )
             {
                 context.e_bandSelFromSweep = BETTER_5G;
             }
-            else if (stru_sweepPower.e_curBand == RF_5G && better_2g_count >= cnt * 5/6)
+            else if (context.rf_info.e_curBand == RF_5G && better_2g_count >= cnt * 5/6)
             {
                 context.e_bandSelFromSweep = BETTER_2G;
             }
@@ -806,7 +777,7 @@ static int __attribute__ ((section(".h264"))) BB_SweepAfterFull( uint8_t flag )
                                                   context.u_bandSwitchParam->grd_bandSwitchParm.i8_GrdBand0_2_Band1SweepAverUnblock,
                                                   context.u_bandSwitchParam->grd_bandSwitchParm.i8_GrdBand1_2_Band0SweepAverUnblock);
 
-            stru_sweepPower.u8_bandSelCnt = 0;
+            context.rf_info.u8_bandSelCnt = 0;
 
             //if mcs <= 1 && snr <= mcs1_snr
             if (context.qam_ldpc <= context.u_bandSwitchParam->grd_bandSwitchParm.u8_minMcsForBandSwitch && grd_snr_forBandChange())
@@ -825,11 +796,11 @@ static int __attribute__ ((section(".h264"))) BB_SweepAfterFull( uint8_t flag )
             }            
         }
     }
-
+#endif
     //if get the right cycle result, do next cycle sweep
     if (result)
     {
-        stru_sweepPower.u8_cycleCnt ++;
+        context.rf_info.u8_cycleCnt ++;
         BB_set_sweepChannel();
     }
 
@@ -841,11 +812,11 @@ uint8_t __attribute__ ((section(".h264"))) BB_GetSweepedChResult( uint8_t flag )
 {
     uint8_t  ret = 0;
 
-    if(1 == stru_sweepPower.u8_cmdSweep)
+    if(1 == context.rf_info.u8_cmdSweep)
     {
         BB_CmdSweep();
     }
-    else if ( !stru_sweepPower.u8_isFull )
+    else if ( !context.rf_info.u8_isFull )
     {
         ret = BB_SweepBeforeFull( );
         if(context.freq_band_mode == SUB_BAND && ret)
@@ -861,13 +832,10 @@ uint8_t __attribute__ ((section(".h264"))) BB_GetSweepedChResult( uint8_t flag )
     return ret;
 }
 
-int32_t __attribute__ ((section(".h264"))) BB_CompareCh1Ch2ByPowerAver(ENUM_RF_BAND e_rfBand, uint8_t u8_itCh1, uint8_t u8_itCh2, int32_t level)
+uint8_t __attribute__ ((section(".h264"))) BB_CompareCh1Ch2ByPowerAver(ENUM_RF_BAND e_rfBand, uint8_t u8_itCh1, uint8_t u8_itCh2, int32_t level)
 {
-    int32_t value = 0;
-
-    int32_t * pi32_power_average = (e_rfBand == RF_5G) ? stru_sweepPower.i32_rf1PwrAvr :
-                                                         stru_sweepPower.i32_rf0PwrAvr;
-                                                
+    uint8_t value = 0;
+                                             
     if(context.bandedge_enable)
     {
         if(u8_itCh1 == u8_itCh2)
@@ -893,7 +861,7 @@ int32_t __attribute__ ((section(".h264"))) BB_CompareCh1Ch2ByPowerAver(ENUM_RF_B
         }
     }
     
-    if (pi32_power_average[u8_itCh1] < (pi32_power_average[u8_itCh2] - level))
+    if (context.rf_info.sweep_pwr_avrg_value[u8_itCh1].value < (context.rf_info.sweep_pwr_avrg_value[u8_itCh2].value  - level))
     {
         value = 1;
     }
@@ -901,24 +869,19 @@ int32_t __attribute__ ((section(".h264"))) BB_CompareCh1Ch2ByPowerAver(ENUM_RF_B
     return value;
 }
 
-int32_t __attribute__ ((section(".h264"))) BB_CompareCh1Ch2ByPower(ENUM_RF_BAND e_rfBand, uint8_t u8_itCh1, uint8_t u8_itCh2, uint8_t u8_cnt)
+uint8_t __attribute__ ((section(".h264"))) BB_CompareCh1Ch2ByPower(ENUM_RF_BAND e_rfBand, uint8_t u8_itCh1, uint8_t u8_itCh2, uint8_t u8_cnt)
 {
-    int32_t value = 0;
+    uint8_t value = 0;
     uint8_t row;
     uint8_t tmpCnt = 0;
-    int32_t *pu32_power;
-
     if (u8_cnt > SWEEP_FREQ_BLOCK_ROWS)
     {
         u8_cnt = SWEEP_FREQ_BLOCK_ROWS;
     }
 
     for( row = 0; row < SWEEP_FREQ_BLOCK_ROWS; row++)
-    {
-        pu32_power = (e_rfBand == RF_5G) ? stru_sweepPower.i32_rf1Pwr[row] : 
-                                           stru_sweepPower.i32_rf0Pwr[row];
-        
-        tmpCnt += ((pu32_power[u8_itCh1] < pu32_power[u8_itCh2]) ? (1) : (0));
+    {      
+        tmpCnt += ((context.rf_info.sweep_pwr_table[row][u8_itCh1].value < context.rf_info.sweep_pwr_table[row][u8_itCh2].value) ? (1) : (0));
     }
     
     value = ((tmpCnt >= u8_cnt) ? (1) : (0));
@@ -997,7 +960,7 @@ uint8_t __attribute__ ((section(".h264"))) BB_selectBestCh(ENUM_RF_BAND e_band, 
     uint32_t start = SysTicks_GetTickCount();
     uint8_t  exclude[6] = {0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF};
     uint8_t  excludecnt = 0;
-    ENUM_CH_BW e_bw = stru_sweepPower.e_bw;
+    ENUM_CH_BW e_bw = context.rf_info.e_bw;
     uint8_t bestCh  = 0xff;         //select one from all the channels
     uint8_t betterCh= 0xff;
     uint8_t other   = 0xff;
@@ -1008,7 +971,7 @@ uint8_t __attribute__ ((section(".h264"))) BB_selectBestCh(ENUM_RF_BAND e_band, 
     uint8_t next_ch;
     uint8_t tmpCh;
 
-    if (!stru_sweepPower.u8_isFull)
+    if (!context.rf_info.u8_isFull)
     {
         return 0;
     }
@@ -1029,11 +992,11 @@ uint8_t __attribute__ ((section(".h264"))) BB_selectBestCh(ENUM_RF_BAND e_band, 
     //select optional channel
     if ( e_opt == SELECT_MAIN_OPT || e_opt == SELECT_OPT )
     {
-        exclude[0] = stru_sweepPower.u8_preMainCh;
-        exclude[1] = stru_sweepPower.u8_mainCh;
+        exclude[0] = context.rf_info.u8_preMainCh;
+        exclude[1] = context.rf_info.u8_mainCh;
         exclude[2] = bestCh;
         
-        tmpCh = (e_opt == SELECT_OPT) ? (stru_sweepPower.u8_mainCh) : (bestCh);
+        tmpCh = (e_opt == SELECT_OPT) ? (context.rf_info.u8_mainCh) : (bestCh);
         BB_GetItAdjacentFrequency(tmpCh, &pre_ch, &next_ch);
         exclude[3] = pre_ch;
         exclude[4] = next_ch;
@@ -1069,9 +1032,9 @@ uint8_t __attribute__ ((section(".h264"))) BB_selectBestCh(ENUM_RF_BAND e_band, 
 
     if ( e_opt == SELECT_OTHER )
     {
-        exclude[0] = stru_sweepPower.u8_preMainCh;
-        exclude[1] = stru_sweepPower.u8_mainCh;
-        exclude[2] = stru_sweepPower.u8_optCh;   
+        exclude[0] = context.rf_info.u8_preMainCh;
+        exclude[1] = context.rf_info.u8_mainCh;
+        exclude[2] = context.rf_info.u8_optCh;   
         excludecnt = 3;
 
         other = find_best(exclude, excludecnt, e_band, log);
@@ -1097,7 +1060,7 @@ uint8_t __attribute__ ((section(".h264"))) BB_selectBestCh600m(ENUM_RF_BAND e_ba
 {
     uint8_t  exclude[6] = {0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF};
     uint8_t  excludecnt = 0;
-    ENUM_CH_BW e_bw = stru_sweepPower.e_bw;
+    ENUM_CH_BW e_bw = context.rf_info.e_bw;
     uint8_t bestCh  = 0xff;         //select one from all the channels
     uint8_t betterCh= 0xff;
     uint8_t other   = 0xff;
@@ -1131,8 +1094,8 @@ uint8_t __attribute__ ((section(".h264"))) get_opt_channel( void )
 {
     uint8_t other = 0;
     int32_t level;
-    uint8_t ret = stru_sweepPower.u8_optCh;
-    ENUM_RF_BAND e_band = stru_sweepPower.e_curBand;
+    uint8_t ret = context.rf_info.u8_optCh;
+    ENUM_RF_BAND e_band = context.e_curBand;
 
     BB_selectBestCh(e_band, SELECT_OTHER, NULL, NULL, &other, 0);
     
@@ -1150,19 +1113,19 @@ uint8_t __attribute__ ((section(".h264"))) get_opt_channel( void )
     }
 
     level = ((1 == BB_JudgeAdjacentFrequency(other)) ? (2 * level) : (level));
-    //if (BB_CompareCh1Ch2ByPower(e_band, other, stru_sweepPower.u8_optCh, SWEEP_FREQ_BLOCK_ROWS))
-    if (BB_CompareCh1Ch2ByPowerAver(e_band, other, stru_sweepPower.u8_optCh, 0))
-    {
-        #if 0
-        //print bandedge 
-            int32_t * pi32_power_average = (e_band == RF_5G) ? stru_sweepPower.i32_rf1PwrAvr :
-                                                         stru_sweepPower.i32_rf0PwrAvr;
-            DLOG_Warning("lna=%d,%d->%d, db,%d,%d,%d,%d,%d,%d,%d,",context.lna_status,stru_sweepPower.u8_optCh,other, \
-                pi32_power_average[0], \
-                pi32_power_average[1],pi32_power_average[2],pi32_power_average[3],pi32_power_average[4],pi32_power_average[5],pi32_power_average[6]);
-        #endif
-        ret = other; 
-    }
+    if (BB_CompareCh1Ch2ByPower(e_band, other, context.rf_info.u8_optCh, SWEEP_FREQ_BLOCK_ROWS))
+	    if (BB_CompareCh1Ch2ByPowerAver(e_band, other, context.rf_info.u8_optCh, 0))
+	    {
+	        #if 0
+	        //print bandedge 
+	            int32_t * pi32_power_average = (e_band == RF_5G) ? context.rf_info.i32_rf1PwrAvr :
+	                                                         context.rf_info.i32_rf0PwrAvr;
+	            DLOG_Warning("lna=%d,%d->%d, db,%d,%d,%d,%d,%d,%d,%d,",context.lna_status,context.rf_info.u8_optCh,other, \
+	                pi32_power_average[0], \
+	                pi32_power_average[1],pi32_power_average[2],pi32_power_average[3],pi32_power_average[4],pi32_power_average[5],pi32_power_average[6]);
+	        #endif
+	        ret = other; 
+	    }
 
     return ret;
 }
@@ -1174,6 +1137,7 @@ uint8_t __attribute__ ((section(".h264"))) get_opt_channel( void )
  * power_fd: each 1.56M bandwidth noise
  * power_db: the power in dbm in each 1.56M
 */
+/*
 static int __attribute__ ((section(".h264"))) calc_power_db(ENUM_RF_BAND e_rfBand, uint8_t bw, uint32_t power_td,
                          int16_t *power_fd, int32_t *power_sum, 
                          uint8_t cnt, uint8_t sweep_ch, int flaglog)
@@ -1200,33 +1164,36 @@ static int __attribute__ ((section(".h264"))) calc_power_db(ENUM_RF_BAND e_rfBan
 
     return 1;
 }
+*/
 
+/*
 static void __attribute__ ((section(".h264"))) calc_average_and_fluct(ENUM_RF_BAND e_rfBand, uint8_t u8_ItCh)
 {
     uint16_t row = 0;
     int32_t *pu32_power;
     int32_t *pu32_power_average;
 	int32_t *pu32_power_rmse;
-    pu32_power_average = (e_rfBand == RF_5G) ? stru_sweepPower.i32_rf1PwrAvr : stru_sweepPower.i32_rf0PwrAvr;  
-	pu32_power_rmse = (e_rfBand == RF_5G) ? stru_sweepPower.i32_rf1psnr : stru_sweepPower.i32_rf0psnr; 
+    pu32_power_average = (e_rfBand == RF_5G) ? context.rf_info.i32_rf1PwrAvr : context.rf_info.i32_rf0PwrAvr;  
+	pu32_power_rmse = (e_rfBand == RF_5G) ? context.rf_info.i32_rf1psnr : context.rf_info.i32_rf0psnr; 
 	
     pu32_power_average[u8_ItCh] = 0;
     for( row = 0; row < SWEEP_FREQ_BLOCK_ROWS; row++)
     {
-        pu32_power = (e_rfBand == RF_5G) ? stru_sweepPower.i32_rf1Pwr[row] : stru_sweepPower.i32_rf0Pwr[row];
+        pu32_power = (e_rfBand == RF_5G) ? context.rf_info.i32_rf1Pwr[row] :context.rf_info.sweep_pwr_table[row];
         pu32_power_average[u8_ItCh] += pu32_power[u8_ItCh];
     }
     pu32_power_average[u8_ItCh] /= SWEEP_FREQ_BLOCK_ROWS;
 
-/*
+#if 0
 	for( row = 0; row < SWEEP_FREQ_BLOCK_ROWS; row++)
     {
-         pu32_power = (e_rfBand == RF_5G) ? stru_sweepPower.i32_rf1Pwr[row] : stru_sweepPower.i32_rf0Pwr[row];
+         pu32_power = (e_rfBand == RF_5G) ? context.rf_info.i32_rf1Pwr[row] : context.rf_info.sweep_pwr_table[row];
 		 pu32_power_rmse[u8_ItCh] += abs(pu32_power[u8_ItCh]-pu32_power_average[u8_ItCh]) ;
     }
 	 pu32_power_rmse[u8_ItCh] /= SWEEP_FREQ_BLOCK_ROWS;
-*/
+#endif
 }
+*/
 
 static uint8_t __attribute__ ((section(".h264"))) BB_GetSweepTotalCh(ENUM_RF_BAND e_rfBand, ENUM_CH_BW e_bw)
 {
@@ -1236,7 +1203,7 @@ static uint8_t __attribute__ ((section(".h264"))) BB_GetSweepTotalCh(ENUM_RF_BAN
 
 static uint8_t __attribute__ ((section(".h264"))) BB_JudgeAdjacentFrequency(uint8_t judge_ch)
 {
-    if ((judge_ch == (stru_sweepPower.u8_mainCh + 1)) || (judge_ch == (stru_sweepPower.u8_mainCh - 1)))
+    if ((judge_ch == (context.rf_info.u8_mainCh + 1)) || (judge_ch == (context.rf_info.u8_mainCh - 1)))
     {
         return 1;
     }
@@ -1248,12 +1215,11 @@ static uint8_t __attribute__ ((section(".h264"))) BB_JudgeAdjacentFrequency(uint
 
 static uint8_t __attribute__ ((section(".h264"))) BB_UpdateOptCh(ENUM_RF_BAND e_rfBand, ENUM_CH_BW e_bw, uint8_t sweep_ch)
 {
-    uint8_t tmpCh = stru_sweepPower.u8_optCh;
+    uint8_t tmpCh = context.rf_info.u8_optCh;
     uint8_t u8_maxCh = BB_GetItFrqNum( e_rfBand );
     int32_t level;
-    uint8_t *pu8_bestChCnt = (RF_5G == (stru_sweepPower.e_curBand) ? (stru_sweepPower.u8_bestBb2ChCnt) : 
-                                                                     (stru_sweepPower.u8_bestBb1ChCnt));
-    if ( e_rfBand != stru_sweepPower.e_curBand || sweep_ch == stru_sweepPower.u8_mainCh || sweep_ch == stru_sweepPower.u8_optCh)
+    int i=0;
+    if ( e_rfBand != context.e_curBand || sweep_ch == context.rf_info.u8_mainCh || sweep_ch == context.rf_info.u8_optCh)
     {
         return 0;
     }
@@ -1264,19 +1230,37 @@ static uint8_t __attribute__ ((section(".h264"))) BB_UpdateOptCh(ENUM_RF_BAND e_
         tmpCh = sweep_ch;
     }    
 
-    if (tmpCh != stru_sweepPower.u8_optCh)
+    if (tmpCh != context.rf_info.u8_optCh)
     {
-        pu8_bestChCnt[tmpCh] += 1;
-        if (pu8_bestChCnt[tmpCh] > 10)
-        {
-            stru_sweepPower.u8_optCh = tmpCh;
-            stru_sweepPower.u8_optSweepCh = tmpCh;
-            memset(pu8_bestChCnt, 0, u8_maxCh);
-        }
+    	if(RF_5G == (context.e_curBand)){
+	        context.rf_info.u8_bestBb2ChCnt[tmpCh] += 1;
+	        if (context.rf_info.u8_bestBb2ChCnt[tmpCh] > 10)
+	        {
+	            context.rf_info.u8_optCh = tmpCh;
+	            context.rf_info.u8_optSweepCh = tmpCh;
+				for(i=0;i<u8_maxCh;i++)context.rf_info.u8_bestBb2ChCnt[i]=0;
+	           
+	        }
+		}
+		else
+	    {
+	    	 context.rf_info.u8_bestBb1ChCnt[tmpCh] += 1;
+	        if (context.rf_info.u8_bestBb1ChCnt[tmpCh] > 10)
+	        {
+	            context.rf_info.u8_optCh = tmpCh;
+	            context.rf_info.u8_optSweepCh = tmpCh;
+				for(i=0;i<u8_maxCh;i++)context.rf_info.u8_bestBb1ChCnt[i]=0;
+	           
+	        }
+		}
+		
     }
     else
     {
-        pu8_bestChCnt[tmpCh] = 0;
+    	if(RF_5G == (context.e_curBand))
+        	context.rf_info.u8_bestBb2ChCnt[tmpCh] = 0;
+		else
+			context.rf_info.u8_bestBb1ChCnt[tmpCh] =0;
     }
 }
 
@@ -1310,33 +1294,33 @@ void __attribute__ ((section(".h264"))) bubble_sort(int * data, int datasize, in
  */
 static void __attribute__ ((section(".h264"))) BB_SweepChangeBand(ENUM_RF_BAND e_toRfBand, uint8_t u8_mainCh, uint8_t u8_optCh)
 {
-    stru_sweepPower.u8_spareSweepCh   =  0;
-    stru_sweepPower.u8_optBandSweepCh =  0;
+    context.rf_info.u8_spareSweepCh   =  0;
+    context.rf_info.u8_optBandSweepCh =  0;
 
-    stru_sweepPower.u8_curBb1Row   =  0;
-    stru_sweepPower.u8_curBb2Row   =  0;
+    context.rf_info.u8_curBb1Row   =  0;
+    context.rf_info.u8_curBb2Row   =  0;
 
-    stru_sweepPower.u8_cycleCnt      =  MAIN_CH_CYCLE;
-    stru_sweepPower.u8_mainSweepRow  =  0;
-    stru_sweepPower.u8_optSweepRow   =  0;
+    context.rf_info.u8_cycleCnt      =  MAIN_CH_CYCLE;
+    context.rf_info.u8_mainSweepRow  =  0;
+    context.rf_info.u8_optSweepRow   =  0;
 
-    stru_sweepPower.u8_preMainCh  =  0xff;
+    context.rf_info.u8_preMainCh  =  0xff;
 
-    stru_sweepPower.u8_mainCh     =  u8_mainCh;
+    context.rf_info.u8_mainCh     =  u8_mainCh;
 
-    stru_sweepPower.u8_prevSweepCh   = 0x0;
-    stru_sweepPower.u16_preMainCount = 0x0;
+    context.rf_info.u8_prevSweepCh   = 0x0;
+    context.rf_info.u16_preMainCount = 0x0;
 
-    stru_sweepPower.u8_mainSweepCh = u8_mainCh;
-    stru_sweepPower.u8_prevSweepCh = u8_mainCh;
+    context.rf_info.u8_mainSweepCh = u8_mainCh;
+    context.rf_info.u8_prevSweepCh = u8_mainCh;
 
-    stru_sweepPower.u8_optCh       = u8_optCh;
-    stru_sweepPower.u8_optSweepCh  = u8_optCh;
+    context.rf_info.u8_optCh       = u8_optCh;
+    context.rf_info.u8_optSweepCh  = u8_optCh;
 
-    stru_sweepPower.e_curBand      =  e_toRfBand;  //current rf band for sweep
-    stru_sweepPower.u8_bandSelCnt  =  0;
+    context.e_curBand      =  e_toRfBand;  //current rf band for sweep
+    context.rf_info.u8_bandSelCnt  =  0;
 
-    BB_set_SweepFrq(e_toRfBand, stru_sweepPower.e_bw ,u8_mainCh);
+    BB_set_SweepFrq(e_toRfBand, context.rf_info.e_bw ,u8_mainCh);
 }
 
 
@@ -1364,25 +1348,32 @@ int8_t __attribute__ ((section(".h264"))) grd_getSwitchDiffBase(int band0_2_band
 /*
  * function to compare the 2G/5G band noise
 */
+
+#if 0
 ENUM_RF_select __attribute__ ((section(".h264"))) BB_grd_cmpBandNoise( void )
 {
-    int i32_2G_noisepower_average[stru_sweepPower.u8_bb1ItFrqSize];
-    int i32_5G_noisepower_average[stru_sweepPower.u8_bb2ItFrqSize];
+    int i32_2G_noisepower_average[context.rf_info.u8_bb1ItFrqSize];
+    int i32_5G_noisepower_average[context.rf_info.u8_bb2ItFrqSize];
     int i32_2GAverage = 0;
     int i32_5GAverage = 0;
+	int i=0;
 
-    int8_t i8_diff0_1 = grd_getSwitchDiffBase(1, stru_sweepPower.flag_signalBlock);
-    int8_t i8_diff1_0 = grd_getSwitchDiffBase(0, stru_sweepPower.flag_signalBlock);
+    int8_t i8_diff0_1 = grd_getSwitchDiffBase(1, context.rf_info.flag_signalBlock);
+    int8_t i8_diff1_0 = grd_getSwitchDiffBase(0, context.rf_info.flag_signalBlock);
 
     int count1 = context.u_bandSwitchParam->grd_bandSwitchParm.u8_GrdBand0CmpChannelCnt;
     int count2 = context.u_bandSwitchParam->grd_bandSwitchParm.u8_GrdBand1CmpChannelCnt;
 
-    memcpy(i32_2G_noisepower_average, stru_sweepPower.i32_rf0PwrAvr, sizeof(int) * (stru_sweepPower.u8_bb1ItFrqSize));
-    memcpy(i32_5G_noisepower_average, stru_sweepPower.i32_rf1PwrAvr, sizeof(int) * (stru_sweepPower.u8_bb2ItFrqSize));
+	for(i=0;i<context.rf_info.u8_bb1ItFrqSize;i++){
+		i32_2G_noisepower_average[i]=context.rf_info.sweep_pwr_avrg_value[i].value;
+	}
+	
+    memcpy(i32_2G_noisepower_average, context.rf_info.i32_rf0PwrAvr, sizeof(int) * (context.rf_info.u8_bb1ItFrqSize));
+    memcpy(i32_5G_noisepower_average, context.rf_info.i32_rf1PwrAvr, sizeof(int) * (context.rf_info.u8_bb2ItFrqSize));
 
     //bubble sort the Noise power, get the best channels
-    bubble_sort(i32_2G_noisepower_average, stru_sweepPower.u8_bb1ItFrqSize, count1);
-    bubble_sort(i32_5G_noisepower_average, stru_sweepPower.u8_bb2ItFrqSize, count2);
+    bubble_sort(i32_2G_noisepower_average, context.rf_info.u8_bb1ItFrqSize, count1);
+    bubble_sort(i32_5G_noisepower_average, context.rf_info.u8_bb2ItFrqSize, count2);
 
     uint8_t tmp = 0;
     for (tmp = 0; tmp < count1; tmp++)
@@ -1399,7 +1390,7 @@ ENUM_RF_select __attribute__ ((section(".h264"))) BB_grd_cmpBandNoise( void )
 
     //compare result.
     //if dont get the current RF mode(BLOCK, UNBLOCK), dont add in count
-    if (stru_sweepPower.flag_signalBlock == RF_SIGNAL_UNKNOWN_MODE)
+    if (context.rf_info.flag_signalBlock == RF_SIGNAL_UNKNOWN_MODE)
     {
         DLOG_Info("UNKNOWN_BLOCK");
         return UNKNOWN_BETTER;
@@ -1408,22 +1399,22 @@ ENUM_RF_select __attribute__ ((section(".h264"))) BB_grd_cmpBandNoise( void )
     {
         if (i32_2GAverage >= i32_5GAverage + i8_diff0_1)
         {
-            DLOG_Info("5G: %d %d %d %d", stru_sweepPower.flag_signalBlock, (i32_2GAverage - i32_5GAverage), i8_diff0_1, i8_diff1_0);
+            DLOG_Info("5G: %d %d %d %d", context.rf_info.flag_signalBlock, (i32_2GAverage - i32_5GAverage), i8_diff0_1, i8_diff1_0);
             return BETTER_5G;
         }
         else if (i32_2GAverage <= i32_5GAverage + i8_diff1_0)
         {
-            DLOG_Info("2G: %d %d %d %d", stru_sweepPower.flag_signalBlock, (i32_2GAverage - i32_5GAverage), i8_diff0_1, i8_diff1_0);
+            DLOG_Info("2G: %d %d %d %d", context.rf_info.flag_signalBlock, (i32_2GAverage - i32_5GAverage), i8_diff0_1, i8_diff1_0);
             return BETTER_2G;
         }
         else
         {
-            DLOG_Info("Equal: %d %d %d %d", stru_sweepPower.flag_signalBlock, (i32_2GAverage - i32_5GAverage), i8_diff0_1, i8_diff1_0);
+            DLOG_Info("Equal: %d %d %d %d", context.rf_info.flag_signalBlock, (i32_2GAverage - i32_5GAverage), i8_diff0_1, i8_diff1_0);
             return EQUAL_2G_5G;
         }
     }
 }
-
+#endif
 
 uint8_t agc_level_min[50];
 uint8_t agc_idx = 0;
@@ -1432,7 +1423,7 @@ void __attribute__ ((section(".h264"))) grd_checkBlockMode(void)
 {
     int      dist   = 0;
     uint16_t agcsum = 0;
-    ENUM_RF_SIGNAL_BLOCK e_signal = stru_sweepPower.flag_signalBlock;
+    ENUM_RF_SIGNAL_BLOCK e_signal = context.rf_info.flag_signalBlock;
     uint8_t  num    = sizeof(agc_level_min) / sizeof(agc_level_min[0]);
 
     agc_level_min[agc_idx] = ((stru_grdstatus.agc_value1 < stru_grdstatus.agc_value2) ? \
@@ -1467,15 +1458,15 @@ void __attribute__ ((section(".h264"))) grd_checkBlockMode(void)
             e_signal = RF_SIGNAL_UNBLOCK_MODE;
         }
 
-        if (stru_sweepPower.flag_signalBlock != e_signal)
+        if (context.rf_info.flag_signalBlock != e_signal)
         {
-            stru_sweepPower.flag_signalBlock = e_signal;
-            BB_WriteRegMask(PAGE2, GRD_SKY_IT_CH_SYNC, (stru_sweepPower.flag_signalBlock<<6), GRD_SKY_BLOCK_MODE_MASK);
+            context.rf_info.flag_signalBlock = e_signal;
+            BB_WriteRegMask(PAGE2, GRD_SKY_IT_CH_SYNC, (context.rf_info.flag_signalBlock<<6), GRD_SKY_BLOCK_MODE_MASK);
         }
 
         DLOG_Info("Block: (0x%x %d) (%d %d) %d res=%d", context.agclevel, dist,
                       context.u_bandSwitchParam->grd_bandSwitchParm.u8_BlockAgcThresh + i8_skyRfPowerDiff,
-                      context.u_bandSwitchParam->grd_bandSwitchParm.u16_BlockDistThresh, i8_skyRfPowerDiff, stru_sweepPower.flag_signalBlock);
+                      context.u_bandSwitchParam->grd_bandSwitchParm.u16_BlockDistThresh, i8_skyRfPowerDiff, context.rf_info.flag_signalBlock);
     }
 }
 
@@ -1538,7 +1529,7 @@ int32_t __attribute__ ((section(".h264"))) grd_doRfbandChange( uint8_t *pu8_main
             }
 
             //clear the result, re-start statistic again
-            stru_sweepPower.u8_bandSelCnt = 0;
+            context.rf_info.u8_bandSelCnt = 0;
 
             context.pwr = BB_get_band_power(context.e_curBand);
             if(context.e_powerMode == RF_POWER_CLOSE)
@@ -1601,7 +1592,7 @@ int32_t __attribute__ ((section(".h264"))) grd_RfBandSelectChannelDoSwitch(void)
     BB_ResetRcMap();
 
     //clear the result, re-start statistic again
-    stru_sweepPower.u8_bandSelCnt = 0;
+    context.rf_info.u8_bandSelCnt = 0;
     
     context.stru_bandChange.u8_ItCh   = main_ch;
     context.stru_bandChange.u8_optCh  = opt_ch;
@@ -1630,63 +1621,46 @@ void __attribute__ ((section(".h264"))) grd_SetSweepMode(uint8_t mode)
 
 uint8_t __attribute__ ((section(".h264"))) BB_isSweepFull(void)
 {
-    return stru_sweepPower.u8_isFull;
+    return context.rf_info.u8_isFull;
 }
 
 void __attribute__ ((section(".h264"))) BB_resetSweepFull(void)
 {
-    stru_sweepPower.u8_isFull = 0;
+    context.rf_info.u8_isFull = 0;
 }
 
 uint8_t BB_get_cur_opt_ch(void)
 {
-    return stru_sweepPower.u8_optCh;
+    return context.rf_info.u8_optCh;
 }
-
-
-
-
-void grd_gen_it_working_ch(uint8_t mode)
+void  __attribute__ ((section(".h264")))grd_gen_it_working_ch(uint8_t mode)
 {
 
 	int i=0,j=0,n=0,find,is_int;
 	static int k=0;
-	STRU_SKY_RF_DATA list[64]={0};
-	STRU_SKY_RF_DATA listb[64]={0};
-	STRU_SKY_RF_DATA listc[64]={0};
-	STRU_SKY_RF_DATA listd[64]={0};
+	STRU_RF_DATA list[64]={0};
+	STRU_RF_DATA listb[64]={0};
+	STRU_RF_DATA listc[64]={0};
+	STRU_RF_DATA listd[64]={0};
 	uint8_t temp=0;
-	int swwp_ch_cnt = BB_GetSweepTotalCh(stru_sweepPower.e_curBand,stru_sweepPower.e_bw);
+	int swwp_ch_cnt = BB_GetSweepTotalCh(context.e_curBand,context.rf_info.e_bw);
 	//sort by value,find the low to high list
-	if(stru_sweepPower.e_curBand==RF_2G){
+	if(context.e_curBand==RF_2G){
 		for(i=0;i<swwp_ch_cnt;i++){
-			listb[i].value=int2char(stru_sweepPower.i32_rf0PwrAvr[i]);
+			listb[i].value=int2char(context.rf_info.sweep_pwr_avrg_value[i].value);
 			listb[i].id=i;
 
 			for(j=0;j<SWEEP_FREQ_BLOCK_ROWS;j++)
 			{
-				listd[j].value=int2char(stru_sweepPower.i32_rf0Pwr[j][i]);
+				listd[j].value=int2char(context.rf_info.sweep_pwr_table[j][i].value);
 				listd[j].id=j;
 			}
 			selectionSortBy(listc,SWEEP_FREQ_BLOCK_ROWS,listd,1);
-			stru_sweepPower.i32_rf0psnr[i]=listc[SWEEP_FREQ_BLOCK_ROWS-1].value - listc[0].value;
+			//context.rf_info.i32_rf0psnr[i]=listc[SWEEP_FREQ_BLOCK_ROWS-1].value - listc[0].value;
 		}
 		selectionSortBy(list,swwp_ch_cnt,listb,1);
 	}
-	else if(stru_sweepPower.e_curBand==RF_5G){
-		for(i=0;i<swwp_ch_cnt;i++){
-			listb[i].value=int2char(stru_sweepPower.i32_rf1PwrAvr[i]);
-			listb[i].id=i;
-		for(j=0;j<SWEEP_FREQ_BLOCK_ROWS;j++)
-			{
-				listd[j].value=int2char(stru_sweepPower.i32_rf1Pwr[j][i]);
-				listd[j].id=j;
-			}
-			selectionSortBy(listc,SWEEP_FREQ_BLOCK_ROWS,listd,1);
-			stru_sweepPower.i32_rf1psnr[i] = listc[SWEEP_FREQ_BLOCK_ROWS-1].value - listc[0].value;
-		}
-		selectionSortBy(list,swwp_ch_cnt,listb,1);
-	}
+	
 
 	#if 0
 			
@@ -1695,7 +1669,7 @@ void grd_gen_it_working_ch(uint8_t mode)
 		{
 			k=0;
 			for(i=0;i<swwp_ch_cnt;i++){
-				int rsme = stru_sweepPower.i32_rf0psnr[list[i].id];
+				int rsme = context.rf_info.i32_rf0psnr[list[i].id];
 				DLOG_Critical("%d: ch[%d]=%d,freq=%d,rsme=%d",i,list[i].id,list[i].value,BB_GetItFrqByCh(list[i].id),rsme);
 			}
 		}
@@ -1712,7 +1686,7 @@ void grd_gen_it_working_ch(uint8_t mode)
 		 
 		  DLOG_Critical("mode=0,it_work_sweep[%d]=%d,it_newsweep[%d]=%d",
 		  oldch, 
-		  stru_sweepPower.i32_rf0PwrAvr[oldch],
+		  context.rf_info.sweep_pwr_avrg_value[oldch].value,
 		  context.cur_IT_ch,
 		  list[0].value);
 		  
@@ -1721,11 +1695,8 @@ void grd_gen_it_working_ch(uint8_t mode)
 	{
 		
 	 	int current_sweep_now=0;
-		if(stru_sweepPower.e_curBand==RF_2G){
-			current_sweep_now = stru_sweepPower.i32_rf0PwrAvr[context.cur_IT_ch];
-		}else{
-			current_sweep_now = stru_sweepPower.i32_rf1PwrAvr[context.cur_IT_ch];
-		}
+		current_sweep_now = context.rf_info.sweep_pwr_avrg_value[context.cur_IT_ch].value;
+		
 		if((current_sweep_now - list[0].value) < 6) return;
 		
 		//if((SysTicks_GetDiff(context.it_chg_gap_delay, SysTicks_GetTickCount())) < 64)return;
@@ -1738,7 +1709,7 @@ void grd_gen_it_working_ch(uint8_t mode)
 		  context.it_chg_gap_delay =  SysTicks_GetTickCount();
 		  DLOG_Critical("mode=1,it_work_sweep[%d]=%d,it_newsweep[%d]=%d",
 		  oldch, 
-		  stru_sweepPower.i32_rf0PwrAvr[oldch],
+		  context.rf_info.sweep_pwr_avrg_value[oldch].value,
 		  context.cur_IT_ch,
 		  list[0].value);
 	}

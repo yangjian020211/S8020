@@ -423,7 +423,7 @@ typedef struct
 {
      uint8_t id; 
      signed char value;
-} STRU_SKY_RF_DATA;
+} STRU_RF_DATA;
 
 
 

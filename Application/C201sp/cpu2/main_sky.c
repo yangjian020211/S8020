@@ -57,7 +57,7 @@ int main(void)
     console_init(2, 115200);   
     dlog_set_output_level(LOG_LEVEL_WARNING);
     DLOG_Critical("cpu2 start!!! \n");
-	/*
+	#if 0
     STRU_HAL_H264_CONFIG st_h264Cfg;
     st_h264Cfg.u8_view0En = 1;
     st_h264Cfg.u8_view0Gop = 10;
@@ -71,7 +71,8 @@ int main(void)
     HAL_H264_Init(st_h264Cfg);
     HAL_H264_UsrCfg(0, &st_enc_usr_cfg);
     HAL_H264_UsrCfg(1, &st_enc_usr_cfg);
-	*/
+	#endif
+	
     HAL_BB_RegisterLnaFuntion(lna_open,c201s_lna_bypass);
     HAL_BB_Enable_RcRandomSkipFreq();
     HAL_BB_RegisterFemFuntion(fem_normal_trx,fem_only_rx);

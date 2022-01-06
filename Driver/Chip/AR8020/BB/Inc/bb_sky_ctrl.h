@@ -118,8 +118,6 @@ uint16_t sky_get_rc_snr( void );
 
 void sky_statistics_rc_snr(uint8_t locked);
 
-uint8_t sky_get_woringband(void);
-
 void sky_gen_rc_working_patten(void);
 
 void reset_table_for_2g();

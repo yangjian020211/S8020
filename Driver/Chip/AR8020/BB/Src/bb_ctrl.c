@@ -30,6 +30,9 @@
 #define 	SKY_PATTEN_MAX_Dynamic_SIZE_2G	7
 
 #define 	SKY_PATTEN_SIZE_5G	4
+static uint8_t vector_pwr_avrg_time_r[6]={3,2,2,1,1,1};
+static uint8_t vector_snr_avrg_time_r[6]={3,2,2,1,1,1};
+#define PRECIESE	10
 
 
 pfun pfun_lna_open=NULL,pfun_lna_bypass=NULL;
@@ -873,12 +876,12 @@ void  __attribute__ ((section(".h264"))) BB_init(ENUM_BB_MODE en_mode, STRU_CUST
     context.vt_start = 0;
     context.vt_end = BB_GetItFrqNumPerFilter();
     BB_WriteReg(PAGE2, SPI_DT_END_ADDR, 0);
-	context.sky_info.rc_ch_dynamic_working_patten_max_len=SKY_PATTEN_MAX_Dynamic_SIZE_2G;
-	context.sky_info.rc_patten_nextchg_delay = SysTicks_GetTickCount();
+	context.rf_info.rc_ch_dynamic_working_patten_max_len=SKY_PATTEN_MAX_Dynamic_SIZE_2G;
+	context.rf_info.rc_patten_nextchg_delay = SysTicks_GetTickCount();
 	bb_update_rc_patten_size();
 	DLOG_Warning("rc_set_unlock_patten");
 	rc_set_unlock_patten();
-	context.sky_info.rc_patten_set_by_usr=0;
+	context.rf_info.rc_patten_set_by_usr=0;
 
 	
 }
@@ -1605,7 +1608,7 @@ static void __attribute__ ((section(".h264"))) BB_HandleEventsCallback(void *p)
 		{
 				uint8_t msg[10]={0};
 				int i=0;
-				context.sky_info.rc_patten_set_by_usr=value;
+				context.rf_info.rc_patten_set_by_usr=value;
 				msg[0]=value1;
 				msg[1]=value1>>8;
 				msg[2]=value1>>16;
@@ -1617,7 +1620,7 @@ static void __attribute__ ((section(".h264"))) BB_HandleEventsCallback(void *p)
 				}
 				else 
 				{
-					for(i=0;i<context.sky_info.rc_ch_patten_need_id_size;i++) 
+					for(i=0;i<context.rf_info.rc_ch_patten_need_id_size;i++) 
 					{
 						context.rcChgPatten.patten_grd[i]=msg[i];
 					}
@@ -2551,10 +2554,10 @@ void BB_GenHashId(uint8_t *rcid, uint8_t *vtid,ENUM_BB_MODE en_mode)
     }
 }
 
-void sky_setRcpatten(uint8_t *msg)
+void __attribute__ ((section(".h264")))sky_setRcpatten(uint8_t *msg)
 {
 	int i=0;
-	for(i=0;i<context.sky_info.rc_ch_patten_need_id_size;i++) 
+	for(i=0;i<context.rf_info.rc_ch_patten_need_id_size;i++) 
 	{
 		context.rcChgPatten.patten[i]=msg[i];
 	}
@@ -2564,11 +2567,11 @@ void sky_setRcpatten(uint8_t *msg)
 	DLOG_Critical("manul set patten,cnt=%d,aim_cnt=%d",context.sync_cnt,context.rcChgPatten.timeout_cnt);
 }
 
-void selectionSortBy(STRU_SKY_RF_DATA *a,int len,STRU_SKY_RF_DATA *b,int by)//b is the org list,and a is the result list
+void __attribute__ ((section(".h264")))selectionSortBy(STRU_RF_DATA *a,int len,STRU_RF_DATA *b,int by)//b is the org list,and a is the result list
 {
 
 	int min_Index,i,j;
-	STRU_SKY_RF_DATA temp={0};
+	STRU_RF_DATA temp={0};
 	for(i=0;i<len;i++){
 		a[i].value=b[i].value;
 		a[i].id=b[i].id;
@@ -2599,7 +2602,7 @@ void selectionSortBy(STRU_SKY_RF_DATA *a,int len,STRU_SKY_RF_DATA *b,int by)//b 
 	
 }
 
-signed char vector_1xn_nx1_caculate(uint8_t *a,signed char *b,uint8_t len,uint8_t precision){
+signed char __attribute__ ((section(".h264")))vector_1xn_nx1_caculate(uint8_t *a,signed char *b,uint8_t len,uint8_t precision){
 	int i=0;
 	int r=0;
 	for(i=0;i<len;i++)
@@ -2609,7 +2612,7 @@ signed char vector_1xn_nx1_caculate(uint8_t *a,signed char *b,uint8_t len,uint8_
 	return (r/precision);
 }
 
-uint8_t dec2bit_index(uint8_t d)
+uint8_t __attribute__ ((section(".h264")))dec2bit_index(uint8_t d)
 {
 	uint8_t r;
 	switch(d){
@@ -2627,30 +2630,22 @@ uint8_t dec2bit_index(uint8_t d)
 	return (r);
 }
 
-void sky_notify_grd_goto_unlock_patten()
-{
-	uint8_t sendbuf[1]={0}; 
-	sendbuf[0]=0;
-	//BB_Session0SendMsg(DT_NUM_SKY_RC_CHPATTEN, sendbuf, 1);
-
-}
-
 static void reset_working_table_statistics()
 {
 	uint8_t row=0;
 	uint8_t ch=0;
 	for(ch=0;ch<MAX_RC_FRQ_SIZE;ch++){
-		context.sky_info.work_snr_avrg_value[ch].value=0;
-		context.sky_info.work_rc_error_value[ch].value=0;
-		context.sky_info.work_snr_fluct_value[ch].value=0;
+		context.rf_info.work_snr_avrg_value[ch].value=0;
+		context.rf_info.work_rc_error_value[ch].value=0;
+		context.rf_info.work_snr_fluct_value[ch].value=0;
 	    for (row = 0; row < SWEEP_FREQ_BLOCK_ROWS; row++){
-	        context.sky_info.work_rc_unlock_table[row][ch].value=0;
-			context.sky_info.work_snr_table[row][ch].value=0;
+	        context.rf_info.work_rc_unlock_table[row][ch].value=0;
+			context.rf_info.work_snr_table[row][ch].value=0;
 	    }
 	}
 }
 
-void rc_set_unlock_patten(void)
+void __attribute__ ((section(".h264")))rc_set_unlock_patten(void)
 {
 	context.rcChgPatten.patten[0]=0x81;
 	context.rcChgPatten.patten[1]=0x41;
@@ -2660,20 +2655,20 @@ void rc_set_unlock_patten(void)
 	DLOG_Error("go to common patten,cnt=%d",context.sync_cnt);
 	rc_update_working_patten();
 }
-void rc_update_working_patten(void)
+void __attribute__ ((section(".h264")))rc_update_working_patten(void)
 {
 	uint8_t i=0,j=0,k=0;
 	uint8_t id=1;
 	
-	for(i=0;i<context.sky_info.rc_ch_patten_need_id_size;i++)
+	for(i=0;i<context.rf_info.rc_ch_patten_need_id_size;i++)
 	{
 		id =0x01;
 		for(j=0;j<8;j++)
 		{
 			if((id & context.rcChgPatten.patten[i]) == id)
 			{
-				context.sky_info.rc_ch_working_patten[k] = i*8+j;
-				DLOG_Warning("syncnt=%d,new_patten[%d]=%d,freq=%d",context.sync_cnt, k,context.sky_info.rc_ch_working_patten[k],BB_GetRcFrqByCh(context.sky_info.rc_ch_working_patten[k]));
+				context.rf_info.rc_ch_working_patten[k] = i*8+j;
+				//DLOG_Warning("syncnt=%d,new_patten[%d]=%d,freq=%d",context.sync_cnt, k,context.rf_info.rc_ch_working_patten[k],BB_GetRcFrqByCh(context.rf_info.rc_ch_working_patten[k]));
 				k++;
 				
 			}
@@ -2681,37 +2676,55 @@ void rc_update_working_patten(void)
 		}
 	}
 	reset_working_table_statistics();
-	context.sky_info.rc_ch_working_patten_size = k;
+	context.rf_info.rc_ch_working_patten_size = k;
 	context.rc_have_update_list = 1;
 }
-void bb_get_rc_channel()
+void __attribute__ ((section(".h264")))bb_get_rc_channel()
 {
 	uint8_t id = 1,channel=0;
 	uint8_t i=0,offset=0,compare_segment;
 	context.rc_eq_channel++;
-	if(context.rc_eq_channel >= context.sky_info.rc_ch_working_patten_size)
+	if(context.rc_eq_channel >= context.rf_info.rc_ch_working_patten_size)
     {
         context.rc_eq_channel = 0;
     }
-	channel = context.sky_info.rc_ch_working_patten[context.rc_eq_channel];
-	
+	channel = context.rf_info.rc_ch_working_patten[context.rc_eq_channel];
+	#if 0
 	if(context.rc_have_update_list==1)
 	{
 		context.rc_have_update_list=0;
 		DLOG_Warning("patten_size=%d,freqch[%d]=%d",
-			context.sky_info.rc_ch_working_patten_size,
+			context.rf_info.rc_ch_working_patten_size,
 			channel,
 			BB_GetRcFrqByCh(channel)
 			);
 	}
+	#endif
 	context.sky_rc_channel = channel;
 	context.grd_rc_channel = channel;
 	
 }
-void bb_update_rc_patten_size()
+void __attribute__ ((section(".h264")))bb_update_rc_patten_size()
 {
 	int mod = BB_GetRcFrqNum(context.e_curBand)%8;
-	context.sky_info.rc_ch_patten_need_id_size= BB_GetRcFrqNum(context.e_curBand)/8+(mod >0);
-	DLOG_Critical("rc_ch_patten_need_id_size=%d",context.sky_info.rc_ch_patten_need_id_size);
+	context.rf_info.rc_ch_patten_need_id_size= BB_GetRcFrqNum(context.e_curBand)/8+(mod >0);
+	//DLOG_Critical("rc_ch_patten_need_id_size=%d",context.rf_info.rc_ch_patten_need_id_size);
+}
+
+void CalcAverageSweepPower(uint8_t ch){
+    uint8_t row;
+	int temp = 0;
+	int tempfluct = 0;
+    //get average power
+	signed char buffer[SWEEP_FREQ_BLOCK_ROWS]={0};
+	for(row=0;row<SWEEP_FREQ_BLOCK_ROWS;row++){
+		
+		buffer[row]=context.rf_info.sweep_pwr_table[row][ch].value;
+		if(row < SWEEP_FREQ_BLOCK_ROWS-1){
+			tempfluct +=abs(context.rf_info.sweep_pwr_table[row+1][ch].value-context.rf_info.sweep_pwr_table[row][ch].value);
+		}  
+	}
+	context.rf_info.sweep_pwr_fluct_value[ch].value=tempfluct/(SWEEP_FREQ_BLOCK_ROWS-1);
+	context.rf_info.sweep_pwr_avrg_value[ch].value=vector_1xn_nx1_caculate(vector_pwr_avrg_time_r,buffer,SWEEP_FREQ_BLOCK_ROWS,PRECIESE);
 }
 

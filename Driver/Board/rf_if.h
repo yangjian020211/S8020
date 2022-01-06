@@ -44,7 +44,7 @@ uint8_t BB_SetAgcGain(ENUM_RF_BAND e_rfBand, uint8_t gain);
 
 int32_t BB_SweepEnergyCompensation(int32_t data);
 
-int32_t BB_SweepSkyEnergy();
+int32_t BB_SweepEnergy();
 
 void  BB_set_power_open(ENUM_RF_BAND band,uint8_t power);
 

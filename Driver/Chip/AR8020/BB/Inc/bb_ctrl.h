@@ -118,6 +118,9 @@ void sky_notify_grd_goto_unlock_patten();
 uint8_t dec2bit_index(uint8_t d);
 signed char int2char(int data);
 void sky_setRcpatten(uint8_t *msg);
+void GetSweepCh_normalsweep(uint8_t u8_bandidx, uint8_t u8_ch,signed char data,ENUM_BB_MODE mode);
+void GetSweepCh_finesweep(uint8_t u8_bandidx, uint8_t u8_ch,signed char data);
+void CalcAverageSweepPower(uint8_t ch);
 
 
 #endif

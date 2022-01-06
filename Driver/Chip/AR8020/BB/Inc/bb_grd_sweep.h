@@ -46,9 +46,9 @@ int32_t BB_Sweep_updateCh(ENUM_RF_BAND e_band, uint8_t mainch);
 
 uint8_t get_opt_channel( void );
 
-int32_t BB_CompareCh1Ch2ByPowerAver(ENUM_RF_BAND e_rfBand, uint8_t u8_itCh1, uint8_t u8_itCh2, int32_t level);
+uint8_t BB_CompareCh1Ch2ByPowerAver(ENUM_RF_BAND e_rfBand, uint8_t u8_itCh1, uint8_t u8_itCh2, int32_t level);
 
-int32_t BB_CompareCh1Ch2ByPower(ENUM_RF_BAND e_rfBand, uint8_t u8_itCh1, uint8_t u8_itCh2, uint8_t u8_cnt);
+uint8_t BB_CompareCh1Ch2ByPower(ENUM_RF_BAND e_rfBand, uint8_t u8_itCh1, uint8_t u8_itCh2, uint8_t u8_cnt);
 
 int32_t grd_doRfbandChange( uint8_t *pu8_mainCh, uint8_t *pu8_optCh );
 

@@ -758,7 +758,7 @@ static void sky_do_rc_patten(void)
         	rc_update_working_patten();
             context.rcChgPatten.en_flag = 0;
             context.rcChgPatten.timeout_cnt = 0;
-			context.sky_info.rc_patten_nextchg_delay=SysTicks_GetTickCount();
+			context.rf_info.rc_patten_nextchg_delay=SysTicks_GetTickCount();
         }
     }
 }
@@ -935,7 +935,6 @@ static void process_wait_it_lock_state()
         u32_contiousUnlock = 0;
         context.dev_state  = CHECK_LOCK;
 		rc_set_unlock_patten();
-		sky_notify_grd_goto_unlock_patten();
         BB_SetTrxMode(BB_RECEIVE_ONLY_MODE);
         sky_soft_reset();
         DLOG_Warning("WAIT_VT_LOCK -> CHECK_LOCK");
@@ -1100,13 +1099,13 @@ static void sky_notify_rc_patten()
 	gap++;
 	if(context.rcChgPatten.en_flag==1 && context.rcChgPatten.valid==1 && gap < delay)
 	{
-		for(i=0;i<context.sky_info.rc_ch_patten_need_id_size;i++)
+		for(i=0;i<context.rf_info.rc_ch_patten_need_id_size;i++)
 		{
 			buf[i+2]=context.rcChgPatten.patten[i];
 		}
 		buf[0]= context.rcChgPatten.timeout_cnt;
-		buf[1]= context.sky_info.rc_patten_set_by_usr;
-		BB_Session0SendMsg(DT_NUM_SKY_RC_PATTEN, buf, context.sky_info.rc_ch_patten_need_id_size+2);
+		buf[1]= context.rf_info.rc_patten_set_by_usr;
+		BB_Session0SendMsg(DT_NUM_SKY_RC_PATTEN, buf, context.rf_info.rc_ch_patten_need_id_size+2);
 		DLOG_Warning("sky notify grd :cnt=%d,aim_cnt=%d", context.sync_cnt, context.rcChgPatten.timeout_cnt);
 	}
 	if(gap > 10) gap = 0;
@@ -1246,7 +1245,6 @@ static void Sky_TIM2_6_IRQHandler(uint32_t u32_vectorNum)
         #ifdef RF_9363
         //if(RF_600M == context.e_curBand)
         {
-            sky_GetSweepResult();
             sky_rcHopFreq600m(1);
         }
         #endif
@@ -1533,9 +1531,9 @@ static void sky_handle_rc_patten_cmd(uint8_t *arg)
 
 	if(context.rcChgPatten.en_flag==0)
 	{
-		context.sky_info.rc_patten_set_by_usr=arg[1];
-		if(context.sky_info.rc_patten_set_by_usr){
-			for(i=0;i<context.sky_info.rc_ch_patten_need_id_size;i++)
+		context.rf_info.rc_patten_set_by_usr=arg[1];
+		if(context.rf_info.rc_patten_set_by_usr){
+			for(i=0;i<context.rf_info.rc_ch_patten_need_id_size;i++)
 			{
 				context.rcChgPatten.patten[i]=arg[i+2];
 			}
@@ -3135,7 +3133,7 @@ static void sky_vtSkip_process(void)
     int32_t swp_e,swp_e_thres;
     static int debug_cnt = 0,vt_change_cnt=0;
     
-    swp_e = BB_SweepSkyEnergy();
+    swp_e = BB_SweepEnergy();
     if(debug_cnt++ > 100)
     {
         debug_cnt = 0;

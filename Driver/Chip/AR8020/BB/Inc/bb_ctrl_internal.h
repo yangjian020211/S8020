@@ -166,21 +166,27 @@ typedef struct
     int8_t  i8_skyPower0;
     int8_t  i8_skyPower1;
 } STRU_BAND_SWITCH_PARAM;
+typedef enum
+{
+    RF_SIGNAL_UNBLOCK_MODE  = 0,
+    RF_SIGNAL_BLOCK_MODE    = 1,
+    RF_SIGNAL_UNKNOWN_MODE  = 2
+} ENUM_RF_SIGNAL_BLOCK;
 
 
 typedef struct
 {
 
 
-	STRU_SKY_RF_DATA sweep_pwr_table[SWEEP_FREQ_BLOCK_ROWS][MAX_RC_FRQ_SIZE];
-	STRU_SKY_RF_DATA work_snr_table[SWEEP_FREQ_BLOCK_ROWS][MAX_RC_FRQ_SIZE];
-	STRU_SKY_RF_DATA work_rc_unlock_table[SWEEP_FREQ_BLOCK_ROWS][MAX_RC_FRQ_SIZE];
+	STRU_RF_DATA sweep_pwr_table[SWEEP_FREQ_BLOCK_ROWS][MAX_RC_FRQ_SIZE];
+	STRU_RF_DATA work_snr_table[SWEEP_FREQ_BLOCK_ROWS][MAX_RC_FRQ_SIZE];
+	STRU_RF_DATA work_rc_unlock_table[SWEEP_FREQ_BLOCK_ROWS][MAX_RC_FRQ_SIZE];
 	
-	STRU_SKY_RF_DATA sweep_pwr_avrg_value[MAX_RC_FRQ_SIZE];
-	STRU_SKY_RF_DATA work_snr_avrg_value[MAX_RC_FRQ_SIZE];
-	STRU_SKY_RF_DATA sweep_pwr_fluct_value[MAX_RC_FRQ_SIZE];
-	STRU_SKY_RF_DATA work_snr_fluct_value[MAX_RC_FRQ_SIZE];
-	STRU_SKY_RF_DATA work_rc_error_value[MAX_RC_FRQ_SIZE];
+	STRU_RF_DATA sweep_pwr_avrg_value[MAX_RC_FRQ_SIZE];
+	STRU_RF_DATA work_snr_avrg_value[MAX_RC_FRQ_SIZE];
+	STRU_RF_DATA sweep_pwr_fluct_value[MAX_RC_FRQ_SIZE];
+	STRU_RF_DATA work_snr_fluct_value[MAX_RC_FRQ_SIZE];
+	STRU_RF_DATA work_rc_error_value[MAX_RC_FRQ_SIZE];
 	
 	int32_t 		 i32_working_times[MAX_RC_FRQ_SIZE];//
 
@@ -214,11 +220,47 @@ typedef struct
 	uint8_t fine_sweep_row;
 	uint8_t fine_sweep_size;
 	uint8_t error_ch_record[MAX_RC_FRQ_SIZE];
-	STRU_SKY_RF_DATA sort_result_list[MAX_RC_FRQ_SIZE];
-	STRU_SKY_RF_DATA pre_selection_list[MAX_RC_FRQ_SIZE];
-	STRU_SKY_RF_DATA lastestpatten[MAX_RC_FRQ_SIZE];
-	STRU_SKY_RF_DATA prelist[MAX_RC_FRQ_SIZE];	
-} STRU_SKY_INFO;
+	STRU_RF_DATA sort_result_list[MAX_RC_FRQ_SIZE];
+	STRU_RF_DATA pre_selection_list[MAX_RC_FRQ_SIZE];
+	STRU_RF_DATA lastestpatten[MAX_RC_FRQ_SIZE];
+	STRU_RF_DATA prelist[MAX_RC_FRQ_SIZE];	
+
+	//vt
+	ENUM_RF_BAND e_bandsupport;
+	uint8_t    u8_mainCh; 		 //current VT channel
+	uint8_t	   u8_mainSweepRow;
+	uint8_t	   u8_mainSweepCh;
+	
+	uint8_t	   u8_optCh;		   //optional VT channel
+	uint8_t	   u8_optSweepRow;
+	uint8_t	   u8_optSweepCh;
+	uint8_t	   u8_bestBb1ChCnt[MAX_IT_FRQ_SIZE];
+	uint8_t	   u8_bestBb2ChCnt[MAX_IT_FRQ_SIZE];
+
+	uint8_t      u8_spareSweepCh;       //channel number
+    uint8_t      u8_optBandSweepCh;     //use to sweep another band channel.
+
+    uint8_t      u8_curBb1Row;
+    uint8_t      u8_curBb2Row;
+    ENUM_RF_BAND e_prevSweepBand;       //previous sweep band
+    uint8_t      u8_prevSweepCh;        //previous sweep channel, main channel and optional channel may change
+
+    uint8_t      u8_cycleCnt;
+    uint8_t      u8_totalCyc;
+    uint8_t      u8_preMainCh;
+    uint16_t     u16_preMainCount;      //if cycle >= u16_preMainCount, clear the u8_preMainCh
+
+    ENUM_RF_select band_sel[15];
+    uint8_t      u8_bandSelCnt;
+    uint8_t      u8_isFull;
+    uint8_t      u8_bb1ItFrqSize;
+    uint8_t      u8_bb2ItFrqSize;
+
+    uint8_t      u8_cmdSweep;
+
+    ENUM_RF_SIGNAL_BLOCK    flag_signalBlock;
+	
+}RF_INFO;
 
 
 typedef struct
@@ -295,7 +337,7 @@ typedef struct
 
     uint8_t   rc_ch_map[MAX_RC_FRQ_SIZE + 2];
 	
-	STRU_SKY_INFO sky_info;
+	RF_INFO rf_info;
 	
 	uint8_t  read_ch_id;
 	uint8_t	  rc_eq_channel;
@@ -499,12 +541,7 @@ typedef enum
 } ENUM_BAND_SWITCH_OPTION;
 
 
-typedef enum
-{
-    RF_SIGNAL_UNBLOCK_MODE  = 0,
-    RF_SIGNAL_BLOCK_MODE    = 1,
-    RF_SIGNAL_UNKNOWN_MODE  = 2
-} ENUM_RF_SIGNAL_BLOCK;
+
 
 
 #define     STATUS_CHG_DELAY        (64)
@@ -560,9 +597,7 @@ int BB_DtSendToBuf(ENUM_DT_NUM e_num, uint8_t *arg);
 int BB_DtStopSend(ENUM_DT_NUM e_num);
 void BB_DtSentToSession(void);
 
-uint8_t sky_SetSweepCh(ENUM_RF_BAND band, uint8_t ch);
 
-uint32_t sky_GetSweepResult(void);
 
 int BB_Session0SendMsg(uint8_t id, uint8_t* data_buf, uint16_t len);
 
@@ -649,7 +684,7 @@ int sky_reset_ch(uint32_t ch);
 
 int sky_send_rc_map(void);
 
-void selectionSortBy(STRU_SKY_RF_DATA *a,int len,STRU_SKY_RF_DATA *b,int by);//b is the org list,and a is the result list
+void selectionSortBy(STRU_RF_DATA *a,int len,STRU_RF_DATA *b,int by);//b is the org list,and a is the result list
 
 signed char vector_1xn_nx1_caculate(uint8_t *a,signed char *b,uint8_t len,uint8_t precision);
 

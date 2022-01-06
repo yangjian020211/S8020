@@ -98,7 +98,7 @@ uint8_t sky_SetSweepCh(ENUM_RF_BAND band, uint8_t ch)
 
 uint32_t sky_GetSweepResult(void)
 {
-    sky_curNoisePower[sky_curSweepCh] = BB_SweepSkyEnergy();
+    sky_curNoisePower[sky_curSweepCh] = BB_SweepEnergy();
 
     sky_NoisePower[sky_curSweepCh][sky_loopcnt] = sky_curNoisePower[sky_curSweepCh];
 

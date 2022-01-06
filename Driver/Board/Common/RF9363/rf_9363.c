@@ -745,7 +745,7 @@ int32_t BB_SweepEnergyCompensation(int32_t data)
 }
 
 
-int32_t BB_SweepSkyEnergy()
+int32_t BB_SweepEnergy()
 {
     int32_t power_db;
     uint32_t power_td = (((uint32_t)(BB_ReadReg(PAGE2, SWEEP_ENERGY_HIGH)) << 16) |

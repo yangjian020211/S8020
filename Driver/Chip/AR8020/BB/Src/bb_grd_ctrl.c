@@ -2285,7 +2285,7 @@ static void grd_do_rc_patten(void)
 		if (context.sync_cnt == context.rcChgPatten.timeout_cnt)
 		{
 
-			context.sky_info.rc_patten_nextchg_delay = SysTicks_GetTickCount();
+			context.rf_info.rc_patten_nextchg_delay = SysTicks_GetTickCount();
 			rc_update_working_patten();
 			context.rcChgPatten.en_flag=0;
 			context.rcChgPatten.timeout_cnt=0;
@@ -2297,7 +2297,7 @@ static void grd_do_rc_patten(void)
 		if (context.sync_cnt == context.rcChgPatten.timeout_cnt_grd)
 		{
 
-			context.sky_info.rc_patten_nextchg_delay = SysTicks_GetTickCount();
+			context.rf_info.rc_patten_nextchg_delay = SysTicks_GetTickCount();
 			rc_update_working_patten();
 			context.rcChgPatten.en_flag_grd=0;
 			context.rcChgPatten.timeout_cnt_grd=0;
@@ -2316,13 +2316,13 @@ static void grd_notify_rc_patten()
 	gap++;
 	if(context.rcChgPatten.en_flag_grd==1 && context.rcChgPatten.valid_grd==1 && gap < delay)
 	{
-		for(i=0;i<context.sky_info.rc_ch_patten_need_id_size;i++)
+		for(i=0;i<context.rf_info.rc_ch_patten_need_id_size;i++)
 		{
 			buf[i+2]=context.rcChgPatten.patten_grd[i];
 		}
 		buf[0]= context.rcChgPatten.timeout_cnt_grd;
-		buf[1]=context.sky_info.rc_patten_set_by_usr;
-		BB_Session0SendMsg(DT_NUM_GRD_RC_CHPATTEN, buf, context.sky_info.rc_ch_patten_need_id_size+2);
+		buf[1]=context.rf_info.rc_patten_set_by_usr;
+		BB_Session0SendMsg(DT_NUM_GRD_RC_CHPATTEN, buf, context.rf_info.rc_ch_patten_need_id_size+2);
 		DLOG_Critical("grd notify sky :cnt=%d,aim_cnt=%d", context.sync_cnt, context.rcChgPatten.timeout_cnt_grd);
 	}
 	if(gap > 5) gap = 0;
@@ -2336,7 +2336,7 @@ static void grd_handle_rc_patten_cmd(uint8_t *arg)
 	int i=0;
 	uint8_t same=1;
 	uint8_t buf[10];
-	for(i=0;i<context.sky_info.rc_ch_patten_need_id_size;i++){
+	for(i=0;i<context.rf_info.rc_ch_patten_need_id_size;i++){
 			if(context.rcChgPatten.patten[i]!=arg[i+2]){
 				same=0;
 			}
@@ -2344,15 +2344,15 @@ static void grd_handle_rc_patten_cmd(uint8_t *arg)
 	if(same) return;
 	if(context.rcChgPatten.en_flag==0)
 	{
-		for(i=0;i<context.sky_info.rc_ch_patten_need_id_size;i++)context.rcChgPatten.patten[i]=0;
+		for(i=0;i<context.rf_info.rc_ch_patten_need_id_size;i++)context.rcChgPatten.patten[i]=0;
 		context.rcChgPatten.en_flag=1;
 		context.rcChgPatten.timeout_cnt=arg[0];
 		DLOG_Critical("grd get new patten ,sync_cnt=%d,aim=%d",context.sync_cnt,context.rcChgPatten.timeout_cnt);
-		for(i=0;i<context.sky_info.rc_ch_patten_need_id_size;i++){
+		for(i=0;i<context.rf_info.rc_ch_patten_need_id_size;i++){
 			context.rcChgPatten.patten[i]=arg[i+2];
 			buf[0] = arg[i+2];
 		}
-		BB_Session0SendMsg(DT_NUM_SKY_RC_PATTEN, &buf[0], context.sky_info.rc_ch_patten_need_id_size+2);
+		BB_Session0SendMsg(DT_NUM_SKY_RC_PATTEN, &buf[0], context.rf_info.rc_ch_patten_need_id_size+2);
 		DLOG_Critical("ack to sky grd notify sky :cnt=%d,aim_cnt=%d", context.sync_cnt, context.rcChgPatten.timeout_cnt);
 	}
 }
