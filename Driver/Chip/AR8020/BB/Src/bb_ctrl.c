@@ -781,13 +781,13 @@ void  __attribute__ ((section(".h264"))) BB_init(ENUM_BB_MODE en_mode, STRU_CUST
     BB_regs_init(context.en_bbmode);
     RF_init(en_mode);
     BB_InitSunBand_RcFreqNum(FREQ_SUB_BAND_10M_RC_NUM, FREQ_SUB_BAND_20M_RC_NUM);
-    
-    #ifdef JYDS
+
+#ifdef JYDS
     context.st_bandMcsOpt.e_rfbandMode = MANUAL;
     context.e_curBand = RF_2G;
-    #else
+#else
     context.e_curBand     = (context.st_bandMcsOpt.e_bandsupport & RF_2G) ? RF_2G : context.st_bandMcsOpt.e_bandsupport;
-    #endif
+#endif
     context.u8_bbStartMcs = (context.st_bandMcsOpt.e_bandwidth == BW_20M) ? context.st_bandMcsOpt.u8_bbStartMcs20M : context.st_bandMcsOpt.u8_bbStartMcs10M;
 
     BB_set_ItFrqByCh(context.e_curBand, BB_GetItFrqNum(context.e_curBand)/2);
@@ -1596,8 +1596,6 @@ static void __attribute__ ((section(".h264"))) BB_HandleEventsCallback(void *p)
                 //DLOG_Info("value:%x flag:%x", value, wake_up_flag);
             }
         }
-<<<<<<< Updated upstream
-=======
 		else if((class == WIRELESS_OTHER) && (item == WIRELESS_RF_PA_MODE))
 		{
 				context.e_powerMode = value;
@@ -1629,7 +1627,6 @@ static void __attribute__ ((section(".h264"))) BB_HandleEventsCallback(void *p)
 				}
 				DLOG_Critical("is_manul=%d,set rc patten %d:%d:%d:%d:%d",value,msg[0],msg[1],msg[2],msg[3],msg[4]); 
 		}
->>>>>>> Stashed changes
         int ret = BB_InsertCmd(0, (STRU_WIRELESS_CONFIG_CHANGE * )p);
     }
 }
@@ -2478,20 +2475,12 @@ void BB_Lna_reset(void)
 ENUM_LNA_STATUS BB_Lna_isNeedSwitch(ENUM_RF_BAND band)
 {
     uint8_t avg_a,avg_b;
-<<<<<<< Updated upstream
-
-=======
 	
->>>>>>> Stashed changes
     if(context.swp_bypass == 1)
     {
         return BYPASS_LNA;
     }
-<<<<<<< Updated upstream
-
-=======
 	
->>>>>>> Stashed changes
     if(!stru_agc2lna.isFull)
     {
         return INVALID_LNA;

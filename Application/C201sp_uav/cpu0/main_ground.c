@@ -55,8 +55,8 @@ void console_init(uint32_t uart_num, uint32_t baut_rate)
 void DLOG_Process(void* p);
 
 
-#define RESET_TIMER        	(HAL_TIMER_NUM11)
-#define RESET_TIMER_INTR	(TIMER_INTR11_VECTOR_NUM)
+#define RESET_TIMER        	(HAL_TIMER_NUM17)
+#define RESET_TIMER_INTR	(TIMER_INTR17_VECTOR_NUM)
 #define DELAY_RESET	(20000000)
 static void DoSysReset(){
 	HAL_TIMER_Stop(RESET_TIMER_INTR);

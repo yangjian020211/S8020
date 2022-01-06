@@ -247,13 +247,13 @@ int PWR_CTRL_ModeSet(STRU_PWR_CTRL *ctrl)
         {
             PWR_CTRL_ModeSetRfChip(PWR_CTRL_ON);
             PWR_CTRL_ModeSetAdDa(PWR_CTRL_ON);
-            PWR_CTRL_ModeSet2t2rSingle(0, PWR_CTRL_ON);
-            PWR_CTRL_ModeSet2t2rSingle(1, PWR_CTRL_OFF);
+            PWR_CTRL_ModeSet2t2rSingle(0, PWR_CTRL_ON);//A path
+            PWR_CTRL_ModeSet2t2rSingle(1, PWR_CTRL_OFF);//B path
             /*if((RF_5G == context.e_curBand) && (RF_2G_5G == context.st_bandMcsOpt.e_bandsupport))
-            {
-                sky_requestRfBandSwitch(RF_2G);
-            }
-            context.stru_bandSwitchParam.u8_bandSwitchAfterUnlock = 0;*/
+		            {
+		                sky_requestRfBandSwitch(RF_2G);
+		            }
+		            context.stru_bandSwitchParam.u8_bandSwitchAfterUnlock = 0;*/
             context.sleep_level = PWR_LEVEL1;           
             break;
         }

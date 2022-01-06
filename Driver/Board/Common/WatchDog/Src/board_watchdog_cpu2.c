@@ -3,6 +3,7 @@
 #include "debuglog.h"
 #include "memory_config.h"
 #include "sys_event.h"
+#include "board_watchdog.h"
 
 static uint32_t u32_feedCount = 0;
 

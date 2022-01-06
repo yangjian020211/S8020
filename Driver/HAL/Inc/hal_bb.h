@@ -246,6 +246,9 @@ HAL_RET_T HAL_BB_SetPowerWorkMode(ENUM_RF_POWER_WORK_MODE e_powerWorkMode);
 
 HAL_RET_T HAL_PwrCtrlSet(uint8_t value);
 
+HAL_RET_T HAL_PA_modeCtrlSet(uint8_t value);
+
+
 uint8_t HAL_GetPwrCtrlLevel(void);
 
 HAL_RET_T HAL_BB_StopSearchRcId(void);

@@ -181,8 +181,6 @@ void  sky_CalcAverage_rc_ch_snr(uint8_t ch)
 
 }
 
-<<<<<<< Updated upstream
-=======
 
 void sky_statistics_rc_snr(uint8_t locked)
 {
@@ -246,7 +244,6 @@ int sky_get_rc_current_sweep_row(){
 }
 
 
->>>>>>> Stashed changes
 int sky_lna_check_sweep_power(int32_t spower_data)
 {   
     static uint32_t   swp_lna_switch_cnt = 0;
@@ -261,10 +258,10 @@ int sky_lna_check_sweep_power(int32_t spower_data)
             swp_lna_switch_cnt += 1;
         }
         
-        /*if(swp_lna_switch_cnt > SWEEP_LNA_SWITCH_THRESHOLD_nper100)
-        {
-            context.swp_bypass = 1; /////////3/100
-        }*/
+        //if(swp_lna_switch_cnt > SWEEP_LNA_SWITCH_THRESHOLD_nper100)
+       // {
+       //     context.swp_bypass = 1; /////////3/100
+       // }
         
         if(swp_watch_window_size > 100)
         {
@@ -304,8 +301,6 @@ int sky_lna_check_sweep_power(int32_t spower_data)
     //DLOG_Warning("sw-b %d wk-b %d sw-c %d p %d",stru_sweepPower.e_prevSweepBand,context.e_curBand,ch,spower_data);
 }
 
-<<<<<<< Updated upstream
-=======
 static uint32_t sweep_pwr_table1[3][50]={0};
 static uint32_t sweep_pwr_table2[3][50]={0};
 
@@ -534,7 +529,6 @@ static void sky_GetSweepCh_normalsweep(uint8_t u8_bandidx, uint8_t u8_ch,signed 
 	   }
 
 }
->>>>>>> Stashed changes
 
 /*
  * return 0: Fail 
@@ -550,40 +544,6 @@ uint8_t __attribute__ ((section(".h264")))sky_GetSweepCh(uint8_t u8_bandidx, uin
     if (data == 0){
         return 0;
     }
-<<<<<<< Updated upstream
-    
-    sky_lna_check_sweep_power(power);
-
-    if (u8_bandidx == 0)
-    {
-        st_skySweep.i32_rf0Pwr[st_skySweep.u8_curRowCnt][u8_ch] = power;
-    }
-    else
-    {
-        st_skySweep.i32_rf1Pwr[st_skySweep.u8_curRowCnt][u8_ch] = power;
-        if (u8_ch > 2)
-        {    
-            st_skySweep.i32_rf1Pwr[st_skySweep.u8_curRowCnt][u8_ch] = power - 3;
-        }
-        else
-        {
-            st_skySweep.i32_rf1Pwr[st_skySweep.u8_curRowCnt][u8_ch] = power + 1;
-        }
-    }
-
-    //last channel
-    if (u8_bandidx == 1 && (u8_ch + 1) == st_skySweep.u8_vtFrqSize[u8_bandidx])
-    {
-        st_skySweep.u8_curRowCnt ++;        //next cnt
-        if (st_skySweep.u8_curRowCnt >= SWEEP_FREQ_BLOCK_ROWS)
-        {
-            st_skySweep.u8_curRowCnt = 0;
-            st_skySweep.u8_isFull    = 1;
-        }
-    }
-
-    return 1;
-=======
     sky_lna_check_sweep_power(data);
 
 	if( context.sky_info.lock_sweep){
@@ -593,7 +553,6 @@ uint8_t __attribute__ ((section(".h264")))sky_GetSweepCh(uint8_t u8_bandidx, uin
 		sky_GetSweepCh_normalsweep(u8_bandidx,u8_ch,data);
 	}
 	return 1;
->>>>>>> Stashed changes
 }
 
 void __attribute__ ((section(".h264"))) sky_GetSweepNoise(int16_t *ptr_noise_power, uint32_t max)

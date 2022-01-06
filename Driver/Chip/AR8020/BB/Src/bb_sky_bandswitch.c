@@ -71,25 +71,6 @@ void sky_bandSwitchLnaSwitch(void)
         }
         else if(context.st_mimo_mode.enum_lna_mode == LNA_AUTO)
         {
-<<<<<<< Updated upstream
-            if(context.swp_bypass == 1)
-            {
-                if(context.lna_status != BYPASS_LNA)
-                {
-                    BB_bypass_lna();
-                    context.lna_status = BYPASS_LNA;
-                }
-            }
-            else if(context.swp_bypass == 2)
-            {
-                if(context.lna_status != OPEN_LNA)
-                {
-                    BB_open_lna();
-                    context.lna_status = OPEN_LNA;
-                }
-        
-            }
-=======
         	
 	            if(context.swp_bypass == 1)
 	            {
@@ -109,7 +90,6 @@ void sky_bandSwitchLnaSwitch(void)
 	        
 	            }
             		
->>>>>>> Stashed changes
         }
 
     }

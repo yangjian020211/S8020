@@ -496,10 +496,7 @@ void usr_bypass_sbus_uart_task(uint8_t dev_type)
         {
             i=0;
             WATCHDOG_Reset();
-<<<<<<< Updated upstream
-=======
 			//WATCHDOG_ResetCpu2();//if c201-d
->>>>>>> Stashed changes
         }
     }
     //get factory setting rt-uart value, max config value is 25

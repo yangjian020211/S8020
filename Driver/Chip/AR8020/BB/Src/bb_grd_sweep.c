@@ -239,10 +239,7 @@ void __attribute__ ((section(".h264"))) BB_GetSweepNoise(int16_t *ptr_noise_powe
         }
     }
 }
-<<<<<<< Updated upstream
-=======
 
->>>>>>> Stashed changes
 int grd_lna_check_sweep_power(uint8_t ch,int32_t spower_data)
 {
 
@@ -259,10 +256,10 @@ int grd_lna_check_sweep_power(uint8_t ch,int32_t spower_data)
             DLOG_Info("%d-%d,%d",ch,context.cur_IT_ch,spower_data);
         }
         
-        /*if(swp_lna_switch_cnt > SWEEP_LNA_SWITCH_THRESHOLD_nper100)
-        {
-            context.swp_bypass = 1; /////////3/100
-        }*/
+     //   if(swp_lna_switch_cnt > SWEEP_LNA_SWITCH_THRESHOLD_nper100)
+     //   {
+     //       context.swp_bypass = 1; /////////3/100
+     //   }
 
         if(swp_watch_window_size > 100)
         {
@@ -301,10 +298,7 @@ int grd_lna_check_sweep_power(uint8_t ch,int32_t spower_data)
 
     //DLOG_Warning("sw-b %d wk-b %d sw-c %d p %d",stru_sweepPower.e_prevSweepBand,context.e_curBand,ch,spower_data);
 }
-<<<<<<< Updated upstream
-=======
 
->>>>>>> Stashed changes
 
 /*
  * adapt to AR8020 new sweep function

@@ -472,6 +472,24 @@ HAL_RET_T HAL_PwrCtrlSet(uint8_t value)
     }
 }
 
+HAL_RET_T HAL_PA_modeCtrlSet(uint8_t value)
+{
+    uint8_t u8_ret;
+    STRU_WIRELESS_CONFIG_CHANGE st_cmd;
+    st_cmd.u8_configClass  = WIRELESS_OTHER;
+    st_cmd.u8_configItem   = WIRELESS_RF_PA_MODE;
+    st_cmd.u32_configValue = value;
+    u8_ret = SYS_EVENT_NotifyInterCore(SYS_EVENT_ID_USER_CFG_CHANGE, (void *)&st_cmd);
+    if( u8_ret )
+    {
+        return HAL_OK;
+    }
+    else
+    {
+        return HAL_BB_ERR_EVENT_NOTIFY;
+    }
+}
+
 uint8_t HAL_GetPwrCtrlLevel(void)
 {
     return pwrCtrlLevel;

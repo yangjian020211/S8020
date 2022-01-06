@@ -5,6 +5,7 @@
 void WATCHDOG_Init(void);
 void WATCHDOG_InitUpgrade(void);
 void WATCHDOG_Reset(void);
+void WATCHDOG_ResetCpu2(void);
 void WATCHDOG_InitCpu2(void);
 void WATCHDOGUPGRADE_Reset(void);
 uint32_t WATCHDOG_InitStatus(void);

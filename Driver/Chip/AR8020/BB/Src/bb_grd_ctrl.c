@@ -32,7 +32,7 @@
 STRU_GRD_STATUS stru_grdstatus;
 
 static init_timer_st grd_timer2_5;
-static init_timer_st grd_timer2_1;
+//static init_timer_st grd_timer2_1;
 
 static init_timer_st grd_timer2_6;
 static init_timer_st grd_timer2_7;
@@ -185,13 +185,10 @@ static void grd_limit_dist_process(void);
 
 //void grd_init_rc_skip_patten(void);
 static void grd_do_rcRate(void);
-<<<<<<< Updated upstream
-=======
 static void do_debug_process(void);
 
 static void grd_do_rc_patten(void);
 static void grd_handle_rc_patten_cmd(uint8_t *arg);
->>>>>>> Stashed changes
 
 
 void BB_GRD_start(void)
@@ -938,10 +935,7 @@ static void grd_lna_switch(void)
             }
             else if(context.st_mimo_mode.enum_lna_mode == LNA_AUTO)
             {
-<<<<<<< Updated upstream
-=======
     	
->>>>>>> Stashed changes
                 if(context.swp_bypass == 1)
                 {
                     BB_bypass_lna();
@@ -951,12 +945,7 @@ static void grd_lna_switch(void)
                 {
                     BB_open_lna();
                     context.lna_status = OPEN_LNA;
-<<<<<<< Updated upstream
-
-                }
-=======
                 }               	  
->>>>>>> Stashed changes
             }
         }
         BB_Lna_reset();
@@ -998,12 +987,8 @@ static void grd_lna_switch(void)
             context.lna_status = BYPASS_LNA;
             BB_Lna_reset();
         }
-<<<<<<< Updated upstream
-        else if(status == OPEN_LNA && context.lna_status == BYPASS_LNA && context.swp_bypass == 2 )
-=======
 		else if(status == OPEN_LNA && context.lna_status == BYPASS_LNA && context.swp_bypass == 2 )
         //else if(status == OPEN_LNA && context.lna_status == BYPASS_LNA)
->>>>>>> Stashed changes
         {
             BB_open_lna();
             context.lna_status = OPEN_LNA;
@@ -1022,26 +1007,18 @@ static void grd_lna_switch(void)
     }*/
 
 }
-
-///////////////////////////////////////////////////////////////////////////////////
-
-static void wimax_vsoc_tx_isr(uint32_t u32_vectorNum)
-{
-    NVIC_DisableIRQ(BB_TX_ENABLE_VECTOR_NUM);
-    STRU_WIRELESS_INFO_DISPLAY *osdptr = (STRU_WIRELESS_INFO_DISPLAY *)(SRAM_BB_STATUS_SHARE_MEMORY_ST_ADDR);
-    STRU_DEVICE_INFO *pst_devInfo      = (STRU_DEVICE_INFO *)(DEVICE_INFO_SHM_ADDR);
-
-    if( context.u8_flagdebugRequest & 0x80)
+static void do_debug_process(){
+	
+	STRU_WIRELESS_INFO_DISPLAY *osdptr = (STRU_WIRELESS_INFO_DISPLAY *)(SRAM_BB_STATUS_SHARE_MEMORY_ST_ADDR);
+	STRU_DEVICE_INFO *pst_devInfo      = (STRU_DEVICE_INFO *)(DEVICE_INFO_SHM_ADDR);
+	if( context.u8_flagdebugRequest & 0x80)
     {
         context.u8_debugMode = context.u8_flagdebugRequest & 0x01;
-
         if( context.u8_debugMode != FALSE )
         {
-
             osdptr->head = 0x00;
             osdptr->tail = 0xff;    //end of the writing
         }
-
         if (context.u8_debugMode == TRUE)
         {
             BB_SPI_DisableEnable(0); //
@@ -1050,25 +1027,29 @@ static void wimax_vsoc_tx_isr(uint32_t u32_vectorNum)
         {
             BB_SPI_DisableEnable(1); //
         }
-
         osdptr->in_debug     = context.u8_debugMode;        
         pst_devInfo->isDebug = context.u8_debugMode;
-
         context.u8_flagdebugRequest = 0;
         //DLOG_Info("DebugMode %d %d\n", osdptr->in_debug, context.u8_debugMode);
     }
-    
+
+}
+///////////////////////////////////////////////////////////////////////////////////
+
+static void wimax_vsoc_tx_isr(uint32_t u32_vectorNum)
+{
+    NVIC_DisableIRQ(BB_TX_ENABLE_VECTOR_NUM);
+    do_debug_process();
+	
     NVIC_EnableIRQ(TIMER_INTR25_VECTOR_NUM);
     TIM_StartTimer(grd_timer2_5);///tx enable , delay 8ms
 
-    {
-        TIM_StartTimer(grd_timer2_6);//tx enable, delay 3.5ms
-        NVIC_EnableIRQ(TIMER_INTR26_VECTOR_NUM);
-    }
+    TIM_StartTimer(grd_timer2_6);//tx enable, delay 3.5ms
+    NVIC_EnableIRQ(TIMER_INTR26_VECTOR_NUM);
+	
     //do rc switch count time
     //NVIC_EnableIRQ(TIMER_INTR21_VECTOR_NUM);
     //TIM_StartTimer(grd_timer2_1);///tx enable , delay 8ms
-
     if (1 == vt_info.valid)
     {
         TIM_StopTimer(timer2_3);
@@ -1093,6 +1074,8 @@ static void wimax_vsoc_tx_isr(uint32_t u32_vectorNum)
     context.wimax_irq_time = SysTicks_GetTickCount();
     grd_lna_switch();
 }
+
+/*
 static void Grd_TIM2_1_IRQHandler(uint32_t u32_vectorNum)
 {
     uint8_t is_bb_tx_irq_exist;
@@ -1106,7 +1089,7 @@ static void Grd_TIM2_1_IRQHandler(uint32_t u32_vectorNum)
     grd_do_rcRate();
 
 }
-
+*/
 static void Grd_TIM2_2_IRQHandler(uint32_t u32_vectorNum)
 {
     uint8_t is_bb_tx_irq_exist;
@@ -1158,37 +1141,7 @@ static void Grd_TIM2_3_IRQHandler(uint32_t u32_vectorNum)
 
     NVIC_DisableIRQ(TIMER_INTR23_VECTOR_NUM);
     TIM_StopTimer(timer2_3);
-
-    STRU_WIRELESS_INFO_DISPLAY *osdptr = (STRU_WIRELESS_INFO_DISPLAY *)(SRAM_BB_STATUS_SHARE_MEMORY_ST_ADDR);
-    STRU_DEVICE_INFO *pst_devInfo      = (STRU_DEVICE_INFO *)(DEVICE_INFO_SHM_ADDR);
-
-    if( context.u8_flagdebugRequest & 0x80)
-    {
-        context.u8_debugMode = context.u8_flagdebugRequest & 0x01;
-
-        if( context.u8_debugMode != FALSE )
-        {
-
-            osdptr->head = 0x00;
-            osdptr->tail = 0xff;    //end of the writing
-        }
-
-        if (context.u8_debugMode == TRUE)
-        {
-            BB_SPI_DisableEnable(0); //
-        }
-        else
-        {
-            BB_SPI_DisableEnable(1); //
-        }
-
-        osdptr->in_debug     = context.u8_debugMode;        
-        pst_devInfo->isDebug = context.u8_debugMode;
-
-        context.u8_flagdebugRequest = 0;
-        //DLOG_Info("DebugMode %d %d\n", osdptr->in_debug, context.u8_debugMode);
-    }
-    
+	do_debug_process();
     NVIC_EnableIRQ(TIMER_INTR23_VECTOR_NUM);
     TIM_StartTimer(timer2_3);
 	
@@ -1204,10 +1157,8 @@ static void Grd_TIM2_3_IRQHandler(uint32_t u32_vectorNum)
 static void Grd_TIM2_5_IRQHandler(uint32_t u32_vectorNum)
 {
     Reg_Read32(BASE_ADDR_TIMER2 + TMRNEOI_5);
-
     NVIC_DisableIRQ(TIMER_INTR25_VECTOR_NUM);
     TIM_StopTimer(grd_timer2_5);
-    
     if(context.u8_debugMode)
     {
         return;
@@ -1232,7 +1183,7 @@ void Grd_TIM2_6_IRQHandler(uint32_t u32_vectorNum)
     TIM_StartTimer(grd_timer2_7);
     NVIC_EnableIRQ(TIMER_INTR27_VECTOR_NUM);
 
-    if ( FALSE == context.u8_debugMode )
+    if (FALSE == context.u8_debugMode )
     {
         if( context.flag_mrc == 1 )
         {
@@ -1255,8 +1206,6 @@ void Grd_TIM2_6_IRQHandler(uint32_t u32_vectorNum)
     Timer1_Delay1_Cnt = 0;
 }
 
-<<<<<<< Updated upstream
-=======
 static void time_slice0(){
 	grd_getSignalStatus();
 	#ifdef RF_8003X
@@ -1428,7 +1377,6 @@ static void time_slice7(){
 	grd_gen_it_working_ch(1);
 
 }
->>>>>>> Stashed changes
 
 void Grd_TIM2_7_IRQHandler(uint32_t u32_vectorNum)
 {
@@ -1441,218 +1389,17 @@ void Grd_TIM2_7_IRQHandler(uint32_t u32_vectorNum)
         TIM_StopTimer(grd_timer2_7);    
         return;
     }
-
-    
-
     switch (Timer1_Delay1_Cnt)
     {
-        case 0:
-            grd_getSignalStatus();
-
-            #ifdef RF_8003X
-			//if(RF_600M != context.e_curBand)
-			{
-				BB_GetSweepedChResult(0);
-			}
-            #endif
-            
-            BB_grd_checkSearchEnd();
-            Timer1_Delay1_Cnt++;
-
-            if(context.enable_rc_skip_patten)
-            {
-                grd_init_rc_skip_patten();
-            }
-            break;
-
-        case 1:
-            grd_fec_judge();
-            //grd_handle_all_rf_cmds();
-            Timer1_Delay1_Cnt++;
-            if(context.enable_non_lbt)
-            {
-                //if(context.dev_state == FEC_LOCK)
-                if(BB_get_cur_opt_ch() != non_lbt_opt_ch)
-                {
-                    DLOG_Warning("opt ch %d -> %d",non_lbt_opt_ch,BB_get_cur_opt_ch());
-                    non_lbt_opt_ch = BB_get_cur_opt_ch();
-                    BB_DtStopSend(DT_NUM_NON_LBT_NOTICE_OPTCH);
-                    BB_DtSendToBuf(DT_NUM_NON_LBT_NOTICE_OPTCH, (uint8_t *)(&non_lbt_opt_ch));
-                }
-                grd_ackSkyVtSkip();
-            }
-            break;
-
-        case 2:
-            if(context.rcHopMode == AUTO)
-            {
-                #ifdef RF_9363
-				//if(RF_600M == context.e_curBand)
-				{
-					grd_rc_hopfreq600m();
-				}
-                #endif
-
-                #ifdef RF_8003X
-				//else
-				{
-					grd_rc_hopfreq();
-				}
-                #endif
-                
-            }
-            if ( context.locked )
-            {
-                grd_checkBlockMode();
-            }
-            grd_write_sync_cnt();
-            
-            if(context.freq_band_mode == SUB_BAND)
-            {
-                grd_sub_band_run();
-            }
-
-            grd_rc_mod_chg_process();
-            #ifdef RF_9363
-			if(RF_600M == context.e_curBand)
-			{
-				grd_filter_chg_process_600m();
-			}
-            #endif
-
-            Timer1_Delay1_Cnt++;
-            break;
-
-        case 3:
-            Timer1_Delay1_Cnt++;
-            BB_GetDevInfo();
-            if (context.locked)
-            {
-                grd_judge_qam_band_switch();
-            }
-            
-            {
-                uint8_t u8_mainCh, u8_optCh;
-                if (1 == grd_doRfbandChange( &u8_mainCh, &u8_optCh) )
-                {
-                    context.vtFreqTime[context.cur_IT_ch] = SysTicks_GetTickCount();//save last main ch time value
-                    context.cur_IT_ch  = u8_mainCh;
-                    BB_Sweep_updateCh(context.e_curBand, context.cur_IT_ch );
-                    if(context.freq_band_mode == SUB_BAND)
-                    {
-                        if(context.locked)
-                        {
-                            context.sub_band_value = context.cur_IT_ch;
-                            context.sub_band_main_ch = context.sub_band_value;
-                            context.sub_band_opt_ch = u8_optCh;
-                            context.sub_band_main_opt_ch_time = SysTicks_GetTickCount();
-                            grd_sub_band_excute(context.cur_IT_ch);
-                        }
-                        else
-                        {
-                            DLOG_Warning("sub band %d->%d", context.sub_band_value,context.cur_IT_ch);
-                            context.sub_band_value = context.cur_IT_ch;
-                            context.sub_band_main_ch = context.sub_band_value;
-                            context.sub_band_opt_ch = u8_optCh;
-                            context.sub_band_main_opt_ch_time = SysTicks_GetTickCount();
-                            context.sub_rc_start = BB_GetSubBandStartCH(context.e_curBand,context.st_bandMcsOpt.e_bandwidth,context.sub_band_value);
-                            context.sub_rc_end = BB_GetSubBandEndCH(context.e_curBand,context.st_bandMcsOpt.e_bandwidth,context.sub_band_value);
-                            grd_rc_channel = context.sub_rc_start;
-                        }
-                    }
-                    else
-                    {
-                        grd_rc_channel = 0;
-                    }
-
-                    BB_ResetRcMap();
-                    grd_rc_hopfreq();
-                
-                    BB_set_ItFrqByCh(context.e_curBand, context.stru_bandChange.u8_ItCh);
-                    BB_grd_NotifyItFreqByCh(context.e_curBand, context.stru_bandChange.u8_ItCh);
-                }
-            }
-            break;
-
-        case 4:
-            Timer1_Delay1_Cnt++;
-            if ((context.dev_state == FEC_LOCK) && (context.locked))
-            {
-                s_st_calcDistData.u32_lockCnt += 1;
-                if (s_st_calcDistData.u32_lockCnt >= 3)
-                {
-                    s_st_calcDistData.u32_lockCnt = 3;
-                    grd_calc_dist();
-                    #ifdef JYDS
-                    grd_limit_dist_process();
-                    #endif
-                }
-                
-                grd_aoc();    
-            }
-            else
-            {
-                s_st_calcDistData.u32_lockCnt = 0;
-            }
-            break;
-
-        case 5:
-            Timer1_Delay1_Cnt++;
-            BB_grd_OSDPlot();
-            //BB_DtSentToSession();
-            BB_SpiGrdDataTransChProc();
-            break;
-
-        case 6:
-            Timer1_Delay1_Cnt++;
-            context.u8_harqcnt_lock = BB_ReadReg(PAGE2, FEC_5_RD);
-            if(context.itHopMode == AUTO && context.locked && context.slave_flag == 0)
-            {
-                flag_snrPostCheck = grd_freq_skip_pre_judge( );
-            }
-            else
-            {
-                flag_snrPostCheck = 0;
-            }
-
-            UNION_BBSPIComHeadByte head;
-            head.b.user_data_valid = 0;
-            head.b.lock_state = (context.locked & 0x01);
-            head.b.vt_match   = ((context.locked & 0x02) >> 1);
-            head.b.flag_searchingSupport = BB_grd_isSearching();
-            head.b.bb_data_size = 3;
-            context.inSearching = BB_grd_isSearching();
-
-            BB_WriteReg(PAGE2, SPI_DT_HEAD_REGISTER, head.u8_headByte);
-            //BB_WriteReg(PAGE2, SPI_DT_END_ADDR, 0);
-            if(!context.flag_in_upgrade)
-			{
-				BB_ComCycleMsgProcess();
-            	BB_ComCycleSendMsg(BB_COM_TYPE_SPI, head.b.bb_data_size, NULL);
-			}
-			/*
-			rc_qam_mode = (BB_ReadReg(PAGE2, TX_2) >> 6) & 0x01; //bit[7:6] - 1:QPSK, 0:BPSK
-		        if(rc_qam_mode != 1)//When OTA ,the rc qam mode will be set as QPSK, disable SPI transfer
-		        {		
-		             BB_ComCycleMsgProcess();
-		            	BB_ComCycleSendMsg(BB_COM_TYPE_SPI, head.b.bb_data_size, NULL);
-		        }*/
-            break;
-
-        case 7:
-            Timer1_Delay1_Cnt++;
-            NVIC_DisableIRQ(TIMER_INTR27_VECTOR_NUM);
-            TIM_StopTimer(grd_timer2_7);
-            if( flag_snrPostCheck )
-            {
-                grd_freq_skip_post_judge( );
-            }
-            
-            break;
-
-        default:
-            Timer1_Delay1_Cnt = 0;
-            break;
+        case 0: Timer1_Delay1_Cnt++; time_slice0();break;          
+        case 1: Timer1_Delay1_Cnt++; time_slice1();break;
+        case 2: Timer1_Delay1_Cnt++; time_slice2();break;
+        case 3: Timer1_Delay1_Cnt++; time_slice3();break;
+        case 4: Timer1_Delay1_Cnt++; time_slice4();break;
+        case 5: Timer1_Delay1_Cnt++; time_slice5();break;
+        case 6: Timer1_Delay1_Cnt++; time_slice6();break;
+        case 7: Timer1_Delay1_Cnt++; time_slice7();break;
+        default: Timer1_Delay1_Cnt = 0; break;   
     }
 }
 
@@ -1693,7 +1440,8 @@ static void Grd_Timer2_2_Init(void)
     reg_IrqHandle(TIMER_INTR22_VECTOR_NUM, Grd_TIM2_2_IRQHandler, NULL);
     NVIC_SetPriority(TIMER_INTR22_VECTOR_NUM,NVIC_EncodePriority(NVIC_PRIORITYGROUP_5,INTR_NVIC_PRIORITY_BB_TX,0));
 }
-static void grd_Timer2_1_Init(void)
+
+/*static void grd_Timer2_1_Init(void)
 {
     grd_timer2_1.base_time_group = 2;
     grd_timer2_1.time_num = 1;
@@ -1705,7 +1453,7 @@ static void grd_Timer2_1_Init(void)
     reg_IrqHandle(TIMER_INTR21_VECTOR_NUM, Grd_TIM2_1_IRQHandler, NULL);
     NVIC_SetPriority(TIMER_INTR21_VECTOR_NUM,NVIC_EncodePriority(NVIC_PRIORITYGROUP_5,INTR_NVIC_PRIORITY_TIMER00,0));
 }
-
+*/
 static void grd_Timer2_5_Init(void)
 {
     grd_timer2_5.base_time_group = 2;
@@ -2481,7 +2229,16 @@ void grd_handle_one_rf_cmd(STRU_WIRELESS_CONFIG_CHANGE* pcmd)
                 PWR_CTRL_ModeSet(&ctrl);
                 break;
             }
-
+			
+			case WIRELESS_RF_PA_MODE:
+					if(context.e_powerMode){
+						BB_SetPowerCloseMode(RF_2G);
+					}
+					else {
+						BB_SetPowerOpenMode(RF_2G);
+					}
+				break;
+				
             default:
                 break;
         }

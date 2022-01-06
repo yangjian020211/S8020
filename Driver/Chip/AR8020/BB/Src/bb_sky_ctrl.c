@@ -693,10 +693,7 @@ static void sky_lna_switch(void)
             BB_Lna_reset();
             return;
         }
-<<<<<<< Updated upstream
-=======
 		//else if(status == OPEN_LNA && context.lna_status == BYPASS_LNA)
->>>>>>> Stashed changes
         else if(status == OPEN_LNA && context.lna_status == BYPASS_LNA && context.swp_bypass == 2)
         {
             BB_open_lna();
@@ -1198,12 +1195,11 @@ static void Sky_TIM2_6_IRQHandler(uint32_t u32_vectorNum)
         return;
     }
 
-    if(1 == vt_info.valid)
+    if(1 == vt_info.valid)//pure video
     {
         sky_handle_all_cmds();
         BB_skyPlot();
         BB_GetDevInfo();
-
         return;
     }
 
@@ -2534,6 +2530,14 @@ static void sky_handle_one_rf_cmd(STRU_WIRELESS_CONFIG_CHANGE* pcmd)
                 PWR_CTRL_ModeSet(&ctrl);
                 break;
             }
+			case WIRELESS_RF_PA_MODE:
+					if(context.e_powerMode){
+						BB_SetPowerCloseMode(RF_2G);
+					}
+					else {
+						BB_SetPowerOpenMode(RF_2G);
+					}
+				break;
             default:
                 break;
         }

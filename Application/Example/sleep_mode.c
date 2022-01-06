@@ -18,19 +18,23 @@ void tx_bypass(int en){
 		HAL_GPIO_OutPut(HAL_GPIO_NUM52);//SPI_TXD5
 		HAL_GPIO_InPut(HAL_GPIO_NUM53);//SPI_RXD5
 		
-		HAL_GPIO_OutPut(HAL_GPIO_NUM108);//UART_RXD5 for debug test 
-		HAL_GPIO_OutPut(HAL_GPIO_NUM54);//SPI_SS_0_N4  
-
 		HAL_GPIO_SetPin(HAL_GPIO_NUM50,HAL_GPIO_PIN_RESET);
-		//HAL_GPIO_SetPin(HAL_GPIO_NUM51,HAL_GPIO_PIN_SET);
 		HAL_GPIO_SetPin(HAL_GPIO_NUM52,HAL_GPIO_PIN_SET);
-		//HAL_GPIO_SetPin(HAL_GPIO_NUM53,HAL_GPIO_PIN_RESET);
-		
+#if 1
+		HAL_GPIO_OutPut(HAL_GPIO_NUM108);//UART_RXD5 for debug test 
+		HAL_GPIO_OutPut(HAL_GPIO_NUM115);//UART_TXD5 for debug test 
 		HAL_GPIO_SetPin(HAL_GPIO_NUM108,HAL_GPIO_PIN_RESET);	
-		DLOG_Critical("set gpio_num_108 0");
-		
 		HAL_GPIO_SetPin(HAL_GPIO_NUM54,HAL_GPIO_PIN_RESET);	
-		DLOG_Critical("set gpio_num_54 0");
+		DLOG_Critical("set gpio_num_108 0");
+		DLOG_Critical("set gpio_num_115 0");
+#endif
+		//close B path fem
+		HAL_GPIO_OutPut(HAL_GPIO_NUM46);//spi ss6
+		HAL_GPIO_OutPut(HAL_GPIO_NUM47);//spi clk6
+		HAL_GPIO_SetPin(HAL_GPIO_NUM46,HAL_GPIO_PIN_RESET);//C0=0
+    	HAL_GPIO_SetPin(HAL_GPIO_NUM47,HAL_GPIO_PIN_RESET);//C1=0
+		
+		
 	}
 	else
 	{
@@ -40,15 +44,19 @@ void tx_bypass(int en){
 		HAL_GPIO_OutPut(HAL_GPIO_NUM53);//SLI_RXD5:AR8003S1_SW_B2_2G
 		
 		HAL_GPIO_InPut(HAL_GPIO_NUM108);//UART_RXD5 for debug test
-		HAL_GPIO_InPut(HAL_GPIO_NUM54);//UART_RXD5 for debug test
+		HAL_GPIO_InPut(HAL_GPIO_NUM115);//UART_TXD5 for debug test
 		
 		DLOG_Critical("set gpio_num_108 as input pin");
-		DLOG_Critical("set gpio_num_54 as input pin");
+		DLOG_Critical("set gpio_num_115 as input pin");
 
 		HAL_GPIO_SetPin(HAL_GPIO_NUM50,HAL_GPIO_PIN_SET);
 		HAL_GPIO_SetPin(HAL_GPIO_NUM51,HAL_GPIO_PIN_RESET);
 		HAL_GPIO_SetPin(HAL_GPIO_NUM52,HAL_GPIO_PIN_RESET);
 		HAL_GPIO_SetPin(HAL_GPIO_NUM53,HAL_GPIO_PIN_SET);
+
+		//open B path fem
+		HAL_GPIO_InPut(HAL_GPIO_NUM46);//spi ss6 :C0=input
+		HAL_GPIO_InPut(HAL_GPIO_NUM47);//spi clk6:C1=input
 	}
 }
 
@@ -84,9 +92,10 @@ static void EnterSleep(uint8_t level)
     {
         FemOn(0);
         FemOn(1);
-		HAL_PwrCtrlSet(level);
+		HAL_PwrCtrlSet(level);//pwr_level 0
 		HAL_Delay(200);
 		tx_bypass(0);//for uav project
+		HAL_PA_modeCtrlSet(0);//set the pa work in close mode when switch to the fem work path
     }
     if(1 == level)
     {
@@ -103,8 +112,9 @@ static void EnterSleep(uint8_t level)
     }
 	else if(4==level)
 	{	
+		HAL_PA_modeCtrlSet(1);//set the pa work in open mode before switch out of fem path
 		tx_bypass(1);//for uav project
-		HAL_PwrCtrlSet(level);
+		HAL_PwrCtrlSet(level);//pwr_level 4
 	}
     DLOG_Warning("enter sleep: %d",level);
 }

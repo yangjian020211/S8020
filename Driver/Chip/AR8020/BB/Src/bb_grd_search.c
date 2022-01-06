@@ -174,12 +174,15 @@ static int BB_grd_setDisconnectRcId(void)
 void grd_SetRCId(uint8_t *pu8_id)
 {
     uint8_t *p = (uint8_t *)(SRAM_SHARE_FLAG_ST_ADDR + SHARE_FLAG_RC_ID_OFFSET);
-
+	int i=0;
+	
     BB_WriteReg(PAGE2, GRD_RC_ID_BIT39_32_REG, pu8_id[0]);
     BB_WriteReg(PAGE2, GRD_RC_ID_BIT31_24_REG, pu8_id[1]);
-    BB_WriteReg(PAGE2, GRD_RC_ID_BIT23_16_REG, pu8_id[2]);
+   	BB_WriteReg(PAGE2, GRD_RC_ID_BIT23_16_REG, pu8_id[2]);
     BB_WriteReg(PAGE2, GRD_RC_ID_BIT15_08_REG, pu8_id[3]);
     BB_WriteReg(PAGE2, GRD_RC_ID_BIT07_00_REG, pu8_id[4]);
+	
+	//for(i=0;i<5;i++) BB_WriteReg(PAGE2, GRD_RC_ID_BIT39_32_REG+i, pu8_id[i]);
 
     memcpy(p, (uint8_t *)context.rcid, RC_ID_SIZE);
 }
