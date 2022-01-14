@@ -248,11 +248,11 @@ void BB_GRD_start(void)
 }
 
 static void grd_log_printf_40_data(uint32_t *str,int i){
-	DLOG_Critical("type=%d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d",
+	DLOG_Critical("type=%d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d",
 					str[0],str[1],str[2],str[3],str[4],str[5],str[6],str[7],str[8],str[9],
 					str[10],str[11],str[12],str[13],str[14],str[15],str[16],str[17],str[18],str[19],
 					str[20],str[21],str[22],str[23],str[24],str[25],str[26],str[27],str[28],str[29],
-					str[30],str[31],str[32],str[33],str[34],str[35],str[36]);
+					str[30],str[31],str[32],str[33],str[34],str[35],str[36],str[37],str[38],str[39],str[40]);
 }
 
 static void BB_grd_uartDataHandler(void)
@@ -330,10 +330,10 @@ static void BB_grd_uartDataHandler(void)
 				int i=0;	
 				
 				if(data[1]==0x00 || data[1]==0x01){
-					for(i=0;i<41;i++) buff[i]=0-data[i+1];
+					for(i=0;i<42;i++) buff[i]=0-data[i+1];
 					buff[0]=data[1];
 				}else if(data[1]==0x02 || data[1]==0x03 || data[1]==0x04 || data[1]==0x05 || data[1]==0x06){
-					for(i=0;i<41;i++) buff[i]=data[i+1];
+					for(i=0;i<42;i++) buff[i]=data[i+1];
 					buff[0]=data[1];
 				}
 				grd_log_printf_40_data(buff,0);

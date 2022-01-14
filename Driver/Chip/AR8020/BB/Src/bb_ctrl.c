@@ -30,8 +30,8 @@
 #define 	SKY_PATTEN_MAX_Dynamic_SIZE_2G	7
 
 #define 	SKY_PATTEN_SIZE_5G	4
-static uint8_t vector_pwr_avrg_time_r[6]={3,2,2,1,1,1};
-static uint8_t vector_snr_avrg_time_r[6]={3,2,2,1,1,1};
+static uint8_t vector_pwr_avrg_time_r[6]={1,1,1,2,2,3};
+static uint8_t vector_snr_avrg_time_r[6]={1,1,1,2,2,3};
 #define PRECIESE	10
 
 
@@ -2609,7 +2609,16 @@ signed char __attribute__ ((section(".h264")))vector_1xn_nx1_caculate(uint8_t *a
 	{
 		r+=a[i]*b[i];
 	}
-	return (r/precision);
+	int v1 = r/precision;
+	if(v1<0){
+		int v2 = (abs(r)%precision)>5 ? -1 : 0;
+		return (v1+v2);
+	}else{
+		int v3 = (abs(r)%precision)>5 ? 1 : 0;
+		return (v1+v3);
+	}
+
+	
 }
 
 uint8_t __attribute__ ((section(".h264")))dec2bit_index(uint8_t d)
@@ -2724,7 +2733,9 @@ void CalcAverageSweepPower(uint8_t ch){
 			tempfluct +=abs(context.rf_info.sweep_pwr_table[row+1][ch].value-context.rf_info.sweep_pwr_table[row][ch].value);
 		}  
 	}
-	context.rf_info.sweep_pwr_fluct_value[ch].value=tempfluct/(SWEEP_FREQ_BLOCK_ROWS-1);
+	int v1 = tempfluct/(SWEEP_FREQ_BLOCK_ROWS-1);
+	int v2 =  (tempfluct%(SWEEP_FREQ_BLOCK_ROWS-1) > 5) ? 1:0;
+	context.rf_info.sweep_pwr_fluct_value[ch].value=v1+v2;
 	context.rf_info.sweep_pwr_avrg_value[ch].value=vector_1xn_nx1_caculate(vector_pwr_avrg_time_r,buffer,SWEEP_FREQ_BLOCK_ROWS,PRECIESE);
 }
-
+  

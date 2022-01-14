@@ -41,6 +41,7 @@
 
 #define CLEAR_MAIN_CNT  (1000)
 
+#define IT_CHANGE_THD 5
 
 static int flaglog = 0;
 
@@ -325,9 +326,19 @@ static uint8_t __attribute__ ((section(".h264"))) BB_GetSweepPower(ENUM_RF_BAND 
     }
     grd_lna_check_sweep_power(sweep_ch,data);
 
-	GetSweepCh_normalsweep(context.rf_info.curBandIdx,sweep_ch,data,BB_GRD_MODE);
-
-	CalcAverageSweepPower(sweep_ch);
+	//GetSweepCh_normalsweep(context.rf_info.curBandIdx,sweep_ch,data,BB_GRD_MODE);
+	
+	if( context.rf_info.lock_sweep){
+		//context.rf_info.pre_selection_list[context.rf_info.fine_sweep_id].id
+		GetSweepCh_finesweep(context.rf_info.curBandIdx,context.rf_info.pre_selection_list[context.rf_info.fine_sweep_id].id,data);
+		CalcAverageSweepPower(context.rf_info.pre_selection_list[context.rf_info.fine_sweep_id].id);
+	}
+	else{
+		GetSweepCh_normalsweep(context.rf_info.curBandIdx,sweep_ch,data,BB_SKY_MODE);
+		CalcAverageSweepPower(sweep_ch);
+	}
+	
+	
 	
 	return 1;
 }
@@ -1633,87 +1644,159 @@ uint8_t BB_get_cur_opt_ch(void)
 {
     return context.rf_info.u8_optCh;
 }
+
+static void grd_print_it_sweep_data(uint32_t *str,int i){
+	#if 1
+	DLOG_Critical("%d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d",
+					i,
+					str[0],str[1],str[2],str[3],str[4],str[5],str[6],str[7],str[8],str[9],
+					str[10],str[11],str[12],str[13],str[14],str[15],str[16],str[17],str[18],str[19],str[20]);
+	#endif
+}
+static uint8_t grd_corse_check_sweep_noise(uint8_t mustchg){
+	STRU_RF_DATA list[MAX_RC_FRQ_SIZE]={0};
+	STRU_RF_DATA listr[MAX_RC_FRQ_SIZE]={0};
+	uint8_t i=0,j=0;
+	int sweep_noise=0;
+	int sweep_noise_fluct=0;
+	
+	
+	//sort by value,find the low to high list, sort all sweep channel
+	for(i=0;i<context.rf_info.f2g_freqsize;i++)
+	{
+		sweep_noise = context.rf_info.sweep_pwr_avrg_value[i].value ;
+		sweep_noise_fluct = context.rf_info.sweep_pwr_fluct_value[i].value;
+		list[i].value=sweep_noise + sweep_noise_fluct;
+		list[i].id=context.rf_info.sweep_pwr_avrg_value[i].id;
+	}
+	selectionSortBy(listr,context.rf_info.f2g_freqsize,list,1);
+	#if 1
+	static int k=0;
+	k++;
+	if(k==500){
+
+		uint32_t str[50]={0};
+		DLOG_Critical("grd sweep table");
+		for(i=0;i<SWEEP_FREQ_BLOCK_ROWS;i++)
+		{
+			for(j=0;j<context.rf_info.f2g_freqsize;j++)str[j]=context.rf_info.sweep_pwr_table[i][j].value;
+				grd_print_it_sweep_data(str,i);
+		}
+		DLOG_Critical("grd sweep avrg");
+		for(j=0;j<context.rf_info.f2g_freqsize;j++)str[j]=context.rf_info.sweep_pwr_avrg_value[j].value;
+				grd_print_it_sweep_data(str,0);
+				
+		DLOG_Critical("grd sweep fluct");
+		for(j=0;j<context.rf_info.f2g_freqsize;j++)str[j]=context.rf_info.sweep_pwr_fluct_value[j].value;
+				grd_print_it_sweep_data(str,0);
+
+		DLOG_Critical("grd sort avrg ");
+		for(j=0;j<context.rf_info.f2g_freqsize;j++)str[j]=listr[j].value;
+				grd_print_it_sweep_data(str,0);
+
+		k=0;
+	}
+	#endif
+	for(i=0;i<context.rf_info.f2g_freqsize;i++)
+	{
+		context.rf_info.sort_result_list[i].id=listr[i].id;
+		context.rf_info.sort_result_list[i].value=listr[i].value;
+	}
+	
+	 int current_sweep_now=0;
+	 current_sweep_now = context.rf_info.sweep_pwr_avrg_value[context.cur_IT_ch].value;
+	 
+	 if((current_sweep_now - listr[0].value) < IT_CHANGE_THD) return 0;
+	 
+	 for(j=0;j<context.rf_info.fine_sweep_size;j++)
+	 {
+		context.rf_info.pre_selection_list[j].id=listr[j].id;
+		context.rf_info.pre_selection_list[j].value=listr[j].value;
+		DLOG_Critical("[%d] %d %d %d",j,listr[j].id,BB_GetRcFrqByCh(listr[j].id),listr[j].value);
+	 }
+	 return 1;
+}
+static void grd_find_best_channel()
+{
+	int i=0;
+	STRU_RF_DATA list[MAX_RC_FRQ_SIZE]={0};
+	STRU_RF_DATA listr[MAX_RC_FRQ_SIZE]={0};
+	int sweep_noise=0;
+	int sweep_noise_fluct=0;
+	int oldch=context.cur_IT_ch;
+	//step1 remove  the error channel if the errors in the working patten meets the state to change patten,and to  caculate the condition for selection 
+	for(i=0;i<context.rf_info.fine_sweep_size;i++){
+		sweep_noise = context.rf_info.sweep_pwr_avrg_value[context.rf_info.pre_selection_list[i].id].value;
+		sweep_noise_fluct = context.rf_info.sweep_pwr_fluct_value[context.rf_info.pre_selection_list[i].id].value ;
+		list[i].value=( sweep_noise + sweep_noise_fluct);
+		list[i].id=context.rf_info.sweep_pwr_avrg_value[context.rf_info.pre_selection_list[i].id].id;
+	}
+	//step2 sort the list by value and record the sort results
+	selectionSortBy(listr,context.rf_info.fine_sweep_size,list,1);
+	if(context.cur_IT_ch==listr[0].id) return;		
+	context.cur_IT_ch=listr[0].id;
+	BB_grd_NotifyItFreqByCh(context.e_curBand, context.cur_IT_ch);
+	context.dev_state = DELAY_14MS;
+	context.it_chg_gap_delay =  SysTicks_GetTickCount();
+	DLOG_Critical("mode=1,it_work_sweep[%d]=%d,it_newsweep[%d]=%d",
+		oldch, 
+		context.rf_info.sweep_pwr_avrg_value[oldch].value,
+		context.cur_IT_ch,
+		list[0].value
+	);
+}
+
 void  __attribute__ ((section(".h264")))grd_gen_it_working_ch(uint8_t mode)
 {
-
 	int i=0,j=0,n=0,find,is_int;
-	static int k=0;
-	STRU_RF_DATA list[64]={0};
-	STRU_RF_DATA listb[64]={0};
-	STRU_RF_DATA listc[64]={0};
-	STRU_RF_DATA listd[64]={0};
-	uint8_t temp=0;
-	int swwp_ch_cnt = BB_GetSweepTotalCh(context.e_curBand,context.rf_info.e_bw);
-	//sort by value,find the low to high list
-	if(context.e_curBand==RF_2G){
-		for(i=0;i<swwp_ch_cnt;i++){
-			listb[i].value=int2char(context.rf_info.sweep_pwr_avrg_value[i].value);
-			listb[i].id=i;
-
-			for(j=0;j<SWEEP_FREQ_BLOCK_ROWS;j++)
-			{
-				listd[j].value=int2char(context.rf_info.sweep_pwr_table[j][i].value);
-				listd[j].id=j;
-			}
-			selectionSortBy(listc,SWEEP_FREQ_BLOCK_ROWS,listd,1);
-			//context.rf_info.i32_rf0psnr[i]=listc[SWEEP_FREQ_BLOCK_ROWS-1].value - listc[0].value;
-		}
-		selectionSortBy(list,swwp_ch_cnt,listb,1);
-	}
-	
-
-	#if 0
-			
-		k++;
-		if(k>200)
-		{
-			k=0;
-			for(i=0;i<swwp_ch_cnt;i++){
-				int rsme = context.rf_info.i32_rf0psnr[list[i].id];
-				DLOG_Critical("%d: ch[%d]=%d,freq=%d,rsme=%d",i,list[i].id,list[i].value,BB_GetItFrqByCh(list[i].id),rsme);
-			}
-		}
-	#endif
-
-	
-	int oldch=context.cur_IT_ch;
-	if(mode==0)
-	{
-		 
-		  context.cur_IT_ch=list[0].id;
-		  BB_grd_NotifyItFreqByCh(context.e_curBand, context.cur_IT_ch);
-		  context.dev_state = DELAY_14MS;
-		 
-		  DLOG_Critical("mode=0,it_work_sweep[%d]=%d,it_newsweep[%d]=%d",
-		  oldch, 
-		  context.rf_info.sweep_pwr_avrg_value[oldch].value,
-		  context.cur_IT_ch,
-		  list[0].value);
-		  
-	}
-	else
-	{
-		
-	 	int current_sweep_now=0;
-		current_sweep_now = context.rf_info.sweep_pwr_avrg_value[context.cur_IT_ch].value;
-		
-		if((current_sweep_now - list[0].value) < 6) return;
-		
-		//if((SysTicks_GetDiff(context.it_chg_gap_delay, SysTicks_GetTickCount())) < 64)return;
-
+		static int k=0;
+		STRU_RF_DATA list[64]={0};
+		STRU_RF_DATA listb[64]={0};
+		//STRU_RF_DATA listc[64]={0};
+		STRU_RF_DATA listd[64]={0};
+		uint8_t temp=0;
+		uint8_t ret=0;
+		int swwp_ch_cnt = BB_GetSweepTotalCh(context.e_curBand,context.rf_info.e_bw);
+		//sort by value,find the low to high list
+		ret = grd_corse_check_sweep_noise(0);
+		int oldch=context.cur_IT_ch;
 		if(context.itHopMode==MANUAL) return;
-	
-		  context.cur_IT_ch=list[0].id;
-		  BB_grd_NotifyItFreqByCh(context.e_curBand, context.cur_IT_ch);
-		  context.dev_state = DELAY_14MS;
-		  context.it_chg_gap_delay =  SysTicks_GetTickCount();
-		  DLOG_Critical("mode=1,it_work_sweep[%d]=%d,it_newsweep[%d]=%d",
-		  oldch, 
-		  context.rf_info.sweep_pwr_avrg_value[oldch].value,
-		  context.cur_IT_ch,
-		  list[0].value);
-	}
-	
+		//return;
+		if(mode==0)
+		{
+			  context.cur_IT_ch=context.rf_info.sort_result_list[0].id;
+			  BB_grd_NotifyItFreqByCh(context.e_curBand, context.cur_IT_ch);
+			  context.dev_state = DELAY_14MS;
+			 
+			  DLOG_Critical("mode=0,it_work_sweep[%d]=%d,it_newsweep[%d]=%d",
+			  oldch, 
+			  context.rf_info.sweep_pwr_avrg_value[oldch].value,
+			  context.cur_IT_ch,
+			  context.rf_info.sort_result_list[0].value);
+			  
+		}
+		else
+		{
+		  if(context.rf_info.lock_sweep==0)
+		  {
+			
+			if(ret)
+			{
+				begin_lock_sweep_noise_for_selection();
+				DLOG_Critical("select new channel because the sweep noise meet");
+			}
+		  }
+		  else
+		  {
+			if(context.rf_info.sweep_finished)
+			{
+				DLOG_Critical("begin select good channel");
+				grd_find_best_channel();
+				end_lock_sweep_noise_for_selection();
+			}
+		  }
+		}
+
 	
 }
 
