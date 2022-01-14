@@ -102,13 +102,6 @@ extern void BB_grd_NotifyItFreqByCh(ENUM_RF_BAND band, uint8_t u8_ch);
 //STRU_SWEEP_NOISE_POWER stru_sweepPower = {0};
 uint8_t sweep_with_filter = 1;
 
-
-static int calc_power_db(ENUM_RF_BAND e_rfBand, uint8_t bw, uint32_t power_td,
-                         int16_t *power_fd, int32_t *power_sum, 
-                         uint8_t cnt, uint8_t sweep_ch, int flaglog);
-
-//static void calc_average_and_fluct(ENUM_RF_BAND e_rfBand, uint8_t u8_ItCh);
-
 static uint8_t BB_GetSweepTotalCh(ENUM_RF_BAND e_rfBand, ENUM_CH_BW e_bw);
 
 static uint8_t BB_UpdateOptCh(ENUM_RF_BAND e_rfBand, ENUM_CH_BW e_bw, uint8_t sweep_ch);
@@ -120,8 +113,6 @@ static void BB_GetItMinMaxCh(ENUM_RF_BAND e_rfBand, ENUM_CH_BW e_bw, uint8_t *mi
 static void BB_GetItAdjacentFrequency(uint8_t ch, uint8_t *pre, uint8_t *next);
 
 //ENUM_RF_select BB_grd_cmpBandNoise( void );
-
-
 
 /*
  * to start sweep
@@ -174,6 +165,7 @@ void __attribute__ ((section(".h264"))) BB_SweepStart(ENUM_RF_BAND e_bandsupport
     {
         context.rf_info.u8_bb1ItFrqSize = BB_GetItFrqNum(RF_2G);
         context.rf_info.u8_bb2ItFrqSize = BB_GetItFrqNum(RF_5G);
+		context.rf_info.f2g_freqsize = context.rf_info.u8_bb1ItFrqSize;
         context.e_curBand = RF_2G;
     }
     else if (RF_5G == e_bandsupport)
@@ -184,6 +176,7 @@ void __attribute__ ((section(".h264"))) BB_SweepStart(ENUM_RF_BAND e_bandsupport
     else if (RF_2G == e_bandsupport)
     {
         context.rf_info.u8_bb1ItFrqSize = BB_GetItFrqNum(RF_2G);
+		context.rf_info.f2g_freqsize = context.rf_info.u8_bb1ItFrqSize;
         context.e_curBand = RF_2G;
     }
 #endif
@@ -192,7 +185,7 @@ void __attribute__ ((section(".h264"))) BB_SweepStart(ENUM_RF_BAND e_bandsupport
 
     context.rf_info.e_prevSweepBand  = context.e_curBand;
     BB_set_SweepFrq(context.e_curBand, e_bw, 0);
-
+	reset_table_for_2g();
     context.u_bandSwitchParam = (UNION_BandSwitchParm *)CFGBIN_GetNodeAndData((STRU_cfgBin *)SRAM_CONFIGURE_MEMORY_ST_ADDR, RF_GRD_BAND_SWITCH_CFG_ID, NULL);
 }
 
@@ -325,21 +318,8 @@ static uint8_t __attribute__ ((section(".h264"))) BB_GetSweepPower(ENUM_RF_BAND 
         return 0;
     }
     grd_lna_check_sweep_power(sweep_ch,data);
-
-	//GetSweepCh_normalsweep(context.rf_info.curBandIdx,sweep_ch,data,BB_GRD_MODE);
-	
-	if( context.rf_info.lock_sweep){
-		//context.rf_info.pre_selection_list[context.rf_info.fine_sweep_id].id
-		GetSweepCh_finesweep(context.rf_info.curBandIdx,context.rf_info.pre_selection_list[context.rf_info.fine_sweep_id].id,data);
-		CalcAverageSweepPower(context.rf_info.pre_selection_list[context.rf_info.fine_sweep_id].id);
-	}
-	else{
-		GetSweepCh_normalsweep(context.rf_info.curBandIdx,sweep_ch,data,BB_SKY_MODE);
-		CalcAverageSweepPower(sweep_ch);
-	}
-	
-	
-	
+	GetSweepCh_normalsweep(context.rf_info.curBandIdx,sweep_ch,data,BB_GRD_MODE);
+	CalcAverageSweepPower(sweep_ch);
 	return 1;
 }
 
@@ -1141,71 +1121,6 @@ uint8_t __attribute__ ((section(".h264"))) get_opt_channel( void )
     return ret;
 }
 
-
-/*
- * get the dbm noise power
- * power_td: total power in time domain
- * power_fd: each 1.56M bandwidth noise
- * power_db: the power in dbm in each 1.56M
-*/
-/*
-static int __attribute__ ((section(".h264"))) calc_power_db(ENUM_RF_BAND e_rfBand, uint8_t bw, uint32_t power_td,
-                         int16_t *power_fd, int32_t *power_sum, 
-                         uint8_t cnt, uint8_t sweep_ch, int flaglog)
-{
-    uint8_t  i = 0;
-    uint8_t  offset = 0;
-
-    power_sum[sweep_ch] = get_10log10(power_td);
-    power_sum[sweep_ch] = BB_SweepEnergyCompensation(power_sum[sweep_ch]);
-    //DLOG_Info("%x -> %d",power_td,power_sum[sweep_ch]);
-    grd_lna_check_sweep_power(sweep_ch,power_sum[sweep_ch]);
-
-    if (e_rfBand == RF_5G)
-    {
-        if (sweep_ch > 2)
-        {
-            power_sum[sweep_ch] -= 3;
-        }
-        else
-        {
-            power_sum[sweep_ch] += 1;
-        }
-    }
-
-    return 1;
-}
-*/
-
-/*
-static void __attribute__ ((section(".h264"))) calc_average_and_fluct(ENUM_RF_BAND e_rfBand, uint8_t u8_ItCh)
-{
-    uint16_t row = 0;
-    int32_t *pu32_power;
-    int32_t *pu32_power_average;
-	int32_t *pu32_power_rmse;
-    pu32_power_average = (e_rfBand == RF_5G) ? context.rf_info.i32_rf1PwrAvr : context.rf_info.i32_rf0PwrAvr;  
-	pu32_power_rmse = (e_rfBand == RF_5G) ? context.rf_info.i32_rf1psnr : context.rf_info.i32_rf0psnr; 
-	
-    pu32_power_average[u8_ItCh] = 0;
-    for( row = 0; row < SWEEP_FREQ_BLOCK_ROWS; row++)
-    {
-        pu32_power = (e_rfBand == RF_5G) ? context.rf_info.i32_rf1Pwr[row] :context.rf_info.sweep_pwr_table[row];
-        pu32_power_average[u8_ItCh] += pu32_power[u8_ItCh];
-    }
-    pu32_power_average[u8_ItCh] /= SWEEP_FREQ_BLOCK_ROWS;
-
-#if 0
-	for( row = 0; row < SWEEP_FREQ_BLOCK_ROWS; row++)
-    {
-         pu32_power = (e_rfBand == RF_5G) ? context.rf_info.i32_rf1Pwr[row] : context.rf_info.sweep_pwr_table[row];
-		 pu32_power_rmse[u8_ItCh] += abs(pu32_power[u8_ItCh]-pu32_power_average[u8_ItCh]) ;
-    }
-	 pu32_power_rmse[u8_ItCh] /= SWEEP_FREQ_BLOCK_ROWS;
-#endif
-}
-*/
-
 static uint8_t __attribute__ ((section(".h264"))) BB_GetSweepTotalCh(ENUM_RF_BAND e_rfBand, ENUM_CH_BW e_bw)
 {
     uint8_t value = BB_GetItFrqNum(e_rfBand);
@@ -1645,7 +1560,7 @@ uint8_t BB_get_cur_opt_ch(void)
     return context.rf_info.u8_optCh;
 }
 
-static void grd_print_it_sweep_data(uint32_t *str,int i){
+static void gprtit(uint32_t *str,int i){
 	#if 1
 	DLOG_Critical("%d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d",
 					i,
@@ -1653,7 +1568,7 @@ static void grd_print_it_sweep_data(uint32_t *str,int i){
 					str[10],str[11],str[12],str[13],str[14],str[15],str[16],str[17],str[18],str[19],str[20]);
 	#endif
 }
-static uint8_t grd_corse_check_sweep_noise(uint8_t mustchg){
+static uint8_t grd_check_sweep_noise(uint8_t mustchg){
 	STRU_RF_DATA list[MAX_RC_FRQ_SIZE]={0};
 	STRU_RF_DATA listr[MAX_RC_FRQ_SIZE]={0};
 	uint8_t i=0,j=0;
@@ -1662,8 +1577,7 @@ static uint8_t grd_corse_check_sweep_noise(uint8_t mustchg){
 	
 	
 	//sort by value,find the low to high list, sort all sweep channel
-	for(i=0;i<context.rf_info.f2g_freqsize;i++)
-	{
+	for(i=0;i<context.rf_info.f2g_freqsize;i++){
 		sweep_noise = context.rf_info.sweep_pwr_avrg_value[i].value ;
 		sweep_noise_fluct = context.rf_info.sweep_pwr_fluct_value[i].value;
 		list[i].value=sweep_noise + sweep_noise_fluct;
@@ -1673,27 +1587,26 @@ static uint8_t grd_corse_check_sweep_noise(uint8_t mustchg){
 	#if 1
 	static int k=0;
 	k++;
-	if(k==500){
-
+	if(k==500)
+	{
 		uint32_t str[50]={0};
 		DLOG_Critical("grd sweep table");
 		for(i=0;i<SWEEP_FREQ_BLOCK_ROWS;i++)
 		{
 			for(j=0;j<context.rf_info.f2g_freqsize;j++)str[j]=context.rf_info.sweep_pwr_table[i][j].value;
-				grd_print_it_sweep_data(str,i);
+				gprtit(str,i);
 		}
 		DLOG_Critical("grd sweep avrg");
 		for(j=0;j<context.rf_info.f2g_freqsize;j++)str[j]=context.rf_info.sweep_pwr_avrg_value[j].value;
-				grd_print_it_sweep_data(str,0);
+				gprtit(str,0);
 				
 		DLOG_Critical("grd sweep fluct");
 		for(j=0;j<context.rf_info.f2g_freqsize;j++)str[j]=context.rf_info.sweep_pwr_fluct_value[j].value;
-				grd_print_it_sweep_data(str,0);
+				gprtit(str,0);
 
 		DLOG_Critical("grd sort avrg ");
 		for(j=0;j<context.rf_info.f2g_freqsize;j++)str[j]=listr[j].value;
-				grd_print_it_sweep_data(str,0);
-
+				gprtit(str,0);
 		k=0;
 	}
 	#endif
@@ -1702,102 +1615,34 @@ static uint8_t grd_corse_check_sweep_noise(uint8_t mustchg){
 		context.rf_info.sort_result_list[i].id=listr[i].id;
 		context.rf_info.sort_result_list[i].value=listr[i].value;
 	}
-	
-	 int current_sweep_now=0;
-	 current_sweep_now = context.rf_info.sweep_pwr_avrg_value[context.cur_IT_ch].value;
+	 int current_sweep_now = context.rf_info.sweep_pwr_avrg_value[context.cur_IT_ch].value;
 	 
 	 if((current_sweep_now - listr[0].value) < IT_CHANGE_THD) return 0;
 	 
-	 for(j=0;j<context.rf_info.fine_sweep_size;j++)
+	 for(j=0;j<context.rf_info.f2g_freqsize;j++)
 	 {
-		context.rf_info.pre_selection_list[j].id=listr[j].id;
-		context.rf_info.pre_selection_list[j].value=listr[j].value;
-		DLOG_Critical("[%d] %d %d %d",j,listr[j].id,BB_GetRcFrqByCh(listr[j].id),listr[j].value);
+		DLOG_Critical("[%d] %d %d %d",j,listr[j].id,BB_GetItFrqByCh(listr[j].id),listr[j].value);
 	 }
 	 return 1;
 }
-static void grd_find_best_channel()
+
+void  grd_gen_it_working_ch(uint8_t mode)
 {
-	int i=0;
-	STRU_RF_DATA list[MAX_RC_FRQ_SIZE]={0};
-	STRU_RF_DATA listr[MAX_RC_FRQ_SIZE]={0};
-	int sweep_noise=0;
-	int sweep_noise_fluct=0;
+	uint8_t ret=0;
+	ret = grd_check_sweep_noise(0);
 	int oldch=context.cur_IT_ch;
-	//step1 remove  the error channel if the errors in the working patten meets the state to change patten,and to  caculate the condition for selection 
-	for(i=0;i<context.rf_info.fine_sweep_size;i++){
-		sweep_noise = context.rf_info.sweep_pwr_avrg_value[context.rf_info.pre_selection_list[i].id].value;
-		sweep_noise_fluct = context.rf_info.sweep_pwr_fluct_value[context.rf_info.pre_selection_list[i].id].value ;
-		list[i].value=( sweep_noise + sweep_noise_fluct);
-		list[i].id=context.rf_info.sweep_pwr_avrg_value[context.rf_info.pre_selection_list[i].id].id;
+	if(context.itHopMode==MANUAL) return;
+	if(mode==0 || ret){
+	  context.cur_IT_ch=context.rf_info.sort_result_list[0].id;
+	  BB_grd_NotifyItFreqByCh(context.e_curBand, context.cur_IT_ch);
+	  context.dev_state = DELAY_14MS;
+	  DLOG_Critical("mode=%d,it_work_sweep[%d]=%d,it_newsweep[%d]=%d",
+	  mode,
+	  oldch, 
+	  context.rf_info.sweep_pwr_avrg_value[oldch].value,
+	  context.cur_IT_ch,
+	  context.rf_info.sort_result_list[0].value);
 	}
-	//step2 sort the list by value and record the sort results
-	selectionSortBy(listr,context.rf_info.fine_sweep_size,list,1);
-	if(context.cur_IT_ch==listr[0].id) return;		
-	context.cur_IT_ch=listr[0].id;
-	BB_grd_NotifyItFreqByCh(context.e_curBand, context.cur_IT_ch);
-	context.dev_state = DELAY_14MS;
-	context.it_chg_gap_delay =  SysTicks_GetTickCount();
-	DLOG_Critical("mode=1,it_work_sweep[%d]=%d,it_newsweep[%d]=%d",
-		oldch, 
-		context.rf_info.sweep_pwr_avrg_value[oldch].value,
-		context.cur_IT_ch,
-		list[0].value
-	);
-}
-
-void  __attribute__ ((section(".h264")))grd_gen_it_working_ch(uint8_t mode)
-{
-	int i=0,j=0,n=0,find,is_int;
-		static int k=0;
-		STRU_RF_DATA list[64]={0};
-		STRU_RF_DATA listb[64]={0};
-		//STRU_RF_DATA listc[64]={0};
-		STRU_RF_DATA listd[64]={0};
-		uint8_t temp=0;
-		uint8_t ret=0;
-		int swwp_ch_cnt = BB_GetSweepTotalCh(context.e_curBand,context.rf_info.e_bw);
-		//sort by value,find the low to high list
-		ret = grd_corse_check_sweep_noise(0);
-		int oldch=context.cur_IT_ch;
-		if(context.itHopMode==MANUAL) return;
-		//return;
-		if(mode==0)
-		{
-			  context.cur_IT_ch=context.rf_info.sort_result_list[0].id;
-			  BB_grd_NotifyItFreqByCh(context.e_curBand, context.cur_IT_ch);
-			  context.dev_state = DELAY_14MS;
-			 
-			  DLOG_Critical("mode=0,it_work_sweep[%d]=%d,it_newsweep[%d]=%d",
-			  oldch, 
-			  context.rf_info.sweep_pwr_avrg_value[oldch].value,
-			  context.cur_IT_ch,
-			  context.rf_info.sort_result_list[0].value);
-			  
-		}
-		else
-		{
-		  if(context.rf_info.lock_sweep==0)
-		  {
-			
-			if(ret)
-			{
-				begin_lock_sweep_noise_for_selection();
-				DLOG_Critical("select new channel because the sweep noise meet");
-			}
-		  }
-		  else
-		  {
-			if(context.rf_info.sweep_finished)
-			{
-				DLOG_Critical("begin select good channel");
-				grd_find_best_channel();
-				end_lock_sweep_noise_for_selection();
-			}
-		  }
-		}
-
-	
 }
 
 

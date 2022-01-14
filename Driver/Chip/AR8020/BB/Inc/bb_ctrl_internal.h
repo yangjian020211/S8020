@@ -222,7 +222,6 @@ typedef struct
 	uint8_t error_ch_record[MAX_RC_FRQ_SIZE];
 	STRU_RF_DATA sort_result_list[MAX_RC_FRQ_SIZE];
 	STRU_RF_DATA pre_selection_list[MAX_RC_FRQ_SIZE];
-	STRU_RF_DATA lastestpatten[MAX_RC_FRQ_SIZE];
 	STRU_RF_DATA prelist[MAX_RC_FRQ_SIZE];	
 
 	//vt
