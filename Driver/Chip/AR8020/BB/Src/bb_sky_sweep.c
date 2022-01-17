@@ -31,7 +31,7 @@ void __attribute__ ((section(".h264"))) sky_startSweep(ENUM_RF_BAND band)
     BB_set_SweepFrq(context.rf_info.sweepBand[context.rf_info.curBandIdx], context.rf_info.e_bw, context.rf_info.curSweepCh);
     context.u_bandSwitchParam = (UNION_BandSwitchParm *)CFGBIN_GetNodeAndData((STRU_cfgBin *)SRAM_CONFIGURE_MEMORY_ST_ADDR, RF_SKY_BAND_SWITCH_CFG_ID, NULL);
 
-    DLOG_Critical("%d %d %d 0x%x",context.rf_info.sweep_freqsize, context.rf_info.bandCnt, context.st_bandMcsOpt.e_bandsupport, context.u_bandSwitchParam);
+   // DLOG_Critical("%d %d %d 0x%x",context.rf_info.sweep_freqsize, context.rf_info.bandCnt, context.st_bandMcsOpt.e_bandsupport, context.u_bandSwitchParam);
 }
 
 void  reset_sweep_table(ENUM_RF_BAND cur_band){
@@ -70,7 +70,7 @@ if(context.en_bbmode==BB_SKY_MODE){
 	        context.rf_info.u8_bb1ItFrqSize = BB_GetItFrqNum(RF_2G);
 	        context.rf_info.u8_bb2ItFrqSize = BB_GetItFrqNum(RF_5G);
 			context.rf_info.sweep_freqsize = context.rf_info.u8_bb1ItFrqSize;
-	        context.e_curBand = RF_2G;
+	        context.e_curBand = RF_2G_5G;
 	    }
 	    else if (RF_5G == cur_band)
 	    {
@@ -125,7 +125,7 @@ static int math_multi(int a,int b){
 	return r;
 }
 static void sptf2(uint32_t *str,int i){
-	#if 1
+	#if 0
 	DLOG_Critical("[%d] %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d",i,
 					str[0],str[1],str[2],str[3],str[4],str[5],str[6],str[7],str[8],str[9],
 					str[10],str[11],str[12],str[13],str[14],str[15],str[16],str[17],str[18],str[19],
@@ -312,7 +312,7 @@ int sky_lna_check_sweep_power(int32_t spower_data)
             swp_watch_window_size = 0;
             swp_recyles_cnt++;
             swp_lna_switch_all_cnt += swp_lna_switch_cnt;
-            DLOG_Info("lna=%d,swp=%d,%d-%d %d",context.lna_status,context.swp_bypass,swp_lna_switch_cnt,swp_lna_switch_all_cnt,swp_recyles_cnt);
+           // DLOG_Info("lna=%d,swp=%d,%d-%d %d",context.lna_status,context.swp_bypass,swp_lna_switch_cnt,swp_lna_switch_all_cnt,swp_recyles_cnt);
             swp_lna_switch_cnt = 0;
         }
 
@@ -453,7 +453,7 @@ static void sky_print_now_working_channels(){
 void GetSweepCh_finesweep(uint8_t u8_bandidx, uint8_t u8_ch,signed char data){
 	int i=0,j=0; 
 	if(u8_ch >=context.rf_info.sweep_freqsize ){
-		  DLOG_Critical("u8_ch =%d ",u8_ch);
+		  //DLOG_Critical("u8_ch =%d ",u8_ch);
 		  return;
 	}
    context.rf_info.sweep_pwr_table[context.rf_info.fine_sweep_row][u8_ch].value = data;
@@ -822,7 +822,7 @@ static void find_best_patten()
 	
 	//step3 decide the len of the patten
 	context.rf_info.rc_ch_working_patten_len=(pre_lists_size > SKY_PATTEN_SIZE_2G) ? SKY_PATTEN_SIZE_2G : pre_lists_size;
-	DLOG_Critical("patten len = %d",context.rf_info.rc_ch_working_patten_len);
+	//DLOG_Critical("patten len = %d",context.rf_info.rc_ch_working_patten_len);
 	if(context.rf_info.sort_result_list[context.rf_info.rc_ch_working_patten_len-1].value -context.rf_info.sort_result_list[0].value > SWEEP_NOISE_SELECT_DIFF_THD ){
 		context.rf_info.rc_ch_working_patten_len=context.rf_info.rc_ch_working_patten_len-1;
 	}

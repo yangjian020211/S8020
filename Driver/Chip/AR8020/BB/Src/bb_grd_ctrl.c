@@ -246,7 +246,7 @@ void BB_GRD_start(void)
 	//init_mcs();
 	
 }
-
+#if 0
 static void gptf(uint32_t *str,int i){
 	DLOG_Critical("type=%d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d",
 					str[0],str[1],str[2],str[3],str[4],str[5],str[6],str[7],str[8],str[9],
@@ -256,13 +256,14 @@ static void gptf(uint32_t *str,int i){
 }
 
 static void gprtit(uint32_t *str,int i){
-	#if 1
+	
 	DLOG_Critical("%d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d",
 					i,
 					str[0],str[1],str[2],str[3],str[4],str[5],str[6],str[7],str[8],str[9],
 					str[10],str[11],str[12],str[13],str[14],str[15],str[16],str[17],str[18],str[19],str[20]);
-	#endif
+	
 }
+#endif
 
 static void BB_grd_uartDataHandler(void)
 {
@@ -335,7 +336,9 @@ static void BB_grd_uartDataHandler(void)
                 context.stru_bandSwitchParam.i8_skyPower1 = param->i8_skyPower1;
             }
 			else if(pid == DT_NUM_SKY_SWEEP_NOISE)
-			{	uint32_t buff[50]={0};
+			{	
+				#if 0
+				uint32_t buff[50]={0};
 				int i=0;	
 				
 				if(data[1]==0x00 || data[1]==0x01){
@@ -379,7 +382,9 @@ static void BB_grd_uartDataHandler(void)
 					uint32_t str2[50]={0};
 					for(j=0;j<context.rf_info.rc_ch_working_patten_size;j++)str2[j]=BB_GetRcFrqByCh(context.rf_info.rc_ch_working_patten[j]);
 							gprtit(str2, 0);
+					
 			   }
+				#endif
 			}
 			else if(pid == DT_NUM_SKY_RC_PATTEN)
 			{

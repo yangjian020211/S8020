@@ -1511,7 +1511,7 @@ uint8_t BB_get_cur_opt_ch(void)
 }
 
 
-static uint8_t grd_check_sweep_noise(uint8_t mustchg){
+static uint8_t __attribute__ ((section(".h264"))) grd_check_sweep_noise(uint8_t mustchg){
 	STRU_RF_DATA list[MAX_RC_FRQ_SIZE]={0};
 	STRU_RF_DATA listr[MAX_RC_FRQ_SIZE]={0};
 	uint8_t i=0,j=0;
@@ -1535,15 +1535,16 @@ static uint8_t grd_check_sweep_noise(uint8_t mustchg){
 	 int current_sweep_now = context.rf_info.sweep_pwr_avrg_value[context.cur_IT_ch].value;
 	 
 	 if((current_sweep_now - listr[0].value) < IT_CHANGE_THD) return 0;
-	 
+	 /*
 	 for(j=0;j<context.rf_info.sweep_freqsize;j++)
 	 {
 		DLOG_Critical("[%d] %d %d %d",j,listr[j].id,BB_GetItFrqByCh(listr[j].id),listr[j].value);
 	 }
+	 */
 	 return 1;
 }
 
-void  grd_gen_it_working_ch(uint8_t mode)
+void  __attribute__ ((section(".h264"))) grd_gen_it_working_ch(uint8_t mode)
 {
 	uint8_t ret=0;
 	ret = grd_check_sweep_noise(0);
