@@ -120,6 +120,7 @@ void __attribute__ ((section(".h264"))) BB_SweepStart(ENUM_RF_BAND e_bandsupport
     else if (RF_5G == e_bandsupport)
     {
         context.rf_info.u8_bb1ItFrqSize = BB_GetItFrqNum(RF_5G);
+		context.rf_info.sweep_freqsize = context.rf_info.u8_bb1ItFrqSize;
         context.e_curBand = RF_5G;
     }
     else if (RF_2G == e_bandsupport)

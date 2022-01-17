@@ -36,61 +36,84 @@ void __attribute__ ((section(".h264"))) sky_startSweep(ENUM_RF_BAND band)
 
 void  reset_sweep_table(ENUM_RF_BAND cur_band){
 	int i=0,j=0;
-	if(cur_band==RF_2G){
-		context.rf_info.sweepBand[0] = RF_2G;
-		context.rf_info.sweep_freqsize = BB_GetSkySweepFrqNum(RF_2G);
-        context.rf_info.bandCnt = 1;
-		context.rf_info.rc_avr_sweep_result_size =  context.rf_info.sweep_freqsize;
-	}else if(cur_band==RF_5G){
-		context.rf_info.sweepBand[1] = RF_5G;
-        context.rf_info.sweep_freqsize = BB_GetSkySweepFrqNum(RF_5G);
-        context.rf_info.bandCnt = 1;
-		context.rf_info.rc_avr_sweep_result_size = context.rf_info.sweep_freqsize;
-	}else if(cur_band==RF_2G_5G){
-		context.rf_info.sweepBand[0] = RF_2G;
-        context.rf_info.sweepBand[1] = RF_5G;
-		context.rf_info.sweep_freqsize = BB_GetSkySweepFrqNum(RF_2G);
-        context.rf_info.bandCnt = 2;
-		context.rf_info.rc_avr_sweep_result_size =  context.rf_info.sweep_freqsize;
+if(context.en_bbmode==BB_SKY_MODE){
+		if(cur_band==RF_2G){
+			context.rf_info.sweepBand[0] = RF_2G;
+			context.rf_info.sweep_freqsize = BB_GetSkySweepFrqNum(RF_2G);
+	        context.rf_info.bandCnt = 1;
+			context.rf_info.rc_avr_sweep_result_size =  context.rf_info.sweep_freqsize;
+		}else if(cur_band==RF_5G){
+			context.rf_info.sweepBand[1] = RF_5G;
+	        context.rf_info.sweep_freqsize = BB_GetSkySweepFrqNum(RF_5G);
+	        context.rf_info.bandCnt = 1;
+			context.rf_info.rc_avr_sweep_result_size = context.rf_info.sweep_freqsize;
+		}else if(cur_band==RF_2G_5G){
+			context.rf_info.sweepBand[0] = RF_2G;
+	        context.rf_info.sweepBand[1] = RF_5G;
+			context.rf_info.sweep_freqsize = BB_GetSkySweepFrqNum(RF_2G);
+	        context.rf_info.bandCnt = 2;
+			context.rf_info.rc_avr_sweep_result_size =  context.rf_info.sweep_freqsize;
+		}
+		else{
+			context.rf_info.bandCnt = 1;
+	        context.rf_info.sweepBand[0]    = context.st_bandMcsOpt.e_bandsupport;
+	        context.rf_info.sweep_freqsize = BB_GetRcFrqNum(context.st_bandMcsOpt.e_bandsupport);
+			context.rf_info.rc_avr_sweep_result_size = context.rf_info.sweep_freqsize;
+		}
+		
+		
 	}
-	else{
-		context.rf_info.bandCnt = 1;
-        context.rf_info.sweepBand[0]    = context.st_bandMcsOpt.e_bandsupport;
-        context.rf_info.sweep_freqsize = BB_GetRcFrqNum(context.st_bandMcsOpt.e_bandsupport);
-		context.rf_info.rc_avr_sweep_result_size = context.rf_info.sweep_freqsize;
-	}
-	
-	for(i=0;i<context.rf_info.sweep_freqsize;i++){
-			context.rf_info.prelist[i].id=i;context.rf_info.prelist[i].value=0;
-			context.rf_info.pre_selection_list[i].id=i;context.rf_info.pre_selection_list[i].value=0;
-			context.rf_info.sweep_pwr_avrg_value[i].id=i;context.rf_info.sweep_pwr_avrg_value[i].value=0;
-			context.rf_info.sweep_pwr_fluct_value[i].id=i;context.rf_info.sweep_pwr_fluct_value[i].value=0;
-			context.rf_info.work_rc_error_value[i].id=i;context.rf_info.work_rc_error_value[i].value=0;
-			context.rf_info.work_snr_avrg_value[i].id=i;context.rf_info.work_snr_avrg_value[i].value=0;
-			context.rf_info.work_snr_fluct_value[i].id=i;context.rf_info.work_snr_fluct_value[i].value=0;
-			context.rf_info.error_ch_record[i]=0xff;
-			for(j=0;j<SWEEP_FREQ_BLOCK_ROWS;j++){
-				context.rf_info.sweep_pwr_table[j][i].id=i;context.rf_info.sweep_pwr_table[j][i].value=0;
-				context.rf_info.work_rc_unlock_table[j][i].id=i;context.rf_info.work_rc_unlock_table[j][i].value=0;
-				context.rf_info.work_snr_table[j][i].id=i;context.rf_info.work_snr_table[j][i].value=0;
-			}
-			
-	}
-	context.rf_info.fine_sweep_id=0;
-    context.rf_info.e_bw = BW_10M;
-    context.rf_info.curBandIdx = 0;
-	context.rf_info.curSweepCh=0;
-    context.rf_info.curRowCnt  = 0;
-	context.rf_info.currc_statistics_Row=0;
-	context.rf_info.sweep_finished=1;
-	context.rf_info.fine_sweep_size=8;
-	context.rf_info.fine_sweep_id=0;
-	context.rf_info.fine_sweep_row=0;
-	context.rf_info.isFull = 0;
-	context.rf_info.rc_ch_working_patten_len=SKY_PATTEN_SIZE_2G;
-	if(context.en_bbmode==BB_GRD_MODE){
+	else if(context.en_bbmode==BB_GRD_MODE){
 		context.rf_info.fine_sweep_size=4;
+		if (cur_band == RF_2G_5G)
+	    {
+	        context.rf_info.u8_bb1ItFrqSize = BB_GetItFrqNum(RF_2G);
+	        context.rf_info.u8_bb2ItFrqSize = BB_GetItFrqNum(RF_5G);
+			context.rf_info.sweep_freqsize = context.rf_info.u8_bb1ItFrqSize;
+	        context.e_curBand = RF_2G;
+	    }
+	    else if (RF_5G == cur_band)
+	    {
+	        context.rf_info.u8_bb1ItFrqSize = BB_GetItFrqNum(RF_5G);
+			context.rf_info.sweep_freqsize = context.rf_info.u8_bb1ItFrqSize;
+	        context.e_curBand = RF_5G;
+	    }
+	    else if (RF_2G == cur_band)
+	    {
+	        context.rf_info.u8_bb1ItFrqSize = BB_GetItFrqNum(RF_2G);
+			context.rf_info.sweep_freqsize = context.rf_info.u8_bb1ItFrqSize;
+	        context.e_curBand = RF_2G;
+	    }
 	}
+
+	for(i=0;i<context.rf_info.sweep_freqsize;i++){
+				context.rf_info.prelist[i].id=i;context.rf_info.prelist[i].value=0;
+				context.rf_info.pre_selection_list[i].id=i;context.rf_info.pre_selection_list[i].value=0;
+				context.rf_info.sweep_pwr_avrg_value[i].id=i;context.rf_info.sweep_pwr_avrg_value[i].value=0;
+				context.rf_info.sweep_pwr_fluct_value[i].id=i;context.rf_info.sweep_pwr_fluct_value[i].value=0;
+				context.rf_info.work_rc_error_value[i].id=i;context.rf_info.work_rc_error_value[i].value=0;
+				context.rf_info.work_snr_avrg_value[i].id=i;context.rf_info.work_snr_avrg_value[i].value=0;
+				context.rf_info.work_snr_fluct_value[i].id=i;context.rf_info.work_snr_fluct_value[i].value=0;
+				context.rf_info.error_ch_record[i]=0xff;
+				for(j=0;j<SWEEP_FREQ_BLOCK_ROWS;j++){
+					context.rf_info.sweep_pwr_table[j][i].id=i;context.rf_info.sweep_pwr_table[j][i].value=0;
+					context.rf_info.work_rc_unlock_table[j][i].id=i;context.rf_info.work_rc_unlock_table[j][i].value=0;
+					context.rf_info.work_snr_table[j][i].id=i;context.rf_info.work_snr_table[j][i].value=0;
+				}
+				
+		}
+		context.rf_info.fine_sweep_id=0;
+	    context.rf_info.e_bw = BW_10M;
+	    context.rf_info.curBandIdx = 0;
+		context.rf_info.curSweepCh=0;
+	    context.rf_info.curRowCnt  = 0;
+		context.rf_info.currc_statistics_Row=0;
+		context.rf_info.sweep_finished=1;
+		context.rf_info.fine_sweep_size=8;
+		context.rf_info.fine_sweep_id=0;
+		context.rf_info.fine_sweep_row=0;
+		context.rf_info.isFull = 0;
+		context.rf_info.rc_ch_working_patten_len=SKY_PATTEN_SIZE_2G;
 
 }
 
