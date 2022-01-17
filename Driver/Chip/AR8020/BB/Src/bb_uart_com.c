@@ -582,8 +582,8 @@ uint8_t BB_ComSendMsg(ENUM_BB_COM_SESSION_ID session_id,
 
     if (BB_ComGetTXQueueFreeLength(pst_txQueue) <= ((length + BBCOM_SESSION_DATA_HEADER_SIZE) + DATA_CHECK_SUM_SIZE)) //2: two checksum bytes
     {
-        DLOG_Error("%d buffer not enough",session_id);
-		DLOG_Error("length = %d ",length);
+        DLOG_Info("%d buffer not enough",session_id);
+		DLOG_Info("length = %d ",length);
         return 0;
     }
 

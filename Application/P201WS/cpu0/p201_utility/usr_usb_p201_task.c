@@ -351,7 +351,7 @@ void bitrate_change_callback(void* p)
     if (0 == ch)
     {
         enc_brcidx_change(br_idx);
-        DLOG_Warning("H264 bitidx ch0: %d \r\n", br_idx);
+        DLOG_Info("H264 bitidx ch0: %d \r\n", br_idx);
     }
 }
 

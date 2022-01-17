@@ -360,19 +360,19 @@ static void BB_grd_uartDataHandler(void)
 					DLOG_Critical("grd sweep table");
 					for(i=0;i<SWEEP_FREQ_BLOCK_ROWS;i++)
 					{
-						for(j=0;j<context.rf_info.f2g_freqsize;j++)str[j]=context.rf_info.sweep_pwr_table[i][j].value;
+						for(j=0;j<context.rf_info.sweep_freqsize;j++)str[j]=context.rf_info.sweep_pwr_table[i][j].value;
 							gprtit(str,i);
 					}
 					DLOG_Critical("grd sweep avrg");
-					for(j=0;j<context.rf_info.f2g_freqsize;j++)str[j]=context.rf_info.sweep_pwr_avrg_value[j].value;
+					for(j=0;j<context.rf_info.sweep_freqsize;j++)str[j]=context.rf_info.sweep_pwr_avrg_value[j].value;
 							gprtit(str,0);
 							
 					DLOG_Critical("grd sweep fluct");
-					for(j=0;j<context.rf_info.f2g_freqsize;j++)str[j]=context.rf_info.sweep_pwr_fluct_value[j].value;
+					for(j=0;j<context.rf_info.sweep_freqsize;j++)str[j]=context.rf_info.sweep_pwr_fluct_value[j].value;
 							gprtit(str,0);
 
 					DLOG_Critical("grd sort avrg ");
-					for(j=0;j<context.rf_info.f2g_freqsize;j++)str[j]=context.rf_info.sort_result_list[j].value;
+					for(j=0;j<context.rf_info.sweep_freqsize;j++)str[j]=context.rf_info.sort_result_list[j].value;
 							gprtit(str,0);
 
 					DLOG_Critical("rc work patten ");

@@ -143,7 +143,7 @@ uint8_t __attribute__ ((section(".h264"))) sky_rcUnLockHopBand(void)
 
             context.e_curBand = OTHER_BAND(context.e_curBand);
             BB_set_RF_Band(BB_SKY_MODE, context.e_curBand);
-
+			reset_sweep_table(context.e_curBand);
             //BB_RcSelectionInit();
 
             if(RF_2G == context.e_curBand)
@@ -247,6 +247,7 @@ void __attribute__ ((section(".h264"))) sky_doRfBandChange(uint8_t u8_lockStatus
             context.e_curBand = OTHER_BAND( context.e_curBand );
 
             BB_set_RF_Band(BB_SKY_MODE, context.e_curBand);
+			reset_sweep_table(context.e_curBand);
             sky_switchSetPower(context.e_curBand);
             if(context.freq_band_mode == SUB_BAND)// && SKY_ID_CRC_MATCH(u8_lockStatus))
             {
@@ -277,7 +278,7 @@ void __attribute__ ((section(".h264"))) sky_handle_RF_band_cmd_pure_vt( ENUM_RF_
         context.e_curBand = OTHER_BAND( context.e_curBand );
 
         BB_set_RF_Band(BB_SKY_MODE, context.e_curBand);
-
+		reset_sweep_table(context.e_curBand);
         sky_switchSetPower(context.e_curBand);
 
         context.sky_rc_channel = 0;

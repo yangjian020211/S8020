@@ -49,57 +49,6 @@ extern STRU_GRD_STATUS stru_grdstatus;
 //extern uint8_t grd_rc_channel;
 extern void BB_grd_NotifyItFreqByCh(ENUM_RF_BAND band, uint8_t u8_ch);
 
-
-//typedef struct
-//{
-    //ENUM_RF_BAND e_bandsupport;
-
-    //////////////////
-    //int32_t      i32_rf0PwrAvr[MAX_IT_FRQ_SIZE];
-	//int32_t		 i32_rf0psnr[MAX_IT_FRQ_SIZE];
-    //////////////////
-    //int32_t      i32_rf1Pwr[SWEEP_FREQ_BLOCK_ROWS][MAX_IT_FRQ_SIZE];
-    //int32_t      i32_rf1PwrAvr[MAX_IT_FRQ_SIZE];
-	//int32_t 	 i32_rf1psnr[MAX_IT_FRQ_SIZE];
-
-    //ENUM_CH_BW   e_bw;
-
-    //uint8_t      u8_mainCh;          //current VT channel
-    //uint8_t      u8_mainSweepRow;
-    //uint8_t      u8_mainSweepCh;
-
-    //uint8_t      u8_optCh;           //optional VT channel
-    //uint8_t      u8_optSweepRow;
-    //uint8_t      u8_optSweepCh;
-    //uint8_t      u8_bestBb1ChCnt[MAX_IT_FRQ_SIZE];
-    //uint8_t      u8_bestBb2ChCnt[MAX_IT_FRQ_SIZE];
-
-    //uint8_t      u8_spareSweepCh;       //channel number
-    //uint8_t      u8_optBandSweepCh;     //use to sweep another band channel.
-
-    //uint8_t      u8_curBb1Row;
-    //uint8_t      u8_curBb2Row;
-    //ENUM_RF_BAND e_prevSweepBand;       //previous sweep band
-    //uint8_t      u8_prevSweepCh;        //previous sweep channel, main channel and optional channel may change
-
-    //uint8_t      u8_cycleCnt;
-    //uint8_t      u8_totalCyc;
-    //uint8_t      u8_preMainCh;
-    //uint16_t     u16_preMainCount;      //if cycle >= u16_preMainCount, clear the u8_preMainCh
-
-    //ENUM_RF_select band_sel[15];
-    //uint8_t      u8_bandSelCnt;
-    //uint8_t      u8_isFull;
-    //uint8_t      u8_bb1ItFrqSize;
-    //uint8_t      u8_bb2ItFrqSize;
-
-    //uint8_t      u8_cmdSweep;
-
-    //ENUM_RF_SIGNAL_BLOCK    flag_signalBlock;
-//} STRU_SWEEP_NOISE_POWER;
-
-
-//STRU_SWEEP_NOISE_POWER stru_sweepPower = {0};
 uint8_t sweep_with_filter = 1;
 
 static uint8_t BB_GetSweepTotalCh(ENUM_RF_BAND e_rfBand, ENUM_CH_BW e_bw);
@@ -165,7 +114,7 @@ void __attribute__ ((section(".h264"))) BB_SweepStart(ENUM_RF_BAND e_bandsupport
     {
         context.rf_info.u8_bb1ItFrqSize = BB_GetItFrqNum(RF_2G);
         context.rf_info.u8_bb2ItFrqSize = BB_GetItFrqNum(RF_5G);
-		context.rf_info.f2g_freqsize = context.rf_info.u8_bb1ItFrqSize;
+		context.rf_info.sweep_freqsize = context.rf_info.u8_bb1ItFrqSize;
         context.e_curBand = RF_2G;
     }
     else if (RF_5G == e_bandsupport)
@@ -176,7 +125,7 @@ void __attribute__ ((section(".h264"))) BB_SweepStart(ENUM_RF_BAND e_bandsupport
     else if (RF_2G == e_bandsupport)
     {
         context.rf_info.u8_bb1ItFrqSize = BB_GetItFrqNum(RF_2G);
-		context.rf_info.f2g_freqsize = context.rf_info.u8_bb1ItFrqSize;
+		context.rf_info.sweep_freqsize = context.rf_info.u8_bb1ItFrqSize;
         context.e_curBand = RF_2G;
     }
 #endif
@@ -185,7 +134,7 @@ void __attribute__ ((section(".h264"))) BB_SweepStart(ENUM_RF_BAND e_bandsupport
 
     context.rf_info.e_prevSweepBand  = context.e_curBand;
     BB_set_SweepFrq(context.e_curBand, e_bw, 0);
-	reset_table_for_2g();
+	reset_sweep_table(context.e_curBand);
     context.u_bandSwitchParam = (UNION_BandSwitchParm *)CFGBIN_GetNodeAndData((STRU_cfgBin *)SRAM_CONFIGURE_MEMORY_ST_ADDR, RF_GRD_BAND_SWITCH_CFG_ID, NULL);
 }
 
@@ -833,7 +782,7 @@ uint8_t __attribute__ ((section(".h264"))) BB_CompareCh1Ch2ByPowerAver(ENUM_RF_B
         {
             return 0;
         }
-        else if(u8_itCh2 == 0 || u8_itCh2 == 6) //current it ch
+        else if(u8_itCh2 == 0 || u8_itCh2 == context.rf_info.sweep_freqsize-1) //current it ch
         {
             if(context.lna_status == OPEN_LNA) // lna open ,ch0,ch6 always give up
             {
@@ -842,7 +791,7 @@ uint8_t __attribute__ ((section(".h264"))) BB_CompareCh1Ch2ByPowerAver(ENUM_RF_B
 
             level -= (context.low_power_db); // lna bypass ,other ch only better ch0,ch6 snr 
         }
-        else if(u8_itCh1 == 0 || u8_itCh1 == 6)
+        else if(u8_itCh1 == 0 || u8_itCh1 == context.rf_info.sweep_freqsize-1)
         {
             if(context.lna_status == OPEN_LNA) // lna open ,ch0,ch6 always give up
             {
@@ -1440,7 +1389,7 @@ int32_t __attribute__ ((section(".h264"))) grd_doRfbandChange( uint8_t *pu8_main
             context.e_curBand = OTHER_BAND(context.e_curBand);  //switch to another band
 
             BB_set_RF_Band(BB_GRD_MODE, context.e_curBand);
-
+			reset_sweep_table(context.e_curBand);
             BB_SweepChangeBand(context.e_curBand, context.stru_bandChange.u8_ItCh, context.stru_bandChange.u8_optCh);
             BB_set_sweepChannel(); //re-set the sweepChannel            
 
@@ -1511,7 +1460,7 @@ int32_t __attribute__ ((section(".h264"))) grd_RfBandSelectChannelDoSwitch(void)
     BB_selectBestCh(context.e_curBand, SELECT_MAIN_OPT, &main_ch, &opt_ch, NULL, 0);
 
     BB_set_RF_Band(BB_GRD_MODE, context.e_curBand);
-
+	reset_sweep_table(context.e_curBand);
     BB_SweepChangeBand(context.e_curBand, main_ch, opt_ch);
     BB_set_sweepChannel();              //re-set the sweepChannel            
 
@@ -1570,14 +1519,14 @@ static uint8_t grd_check_sweep_noise(uint8_t mustchg){
 	
 	
 	//sort by value,find the low to high list, sort all sweep channel
-	for(i=0;i<context.rf_info.f2g_freqsize;i++){
+	for(i=0;i<context.rf_info.sweep_freqsize;i++){
 		sweep_noise = context.rf_info.sweep_pwr_avrg_value[i].value ;
 		sweep_noise_fluct = context.rf_info.sweep_pwr_fluct_value[i].value;
 		list[i].value=sweep_noise + sweep_noise_fluct;
 		list[i].id=context.rf_info.sweep_pwr_avrg_value[i].id;
 	}
-	selectionSortBy(listr,context.rf_info.f2g_freqsize,list,1);
-	for(i=0;i<context.rf_info.f2g_freqsize;i++)
+	selectionSortBy(listr,context.rf_info.sweep_freqsize,list,1);
+	for(i=0;i<context.rf_info.sweep_freqsize;i++)
 	{
 		context.rf_info.sort_result_list[i].id=listr[i].id;
 		context.rf_info.sort_result_list[i].value=listr[i].value;
@@ -1586,7 +1535,7 @@ static uint8_t grd_check_sweep_noise(uint8_t mustchg){
 	 
 	 if((current_sweep_now - listr[0].value) < IT_CHANGE_THD) return 0;
 	 
-	 for(j=0;j<context.rf_info.f2g_freqsize;j++)
+	 for(j=0;j<context.rf_info.sweep_freqsize;j++)
 	 {
 		DLOG_Critical("[%d] %d %d %d",j,listr[j].id,BB_GetItFrqByCh(listr[j].id),listr[j].value);
 	 }

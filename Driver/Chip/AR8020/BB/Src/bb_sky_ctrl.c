@@ -2782,7 +2782,7 @@ static void sky_aoc_execute(void *power)
         return;
     }
 
-    if(context.bandedge_enable && (context.cur_IT_ch == 0 || context.cur_IT_ch == 6))
+    if(context.bandedge_enable && (context.cur_IT_ch == 0 || context.cur_IT_ch == context.rf_info.sweep_freqsize-1))
     {
         return;
     }

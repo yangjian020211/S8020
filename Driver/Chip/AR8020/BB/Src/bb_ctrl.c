@@ -1059,6 +1059,7 @@ void  __attribute__ ((section(".h264")))  BB_set_RF_Band(ENUM_BB_MODE sky_ground
 
     //calibration and reset
     BB_RF_band_switch(rf_band);
+	//reset_sweep_table(rf_band);
 }
 
 

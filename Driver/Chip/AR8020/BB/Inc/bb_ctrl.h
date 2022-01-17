@@ -123,7 +123,7 @@ void GetSweepCh_finesweep(uint8_t u8_bandidx, uint8_t u8_ch,signed char data);
 void CalcAverageSweepPower(uint8_t ch);
 void begin_lock_sweep_noise_for_selection();
 void end_lock_sweep_noise_for_selection();
-void reset_table_for_2g();
+void reset_sweep_table(ENUM_RF_BAND cur_band);
 
 
 #endif

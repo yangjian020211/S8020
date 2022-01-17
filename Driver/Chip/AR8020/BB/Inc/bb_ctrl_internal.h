@@ -210,8 +210,8 @@ typedef struct
 	uint8_t sweep_cycle;
 	uint8_t currc_statistics_Row;
 	uint8_t currc_statistics_ch;
-	uint8_t f2g_freqsize;
-	uint8_t f5g_freqsize;
+	uint8_t sweep_freqsize;
+	//uint8_t f5g_freqsize;
 
 	//caculation
 	uint8_t sweep_finished;
