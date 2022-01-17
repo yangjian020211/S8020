@@ -1560,14 +1560,7 @@ uint8_t BB_get_cur_opt_ch(void)
     return context.rf_info.u8_optCh;
 }
 
-static void gprtit(uint32_t *str,int i){
-	#if 1
-	DLOG_Critical("%d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d",
-					i,
-					str[0],str[1],str[2],str[3],str[4],str[5],str[6],str[7],str[8],str[9],
-					str[10],str[11],str[12],str[13],str[14],str[15],str[16],str[17],str[18],str[19],str[20]);
-	#endif
-}
+
 static uint8_t grd_check_sweep_noise(uint8_t mustchg){
 	STRU_RF_DATA list[MAX_RC_FRQ_SIZE]={0};
 	STRU_RF_DATA listr[MAX_RC_FRQ_SIZE]={0};
@@ -1584,32 +1577,6 @@ static uint8_t grd_check_sweep_noise(uint8_t mustchg){
 		list[i].id=context.rf_info.sweep_pwr_avrg_value[i].id;
 	}
 	selectionSortBy(listr,context.rf_info.f2g_freqsize,list,1);
-	#if 1
-	static int k=0;
-	k++;
-	if(k==500)
-	{
-		uint32_t str[50]={0};
-		DLOG_Critical("grd sweep table");
-		for(i=0;i<SWEEP_FREQ_BLOCK_ROWS;i++)
-		{
-			for(j=0;j<context.rf_info.f2g_freqsize;j++)str[j]=context.rf_info.sweep_pwr_table[i][j].value;
-				gprtit(str,i);
-		}
-		DLOG_Critical("grd sweep avrg");
-		for(j=0;j<context.rf_info.f2g_freqsize;j++)str[j]=context.rf_info.sweep_pwr_avrg_value[j].value;
-				gprtit(str,0);
-				
-		DLOG_Critical("grd sweep fluct");
-		for(j=0;j<context.rf_info.f2g_freqsize;j++)str[j]=context.rf_info.sweep_pwr_fluct_value[j].value;
-				gprtit(str,0);
-
-		DLOG_Critical("grd sort avrg ");
-		for(j=0;j<context.rf_info.f2g_freqsize;j++)str[j]=listr[j].value;
-				gprtit(str,0);
-		k=0;
-	}
-	#endif
 	for(i=0;i<context.rf_info.f2g_freqsize;i++)
 	{
 		context.rf_info.sort_result_list[i].id=listr[i].id;

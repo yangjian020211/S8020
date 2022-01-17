@@ -119,14 +119,14 @@ static void sptf2(uint32_t *str,int i){
 }
 
 static void sptf(uint32_t *str,int i){
-#if 1
-DLOG_Critical("[%d] type=[%d] %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d",
-					i,
-					str[0],str[1],str[2],str[3],str[4],str[5],str[6],str[7],str[8],str[9],
-					str[10],str[11],str[12],str[13],str[14],str[15],str[16],str[17],str[18],str[19],
-					str[20],str[21],str[22],str[23],str[24],str[25],str[26],str[27],str[28],str[29],
-					str[30],str[31],str[32],str[33],str[34],str[35],str[36],str[37],str[38],str[39],str[40]);
-#endif
+	#if 0
+	DLOG_Critical("[%d] type=[%d] %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d",
+	i,
+	str[0],str[1],str[2],str[3],str[4],str[5],str[6],str[7],str[8],str[9],
+	str[10],str[11],str[12],str[13],str[14],str[15],str[16],str[17],str[18],str[19],
+	str[20],str[21],str[22],str[23],str[24],str[25],str[26],str[27],str[28],str[29],
+	str[30],str[31],str[32],str[33],str[34],str[35],str[36],str[37],str[38],str[39],str[40]);
+	#endif
 	uint8_t data_buf[41]={0};
 	int j=0;
 	for(j=0;j<41;j++) data_buf[j]=abs(str[j]);
@@ -148,7 +148,6 @@ static void reset_working_times_ch_statistics(uint8_t ch)
 {
 	uint8_t row=0;
 	context.rf_info.i32_working_times[ch] = 0;
-   
 }
 
 void sky_statistics_rc_ch_error(uint8_t locked)
@@ -411,7 +410,7 @@ static void sky_print_sweep_error_table()
 	int i=0,j=0; 
 	uint32_t str[50]={0};
 	for(j=0;j<context.rf_info.f2g_freqsize;j++)str[j+1]=context.rf_info.work_rc_error_value[j].value;
-	str[0]=0x03;//pwr_fluct
+	str[0]=0x03;
 	sptf(str, 0);	
 }
 
@@ -490,7 +489,7 @@ void GetSweepCh_normalsweep(uint8_t u8_bandidx, uint8_t u8_ch,signed char data,E
 		   if(mode==BB_GRD_MODE) return ;
 		   if(tx_sweep)
 		   {
-			   #if 0
+			   #if 1
 				   k++;
 				   if(k==1){
 					   tx_sweep_pwr_table1();
@@ -499,6 +498,7 @@ void GetSweepCh_normalsweep(uint8_t u8_bandidx, uint8_t u8_ch,signed char data,E
 					   sky_print_sweep_pwr_result();
 					   
 				   }else if(k==3){
+				   		sky_print_sweep_error_table();
 					   //sky_print_sweep_pwr_result();
 					   
 				   }else if(k==4){
@@ -506,11 +506,7 @@ void GetSweepCh_normalsweep(uint8_t u8_bandidx, uint8_t u8_ch,signed char data,E
 				   }
 				   else if(k==5){
 					   sky_print_sweep_snr_result();
-				   }else if(k==6){
-					   sky_print_sweep_error_table();
-					   sky_print_working_times_statistics();
-					   sky_print_now_working_channels();
-					   k=0;
+					    k=0;
 					   tx_sweep = 0;
 				   }
 			   #endif

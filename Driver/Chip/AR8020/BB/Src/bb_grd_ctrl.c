@@ -255,6 +255,15 @@ static void gptf(uint32_t *str,int i){
 					str[30],str[31],str[32],str[33],str[34],str[35],str[36],str[37],str[38],str[39],str[40]);
 }
 
+static void gprtit(uint32_t *str,int i){
+	#if 1
+	DLOG_Critical("%d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d",
+					i,
+					str[0],str[1],str[2],str[3],str[4],str[5],str[6],str[7],str[8],str[9],
+					str[10],str[11],str[12],str[13],str[14],str[15],str[16],str[17],str[18],str[19],str[20]);
+	#endif
+}
+
 static void BB_grd_uartDataHandler(void)
 {
     uint8_t  data[128];
@@ -337,6 +346,40 @@ static void BB_grd_uartDataHandler(void)
 					buff[0]=data[1];
 				}
 				gptf(buff,0);
+
+				if(data[1]==0x01){
+					DLOG_Critical("cur_IT_ch=%d,freq=%d£¬main_ch=%d,option_ch=%d",context.cur_IT_ch,BB_GetItFrqByCh(context.cur_IT_ch),context.rf_info.u8_mainSweepCh,context.rf_info.u8_optSweepCh);
+					DLOG_Critical("rc_error=%d,rc_agca=%d,rc_agcb=%d",(100-g_stru_skyStatus.u8_rcCrcLockCnt),g_stru_skyStatus.u8_skyagc1,g_stru_skyStatus.u8_skyagc2);
+					}
+				
+
+				if(data[1]==0x06)
+				{
+					uint32_t str[50]={0};
+					int j=0;
+					DLOG_Critical("grd sweep table");
+					for(i=0;i<SWEEP_FREQ_BLOCK_ROWS;i++)
+					{
+						for(j=0;j<context.rf_info.f2g_freqsize;j++)str[j]=context.rf_info.sweep_pwr_table[i][j].value;
+							gprtit(str,i);
+					}
+					DLOG_Critical("grd sweep avrg");
+					for(j=0;j<context.rf_info.f2g_freqsize;j++)str[j]=context.rf_info.sweep_pwr_avrg_value[j].value;
+							gprtit(str,0);
+							
+					DLOG_Critical("grd sweep fluct");
+					for(j=0;j<context.rf_info.f2g_freqsize;j++)str[j]=context.rf_info.sweep_pwr_fluct_value[j].value;
+							gprtit(str,0);
+
+					DLOG_Critical("grd sort avrg ");
+					for(j=0;j<context.rf_info.f2g_freqsize;j++)str[j]=context.rf_info.sort_result_list[j].value;
+							gprtit(str,0);
+
+					DLOG_Critical("rc work patten ");
+					uint32_t str2[50]={0};
+					for(j=0;j<context.rf_info.rc_ch_working_patten_size;j++)str2[j]=BB_GetRcFrqByCh(context.rf_info.rc_ch_working_patten[j]);
+							gprtit(str2, 0);
+			   }
 			}
 			else if(pid == DT_NUM_SKY_RC_PATTEN)
 			{
