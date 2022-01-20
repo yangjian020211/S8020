@@ -179,13 +179,13 @@ typedef struct
 
 
 	STRU_RF_DATA sweep_pwr_table[SWEEP_FREQ_BLOCK_ROWS][MAX_RC_FRQ_SIZE];
-	STRU_RF_DATA work_snr_table[SWEEP_FREQ_BLOCK_ROWS][MAX_RC_FRQ_SIZE];
+	//STRU_RF_DATA work_snr_table[SWEEP_FREQ_BLOCK_ROWS][MAX_RC_FRQ_SIZE];
 	STRU_RF_DATA work_rc_unlock_table[SWEEP_FREQ_BLOCK_ROWS][MAX_RC_FRQ_SIZE];
 	
 	STRU_RF_DATA sweep_pwr_avrg_value[MAX_RC_FRQ_SIZE];
-	STRU_RF_DATA work_snr_avrg_value[MAX_RC_FRQ_SIZE];
+	//STRU_RF_DATA work_snr_avrg_value[MAX_RC_FRQ_SIZE];
 	STRU_RF_DATA sweep_pwr_fluct_value[MAX_RC_FRQ_SIZE];
-	STRU_RF_DATA work_snr_fluct_value[MAX_RC_FRQ_SIZE];
+	//STRU_RF_DATA work_snr_fluct_value[MAX_RC_FRQ_SIZE];
 	STRU_RF_DATA work_rc_error_value[MAX_RC_FRQ_SIZE];
 	
 	int32_t 		 i32_working_times[MAX_RC_FRQ_SIZE];//
@@ -383,7 +383,7 @@ typedef struct
     uint8_t    mcs_empty_pack_cnt;
     uint8_t    realtime_mode;
     //uint8_t    enable_rc_skip_patten;
-    uint8_t    rc_skip_patten;
+    //uint8_t    rc_skip_patten;
     uint8_t    enable_rc_random_skip_patten;
     uint8_t    command_lna_switch_flag;
     uint8_t    command_lna_switch_value;

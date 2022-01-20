@@ -84,4 +84,7 @@ void RF8003xCalcFrq2Register(uint16_t u16_frq, STRU_FRQ_CHANNEL *frq_regvalue);
 
 uint8_t BB_set_skySweepVtfrq(ENUM_RF_BAND band, uint8_t ch);
 
+void RF8003s_GetFctFreqTable(ENUM_CH_BW e_bw);
+
+
 #endif

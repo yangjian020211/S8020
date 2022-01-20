@@ -188,7 +188,7 @@ static int __attribute__ ((section(".h264"))) H264_Encoder_UpdateVideoInfo(unsig
             }
         }
         
-        DLOG_Critical("Video format change: %d, %d, %d, %d\n", view, resW, resH, framerate);
+        //DLOG_Critical("Video format change: %d, %d, %d, %d\n", view, resW, resH, framerate);
     }
 
     osdptr->video_width[view] = resW;
@@ -264,7 +264,7 @@ static void __attribute__ ((section(".h264"))) H264_Encoder_IdleCallback(void* p
 
             g_stEncoderStatus[0].over_flow = 0;
             
-            DLOG_Error("Buffer level %d, open view 0", buf_level);
+            //DLOG_Error("Buffer level %d, open view 0", buf_level);
 
         }
     }
@@ -283,7 +283,7 @@ static void __attribute__ ((section(".h264"))) H264_Encoder_IdleCallback(void* p
 
             g_stEncoderStatus[1].over_flow = 0;
             
-            DLOG_Error("Buffer level %d, open view 1", buf_level);
+            //DLOG_Error("Buffer level %d, open view 1", buf_level);
         }        
     }
 }
@@ -431,9 +431,9 @@ int __attribute__ ((section(".h264"))) H264_Encoder_UpdateBitrate(unsigned char 
 	//	ratiomax	= IPRatio[0][br_idx][1];
 	//}
 
-    DLOG_Info("%d %d %d %d %d %d\n", g_stEncoderStatus[0].running, g_stEncoderStatus[1].running, 
-                                     g_stEncoderStatus[0].brc_enable, g_stEncoderStatus[1].brc_enable, 
-                                     g_stEncoderStatus[0].bitrate, g_stEncoderStatus[1].bitrate);
+    //DLOG_Info("%d %d %d %d %d %d\n", g_stEncoderStatus[0].running, g_stEncoderStatus[1].running, 
+   //                                  g_stEncoderStatus[0].brc_enable, g_stEncoderStatus[1].brc_enable, 
+   //                                  g_stEncoderStatus[0].bitrate, g_stEncoderStatus[1].bitrate);
     if (g_stEncoderStatus[view].running && g_stEncoderStatus[view].brc_enable /*&& (g_stEncoderStatus[view].bitrate != br_idx)*/)
     {
         if (view == 0)
@@ -451,7 +451,7 @@ int __attribute__ ((section(".h264"))) H264_Encoder_UpdateBitrate(unsigned char 
             H264_Encoder_UpdateMinAndMaxQP(1, br_idx);
         }
 
-        DLOG_Info("Encoder bitrate change: %d, %d, %d, %d\n", view, br_idx, ratio, ratiomax);
+    //    DLOG_Info("Encoder bitrate change: %d, %d, %d, %d\n", view, br_idx, ratio, ratiomax);
     }
     
     g_stEncoderStatus[view].bitrate = br_idx;
@@ -466,12 +466,12 @@ static void __attribute__ ((section(".h264"))) H264_Encoder_BBModulationChangeCa
     if (0 == ch)
     {
         H264_Encoder_UpdateBitrate(0, br_idx);
-        DLOG_Warning("H264 bitidx ch1: %d \r\n", br_idx);
+     //   DLOG_Warning("H264 bitidx ch1: %d \r\n", br_idx);
     }
     else if (1 == ch)
     {
         H264_Encoder_UpdateBitrate(1, br_idx);
-        DLOG_Warning("H264 bitidx ch2: %d \r\n", br_idx);
+     //   DLOG_Warning("H264 bitidx ch2: %d \r\n", br_idx);
     }
     else
     {
@@ -534,7 +534,7 @@ static void __attribute__ ((section(".h264"))) VEBRC_IRQ_Wrap_Handler(uint32_t u
                 g_stEncoderStatus[0].over_flow = 1;
                 close_view0();
                 g_stEncoderStatus[0].running = 0;
-				DLOG_Error("Buffer level %d, close view 0.", buf_level);
+				//DLOG_Error("Buffer level %d, close view 0.", buf_level);
             }
 			DLOG_Info("V0 BLvl %d", buf_level);
 
@@ -576,7 +576,7 @@ static void __attribute__ ((section(".h264"))) VEBRC_IRQ_Wrap_Handler(uint32_t u
                 g_stEncoderStatus[1].running = 0;
                 DLOG_Error("Buffer level %d, close view 1.", buf_level);
             }
-			DLOG_Info("V1 BLvl %d", buf_level);
+			//DLOG_Info("V1 BLvl %d", buf_level);
 
 #ifdef ARCAST
             // Insert timestamp for audio sync
@@ -643,7 +643,7 @@ static void __attribute__ ((section(".h264"))) VEBRC_IRQ_Wrap_Handler(uint32_t u
 
         if (g_stEncoderStatus[0].running == 1)
         {
-            DLOG_Critical("Enc Hang, Reset view0");
+            //DLOG_Critical("Enc Hang, Reset view0");
             H264_Encoder_RestartView(0, g_stEncoderStatus[0].resW, g_stEncoderStatus[0].resH, 
                                      g_stEncoderStatus[0].gop, g_stEncoderStatus[0].framerate, 
                                      g_stEncoderStatus[0].bitrate, g_stEncoderStatus[0].src);
@@ -719,7 +719,7 @@ static void __attribute__ ((section(".h264"))) VEBRC_IRQ_Wrap_Handler(uint32_t u
 		s_RptParam.v1_width = v1_width;
 		s_RptParam.v1_hight = v1_height;
 		SYS_EVENT_NotifyInterCore(SYS_EVENT_ID_H264_RPT_EVENT, (&s_RptParam) );	
-		DLOG_Critical("PicSize Change: V0 %d, %d, V1 %d, %d\n", v0_width, v0_height, v1_width, v1_height);
+		//DLOG_Critical("PicSize Change: V0 %d, %d, V1 %d, %d\n", v0_width, v0_height, v1_width, v1_height);
 	}
 
 	rca[0].ret_width = v0_width;
@@ -817,7 +817,7 @@ int __attribute__ ((section(".h264"))) H264_Encoder_Init(uint8_t gop0, uint8_t b
     SYS_EVENT_RegisterHandler(SYS_EVENT_ID_BB_SUPPORT_BR_CHANGE, H264_Encoder_BBModulationChangeCallback);
     SYS_EVENT_RegisterHandler(SYS_EVENT_ID_ENCODER_CMD, H264_Encoder_CmdProcess);
 
-    DLOG_Info("h264 encoder init OK\n");
+    //DLOG_Info("h264 encoder init OK\n");
 
     return 1;
 }

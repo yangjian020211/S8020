@@ -142,7 +142,6 @@ static uint8_t get_sky_mod_status_info(uint8_t *buf)
 {
     int len;
     uint16_t ret;
-
     
     buf[0] = 0xff;
     buf[1] = 0x5a;

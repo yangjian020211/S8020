@@ -114,19 +114,16 @@ void __attribute__ ((section(".h264"))) BB_SweepStart(ENUM_RF_BAND e_bandsupport
     {
         context.rf_info.u8_bb1ItFrqSize = BB_GetItFrqNum(RF_2G);
         context.rf_info.u8_bb2ItFrqSize = BB_GetItFrqNum(RF_5G);
-		context.rf_info.sweep_freqsize = context.rf_info.u8_bb1ItFrqSize;
         context.e_curBand = RF_2G;
     }
     else if (RF_5G == e_bandsupport)
     {
         context.rf_info.u8_bb1ItFrqSize = BB_GetItFrqNum(RF_5G);
-		context.rf_info.sweep_freqsize = context.rf_info.u8_bb1ItFrqSize;
         context.e_curBand = RF_5G;
     }
     else if (RF_2G == e_bandsupport)
     {
         context.rf_info.u8_bb1ItFrqSize = BB_GetItFrqNum(RF_2G);
-		context.rf_info.sweep_freqsize = context.rf_info.u8_bb1ItFrqSize;
         context.e_curBand = RF_2G;
     }
 #endif
@@ -255,7 +252,8 @@ static uint8_t __attribute__ ((section(".h264"))) BB_GetSweepPower(ENUM_RF_BAND 
     uint8_t  u8_maxCh = BB_GetSweepTotalCh(e_rfBand, bw);
     if(sweep_ch >= u8_maxCh)
     {
-        DLOG_Error("Ch overflow:%d %d %d", e_rfBand, sweep_ch, u8_maxCh);
+       // DLOG_Error("Ch overflow:%d %d %d", e_rfBand, sweep_ch, u8_maxCh);
+       return 0;
 		
     }
 
@@ -1390,10 +1388,12 @@ int32_t __attribute__ ((section(".h264"))) grd_doRfbandChange( uint8_t *pu8_main
             context.e_curBand = OTHER_BAND(context.e_curBand);  //switch to another band
 
             BB_set_RF_Band(BB_GRD_MODE, context.e_curBand);
+			RF8003s_GetFctFreqTable(context.st_bandMcsOpt.e_bandwidth);
 			reset_sweep_table(context.e_curBand);
             BB_SweepChangeBand(context.e_curBand, context.stru_bandChange.u8_ItCh, context.stru_bandChange.u8_optCh);
             BB_set_sweepChannel(); //re-set the sweepChannel            
-
+			rc_set_unlock_patten();
+			//grd_rc_hopfreq();
             if ( pu8_mainCh )
             {
                 *pu8_mainCh = context.stru_bandChange.u8_ItCh;
@@ -1425,11 +1425,7 @@ int32_t __attribute__ ((section(".h264"))) grd_doRfbandChange( uint8_t *pu8_main
 
             return 1;
         }
-        else
-        {
-            //in band changing
-        }
-    }
+   }
 
     return 0;
 }
@@ -1461,11 +1457,10 @@ int32_t __attribute__ ((section(".h264"))) grd_RfBandSelectChannelDoSwitch(void)
     BB_selectBestCh(context.e_curBand, SELECT_MAIN_OPT, &main_ch, &opt_ch, NULL, 0);
 
     BB_set_RF_Band(BB_GRD_MODE, context.e_curBand);
-	reset_sweep_table(context.e_curBand);
+	//RF8003s_GetFctFreqTable(context.st_bandMcsOpt.e_bandwidth);
+	//reset_sweep_table(context.e_curBand);
     BB_SweepChangeBand(context.e_curBand, main_ch, opt_ch);
     BB_set_sweepChannel();              //re-set the sweepChannel            
-
-    BB_ResetRcMap();
 
     //clear the result, re-start statistic again
     context.rf_info.u8_bandSelCnt = 0;

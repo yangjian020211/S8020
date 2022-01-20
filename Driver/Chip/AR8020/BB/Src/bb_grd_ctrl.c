@@ -246,7 +246,7 @@ void BB_GRD_start(void)
 	//init_mcs();
 	
 }
-#if 0
+#if 1
 static void gptf(uint32_t *str,int i){
 	DLOG_Critical("type=%d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d",
 					str[0],str[1],str[2],str[3],str[4],str[5],str[6],str[7],str[8],str[9],
@@ -337,9 +337,9 @@ static void BB_grd_uartDataHandler(void)
             }
 			else if(pid == DT_NUM_SKY_SWEEP_NOISE)
 			{	
-				#if 0
+				
 				uint32_t buff[50]={0};
-				int i=0;	
+				int i=0,j=0;	
 				
 				if(data[1]==0x00 || data[1]==0x01){
 					for(i=0;i<42;i++) buff[i]=0-data[i+1];
@@ -349,14 +349,20 @@ static void BB_grd_uartDataHandler(void)
 					buff[0]=data[1];
 				}
 				gptf(buff,0);
-
-				if(data[1]==0x01){
-					DLOG_Critical("cur_IT_ch=%d,freq=%d£¬main_ch=%d,option_ch=%d",context.cur_IT_ch,BB_GetItFrqByCh(context.cur_IT_ch),context.rf_info.u8_mainSweepCh,context.rf_info.u8_optSweepCh);
-					DLOG_Critical("rc_error=%d,rc_agca=%d,rc_agcb=%d",(100-g_stru_skyStatus.u8_rcCrcLockCnt),g_stru_skyStatus.u8_skyagc1,g_stru_skyStatus.u8_skyagc2);
-					}
 				
-
-				if(data[1]==0x06)
+				#if 1
+				
+				if(data[1]==0x01)
+				{
+					//DLOG_Critical("cur_IT_ch=%d,freq=%d£¬main_ch=%d,option_ch=%d",context.cur_IT_ch,BB_GetItFrqByCh(context.cur_IT_ch),context.rf_info.u8_mainSweepCh,context.rf_info.u8_optSweepCh);
+					DLOG_Critical("rc_error=%d,rc_agca=%d,rc_agcb=%d",(100-g_stru_skyStatus.u8_rcCrcLockCnt),g_stru_skyStatus.u8_skyagc1,g_stru_skyStatus.u8_skyagc2);
+					//DLOG_Critical("rc work patten ");
+					//uint32_t str2[50]={0};
+					//for(j=0;j<context.rf_info.rc_ch_working_patten_size;j++)str2[j]=BB_GetRcFrqByCh(context.rf_info.rc_ch_working_patten[j]);
+					//		gprtit(str2, 0);
+				}
+				
+				if(data[1]==0x02)
 				{
 					uint32_t str[50]={0};
 					int j=0;
@@ -382,8 +388,9 @@ static void BB_grd_uartDataHandler(void)
 					uint32_t str2[50]={0};
 					for(j=0;j<context.rf_info.rc_ch_working_patten_size;j++)str2[j]=BB_GetRcFrqByCh(context.rf_info.rc_ch_working_patten[j]);
 							gprtit(str2, 0);
-					
 			   }
+			
+				
 				#endif
 			}
 			else if(pid == DT_NUM_SKY_RC_PATTEN)
@@ -394,7 +401,7 @@ static void BB_grd_uartDataHandler(void)
 			{
 				context.rcChgPatten.en_flag_grd=0;
 				context.rcChgPatten.valid_grd=0;
-				DLOG_Warning("grd get ack from grd_rc_chgpatten!");
+				//DLOG_Warning("grd get ack from grd_rc_chgpatten!");
 			}
             grd_handle_cmd_ack(data);
         }
@@ -1352,7 +1359,7 @@ static void time_slice3(){
 		{
 			context.grd_rc_channel = 0;
 		}
-		BB_ResetRcMap();
+		//BB_ResetRcMap();
 		grd_rc_hopfreq();
 		BB_set_ItFrqByCh(context.e_curBand, context.stru_bandChange.u8_ItCh);
 		BB_grd_NotifyItFreqByCh(context.e_curBand, context.stru_bandChange.u8_ItCh);
@@ -1533,13 +1540,18 @@ void grd_rc_hopfreq(void)
     if(unlock_cnt >= (3 * VT_CONTINUE_UNLOCK_NUM))
     {
         unlock_cnt = 0;
-        if ((context.stru_bandSwitchParam.u8_bandSwitchAfterUnlock==0x81 || RF_5G == context.e_curBand)\
-            && context.locked == 0 && \
-            context.st_bandMcsOpt.e_rfbandMode == AUTO && context.st_bandMcsOpt.e_bandsupport == RF_2G_5G)
+       if((context.st_bandMcsOpt.e_rfbandMode == AUTO && context.st_bandMcsOpt.e_bandsupport == RF_2G_5G))
         {
             grd_RfBandSelectChannelDoSwitch();  //do switch band and set VT channel
         }
-		
+		/*
+		if ((context.stru_bandSwitchParam.u8_bandSwitchAfterUnlock==0x81 || RF_5G == context.e_curBand)\
+				 && context.locked == 0 && \
+				 context.st_bandMcsOpt.e_rfbandMode == AUTO && context.st_bandMcsOpt.e_bandsupport == RF_2G_5G)
+		{
+            grd_RfBandSelectChannelDoSwitch();  //do switch band and set VT channel
+        }
+        */
     }
 
 	if(context.freq_band_mode == SUB_BAND)
@@ -1552,42 +1564,10 @@ void grd_rc_hopfreq(void)
     }
     else
     {
-		if(context.rc_hoping_patten_mode==SELECTION_BAND_HOPING)
-		{
-        	bb_get_rc_channel();
-		}
-		else
-		{
-			 max_ch_size = BB_GetRcFrqNum(context.e_curBand); 
-        	 context.grd_rc_channel++;
-        	 context.grd_rc_channel %= max_ch_size;
-		}
-
+    	bb_get_rc_channel();
     }
-
-    //BB_WriteRegMask(PAGE2, GRD_SKY_RC_CH_SYNC, grd_rc_channel, GRD_SKY_RC_CH_MASK);
-
-    if (context.st_chSelectionParam.u8_rcChSelectionEnable)
-    {
-        uint8_t skip_rc_ch = context.rc_ch_map[context.grd_rc_channel];
-		/*
-        if(context.enable_rc_skip_patten && !context.inSearching && context.rc_skip_patten < RC_SKIP_PATTEN_NUM)
-        {
-            skip_rc_ch = BB_RcPattenMap(context.rc_skip_patten,skip_rc_ch);
-        }*/
-        BB_set_Rcfrq(context.e_curBand, skip_rc_ch);
-    }
-    else
-    {
-        uint8_t skip_rc_ch = context.grd_rc_channel;
-		/*
-        if(context.enable_rc_skip_patten && !context.inSearching  && context.rc_skip_patten < RC_SKIP_PATTEN_NUM)
-        {
-            skip_rc_ch = BB_RcPattenMap(context.rc_skip_patten,skip_rc_ch);
-        }
-        */
-        BB_set_Rcfrq(context.e_curBand, skip_rc_ch);
-    }
+    BB_set_Rcfrq(context.e_curBand, context.grd_rc_channel);
+  
 }
 
 void grd_rc_hopfreq600m(void)

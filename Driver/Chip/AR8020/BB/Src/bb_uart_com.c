@@ -233,7 +233,7 @@ uint32_t BB_ComPacketDataAnalyze(uint8_t *u8_uartRxBuf, uint8_t u8_uartRxLen, ST
         {
             if (rx_header->data_length > BBCOM_RX_BUF_SIZE)
             {
-                DLOG_Error("len should not exceed: %d", BBCOM_RX_BUF_SIZE);
+               // DLOG_Error("len should not exceed: %d", BBCOM_RX_BUF_SIZE);
 
                 continue;
             }
@@ -248,7 +248,7 @@ uint32_t BB_ComPacketDataAnalyze(uint8_t *u8_uartRxBuf, uint8_t u8_uartRxLen, ST
             else
             {
                 /* exception */
-                DLOG_Error("find header while receiving user data");
+                //DLOG_Error("find header while receiving user data");
 
                 pstBBComRxFIFO->rx_data_buf[rx_header->data_buf_index++] = chData;
 
@@ -582,8 +582,8 @@ uint8_t BB_ComSendMsg(ENUM_BB_COM_SESSION_ID session_id,
 
     if (BB_ComGetTXQueueFreeLength(pst_txQueue) <= ((length + BBCOM_SESSION_DATA_HEADER_SIZE) + DATA_CHECK_SUM_SIZE)) //2: two checksum bytes
     {
-        DLOG_Info("%d buffer not enough",session_id);
-		DLOG_Info("length = %d ",length);
+       // DLOG_Info("%d buffer not enough",session_id);
+		//DLOG_Info("length = %d ",length);
         return 0;
     }
 

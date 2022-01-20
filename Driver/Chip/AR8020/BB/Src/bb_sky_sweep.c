@@ -26,8 +26,8 @@ void __attribute__ ((section(".h264"))) sky_startSweep(ENUM_RF_BAND band)
 {
 	
 	//context.rf_info.rc_avr_sweep_result_size
-	reset_sweep_table(RF_2G);
-	//reset_table_for_5g();
+	reset_sweep_table(band);
+	context.rf_info.e_bw = BW_10M;
     BB_set_SweepFrq(context.rf_info.sweepBand[context.rf_info.curBandIdx], context.rf_info.e_bw, context.rf_info.curSweepCh);
     context.u_bandSwitchParam = (UNION_BandSwitchParm *)CFGBIN_GetNodeAndData((STRU_cfgBin *)SRAM_CONFIGURE_MEMORY_ST_ADDR, RF_SKY_BAND_SWITCH_CFG_ID, NULL);
 
@@ -36,14 +36,15 @@ void __attribute__ ((section(".h264"))) sky_startSweep(ENUM_RF_BAND band)
 
 void  reset_sweep_table(ENUM_RF_BAND cur_band){
 	int i=0,j=0;
-if(context.en_bbmode==BB_SKY_MODE){
+    DLOG_Warning("cur_band=%d,en_bbmode=%d",cur_band,context.en_bbmode);
+	if(context.en_bbmode==BB_SKY_MODE){
 		if(cur_band==RF_2G){
 			context.rf_info.sweepBand[0] = RF_2G;
 			context.rf_info.sweep_freqsize = BB_GetSkySweepFrqNum(RF_2G);
 	        context.rf_info.bandCnt = 1;
 			context.rf_info.rc_avr_sweep_result_size =  context.rf_info.sweep_freqsize;
 		}else if(cur_band==RF_5G){
-			context.rf_info.sweepBand[1] = RF_5G;
+			context.rf_info.sweepBand[0] = RF_5G;
 	        context.rf_info.sweep_freqsize = BB_GetSkySweepFrqNum(RF_5G);
 	        context.rf_info.bandCnt = 1;
 			context.rf_info.rc_avr_sweep_result_size = context.rf_info.sweep_freqsize;
@@ -57,11 +58,9 @@ if(context.en_bbmode==BB_SKY_MODE){
 		else{
 			context.rf_info.bandCnt = 1;
 	        context.rf_info.sweepBand[0]    = context.st_bandMcsOpt.e_bandsupport;
-	        context.rf_info.sweep_freqsize = BB_GetRcFrqNum(context.st_bandMcsOpt.e_bandsupport);
+	        context.rf_info.sweep_freqsize = BB_GetSkySweepFrqNum(cur_band);
 			context.rf_info.rc_avr_sweep_result_size = context.rf_info.sweep_freqsize;
 		}
-		
-		
 	}
 	else if(context.en_bbmode==BB_GRD_MODE){
 		context.rf_info.fine_sweep_size=4;
@@ -70,7 +69,7 @@ if(context.en_bbmode==BB_SKY_MODE){
 	        context.rf_info.u8_bb1ItFrqSize = BB_GetItFrqNum(RF_2G);
 	        context.rf_info.u8_bb2ItFrqSize = BB_GetItFrqNum(RF_5G);
 			context.rf_info.sweep_freqsize = context.rf_info.u8_bb1ItFrqSize;
-	        context.e_curBand = RF_2G_5G;
+	        context.e_curBand = RF_2G;
 	    }
 	    else if (RF_5G == cur_band)
 	    {
@@ -86,34 +85,35 @@ if(context.en_bbmode==BB_SKY_MODE){
 	    }
 	}
 
-	for(i=0;i<context.rf_info.sweep_freqsize;i++){
-				context.rf_info.prelist[i].id=i;context.rf_info.prelist[i].value=0;
-				context.rf_info.pre_selection_list[i].id=i;context.rf_info.pre_selection_list[i].value=0;
-				context.rf_info.sweep_pwr_avrg_value[i].id=i;context.rf_info.sweep_pwr_avrg_value[i].value=0;
-				context.rf_info.sweep_pwr_fluct_value[i].id=i;context.rf_info.sweep_pwr_fluct_value[i].value=0;
-				context.rf_info.work_rc_error_value[i].id=i;context.rf_info.work_rc_error_value[i].value=0;
-				context.rf_info.work_snr_avrg_value[i].id=i;context.rf_info.work_snr_avrg_value[i].value=0;
-				context.rf_info.work_snr_fluct_value[i].id=i;context.rf_info.work_snr_fluct_value[i].value=0;
-				context.rf_info.error_ch_record[i]=0xff;
-				for(j=0;j<SWEEP_FREQ_BLOCK_ROWS;j++){
-					context.rf_info.sweep_pwr_table[j][i].id=i;context.rf_info.sweep_pwr_table[j][i].value=0;
-					context.rf_info.work_rc_unlock_table[j][i].id=i;context.rf_info.work_rc_unlock_table[j][i].value=0;
-					context.rf_info.work_snr_table[j][i].id=i;context.rf_info.work_snr_table[j][i].value=0;
-				}
-				
+	for(i=0;i<context.rf_info.sweep_freqsize;i++)
+	{
+		context.rf_info.prelist[i].id=i;context.rf_info.prelist[i].value=0;
+		context.rf_info.pre_selection_list[i].id=i;context.rf_info.pre_selection_list[i].value=0;
+		context.rf_info.sweep_pwr_avrg_value[i].id=i;context.rf_info.sweep_pwr_avrg_value[i].value=0;
+		context.rf_info.sweep_pwr_fluct_value[i].id=i;context.rf_info.sweep_pwr_fluct_value[i].value=0;
+		context.rf_info.work_rc_error_value[i].id=i;context.rf_info.work_rc_error_value[i].value=0;
+		//context.rf_info.work_snr_avrg_value[i].id=i;context.rf_info.work_snr_avrg_value[i].value=0;
+		//context.rf_info.work_snr_fluct_value[i].id=i;context.rf_info.work_snr_fluct_value[i].value=0;
+		context.rf_info.error_ch_record[i]=0xff;
+		for(j=0;j<SWEEP_FREQ_BLOCK_ROWS;j++)
+		{
+			context.rf_info.sweep_pwr_table[j][i].id=i;context.rf_info.sweep_pwr_table[j][i].value=0;
+			context.rf_info.work_rc_unlock_table[j][i].id=i;context.rf_info.work_rc_unlock_table[j][i].value=0;
+			//context.rf_info.work_snr_table[j][i].id=i;context.rf_info.work_snr_table[j][i].value=0;
 		}
-		context.rf_info.fine_sweep_id=0;
-	    context.rf_info.e_bw = BW_10M;
-	    context.rf_info.curBandIdx = 0;
-		context.rf_info.curSweepCh=0;
-	    context.rf_info.curRowCnt  = 0;
-		context.rf_info.currc_statistics_Row=0;
-		context.rf_info.sweep_finished=1;
-		context.rf_info.fine_sweep_size=8;
-		context.rf_info.fine_sweep_id=0;
-		context.rf_info.fine_sweep_row=0;
-		context.rf_info.isFull = 0;
-		context.rf_info.rc_ch_working_patten_len=SKY_PATTEN_SIZE_2G;
+	}
+	context.rf_info.fine_sweep_id=0;
+	context.rf_info.curBandIdx = 0;
+	context.rf_info.curSweepCh=0;
+	context.rf_info.curRowCnt  = 0;
+	context.rf_info.currc_statistics_Row=0;
+	context.rf_info.sweep_finished=1;
+	context.rf_info.fine_sweep_size=8;
+	context.rf_info.fine_sweep_id=0;
+	context.rf_info.fine_sweep_row=0;
+	context.rf_info.isFull = 0;
+	context.rf_info.rc_ch_working_patten_len=SKY_PATTEN_SIZE_2G;
+	bb_update_rc_patten_size();
 
 }
 
@@ -192,6 +192,7 @@ void sky_statistics_rc_ch_error(uint8_t locked)
 	sky_CalcAverage_rc_ch_error_cnt(ch);
 }
 
+/*
 void  sky_CalcAverage_rc_ch_snr(uint8_t ch)
 {
     uint8_t row=0,total=0;
@@ -213,7 +214,6 @@ void  sky_CalcAverage_rc_ch_snr(uint8_t ch)
 	   }
 
 }
-
 
 void sky_statistics_rc_snr(uint8_t locked)
 {
@@ -251,7 +251,7 @@ void sky_statistics_rc_snr(uint8_t locked)
 	context.rf_info.i32_working_times[ch]++; 
 	
 }
-
+*/
 void sky_SetNextSweepCh(void)
 {
 	//if need to change patten,need to sweep the selections more 
@@ -398,7 +398,7 @@ static void sky_print_sweep_pwr_result(){
 	sptf(str, 0);
 
 }
-
+/*
 static void sky_print_sweep_snr_result(){
 	int i=0,j=0; 
 	uint32_t str[50]={0};
@@ -423,7 +423,7 @@ static void sky_print_sweep_snr_table()
 	}
 	
 }
-
+*/
 static void sky_print_sweep_error_table()
 {
 	int i=0,j=0; 
@@ -517,14 +517,16 @@ void GetSweepCh_normalsweep(uint8_t u8_bandidx, uint8_t u8_ch,signed char data,E
 					   sky_print_sweep_pwr_result();
 					   
 				   }else if(k==3){
-				   		sky_print_sweep_error_table();
+				   	 	k=0;
+					    tx_sweep = 0;
+				   		//sky_print_sweep_error_table();
 					   //sky_print_sweep_pwr_result();
 					   
 				   }else if(k==4){
-					   sky_print_sweep_snr_table();
+					   //sky_print_sweep_snr_table();
 				   }
 				   else if(k==5){
-					   sky_print_sweep_snr_result();
+					   //sky_print_sweep_snr_result();
 					    k=0;
 					   tx_sweep = 0;
 				   }
@@ -618,7 +620,7 @@ int __attribute__ ((section(".h264"))) sky_Get_statistic_rc_error_Result(uint8_t
 	return 0;
 }
 
-int sky_get_rc_total_channel()
+int __attribute__ ((section(".h264")))sky_get_rc_total_channel()
 {
 	return (context.rf_info.sweep_freqsize);
 	/*
@@ -631,7 +633,7 @@ int sky_get_rc_total_channel()
 	*/
 }
 
-static uint8_t is_same_patten(){
+static uint8_t __attribute__ ((section(".h264")))is_same_patten(){
 	int i=0;
 	STRU_RF_DATA list[MAX_RC_FRQ_SIZE]={0};
 	STRU_RF_DATA listcomp_wk[MAX_RC_FRQ_SIZE]={0};
@@ -659,7 +661,7 @@ static uint8_t is_same_patten(){
 	return 1;
 }
 
-static uint8_t corse_check_sweep_noise(uint8_t mustchg){
+static uint8_t __attribute__ ((section(".h264")))corse_check_sweep_noise(uint8_t mustchg){
 	STRU_RF_DATA list[MAX_RC_FRQ_SIZE]={0};
 	STRU_RF_DATA listr[MAX_RC_FRQ_SIZE]={0};
 	STRU_RF_DATA listcomp[MAX_RC_FRQ_SIZE]={0};
@@ -787,7 +789,7 @@ static uint8_t check_working_channel_snr(){
 	return 0;
 }
 
-static void find_best_patten()
+static void __attribute__ ((section(".h264")))find_best_patten()
 {
 	int i=0;
 
@@ -861,19 +863,19 @@ static void find_best_patten()
 	context.rcChgPatten.timeout_cnt=context.sync_cnt+STATUS_CHG_DELAY;
 }
 
-void begin_lock_sweep_noise_for_selection(){
+void __attribute__ ((section(".h264")))begin_lock_sweep_noise_for_selection(){
 	context.rf_info.sweep_finished=0;
 	context.rf_info.fine_sweep_id=0;
 	context.rf_info.lock_sweep=1;
 }
 
-void end_lock_sweep_noise_for_selection(){
+void __attribute__ ((section(".h264")))end_lock_sweep_noise_for_selection(){
 	context.rf_info.sweep_finished=0;
 	context.rf_info.fine_sweep_id=0;
 	context.rf_info.lock_sweep=0;
 }
 
-void sky_gen_rc_working_patten(void)
+void __attribute__ ((section(".h264")))sky_gen_rc_working_patten(void)
 {
 	int sweep_noise_meet=0;
 	int working_error_meet=0;
@@ -886,7 +888,7 @@ void sky_gen_rc_working_patten(void)
 	if(context.dev_state == CHECK_LOCK) return;
 	if(context.dev_state == WAIT_VT_LOCK) return;
 	if(context.rf_info.isFull==0) return;
-	if((SysTicks_GetDiff(context.rf_info.rc_patten_nextchg_delay, SysTicks_GetTickCount())) < CHG_PATTEN_TIME_GAP)return;
+	//if((SysTicks_GetDiff(context.rf_info.rc_patten_nextchg_delay, SysTicks_GetTickCount())) < CHG_PATTEN_TIME_GAP)return;
 	
 	if(context.rf_info.lock_sweep==0)
 	{
@@ -905,6 +907,7 @@ void sky_gen_rc_working_patten(void)
 				begin_lock_sweep_noise_for_selection();
 				DLOG_Critical("change patten because of the sweep noise meet");
 			}
+			/*
 			else
 			{
 				working_snr_meet = check_working_channel_snr();
@@ -915,7 +918,7 @@ void sky_gen_rc_working_patten(void)
 					DLOG_Critical("change patten because of the working snr meet");
 				}
 			}
-			
+			*/
 		}
 	}
 	else

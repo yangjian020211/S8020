@@ -36,9 +36,11 @@ static int16_t Gen2GrcFreq[240];
 static uint8_t u8_2g_bb_power_a[240];
 static uint8_t u8_2g_bb_power_b[240];
 
-static uint8_t u8_rcFreqCnt_2g;
-static uint8_t u8_itFreqCnt_2g;
+static uint8_t rcFreqCnt_2g;
+static uint8_t itFreqCnt_2g;
 
+static uint16_t *pRcFreqlist_2g = NULL;
+static uint16_t *pItFreqlist_2g = NULL;
 
 
 static STRU_FRQ_CHANNEL pstru_rcFreq_5g[240];//40*6
@@ -51,6 +53,10 @@ static uint8_t u8_5g_bb_power_b[240];
 static uint8_t u8_rcFreqCnt_5g;
 static uint8_t u8_itFreqCnt_5g;
 
+static uint16_t *pRcFreqlist_5g = NULL;
+static uint16_t *pItFreqlist_5g = NULL;
+
+
 static STRU_RF_REG *pstru_rf0_regBeforeCali;
 static STRU_RF_REG *pstru_rf1_regBeforeCali;
 
@@ -61,8 +67,8 @@ static STRU_BOARD_RF_PARA *pstru_rf_boardcfg;
 
 static STRU_BB_POWER_CLOSE *pst_close_power = NULL; 
 static STRU_BB_CH_OPEN_POWER_REF_VALUE *pst_bbPowerOpenRefValue = NULL;
-static STRU_FRQ_CHANNEL pstru_skySweeFreq_2g[10];
-static STRU_FRQ_CHANNEL pstru_skySweeFreq_5g[10];
+static STRU_FRQ_CHANNEL pstru_skySweeFreq_2g[40];
+static STRU_FRQ_CHANNEL pstru_skySweeFreq_5g[40];
 static uint8_t u8_skySweeFreqCnt_2g;
 static uint8_t u8_skySweeFreqCnt_5g;
 static uint8_t u8_subBand10MrcFreqNum;
@@ -170,7 +176,7 @@ static void RF8003s_CalcFctNode2RegTable(uint32_t nodeid, STRU_FRQ_CHANNEL *frq_
         return;
     }
 
-    DLOG_Info("Node id = %x %d", nodeid, p_frq->u32_rfChCount);
+    DLOG_Warning("Node id = %x %d", nodeid, p_frq->u32_rfChCount);
 
     if(p_frq->u32_rfChCount > 40)
     {
@@ -205,141 +211,146 @@ static void RF8003s_CalcSweepRegTable(STRU_cfgBin *cfg)
         }
     }
 }
-void dump_freq(uint8_t offset , uint8_t cnt, uint8_t val)
-{
-    uint8_t i;
-    if(val==0)
-    {
-        DLOG_Warning("cnt = %d",u8_rcFreqCnt_2g);
-        for(i=offset;i<cnt;i++)
-            DLOG_Warning("%d",Gen2GrcFreq[i]);
-    }
-    else if(val == 1)
-    {
-        DLOG_Warning("cnt = %d",u8_rcFreqCnt_5g);
-        for(i=offset;i<cnt;i++)
-            DLOG_Warning("%d",Gen5GrcFreq[i]);
-    }
-    else if(val == 2)
-    {
-        DLOG_Warning("cnt = %d",u8_rcFreqCnt_2g);
-        for(i=offset;i<cnt;i++)
-            DLOG_Warning("%x",u8_2g_bb_power_a[i]);
 
-    }
-    else if(val == 3)
-    {
-        DLOG_Warning("cnt = %d",u8_rcFreqCnt_5g);
-        for(i=offset;i<cnt;i++)
-            DLOG_Warning("%x",u8_5g_bb_power_a[i]);
-    }
-}
 void RF8003s_GetFctFreqTable(ENUM_CH_BW e_bw)
 {
     uint8_t i = 0,j=0;
     uint32_t nodeid_band0,nodeid_band1,freq_cnt;
     STRU_cfgNode *node,*node_vt;
-    STRU_RF_CHANNEL *p_frq,*p_frq_vt;
+    STRU_RF_CHANNEL *p_frq_vt;
+	STRU_RF_CHANNEL *p_frq_2g,*p_frq_5g,*p_frq_vt_2g_10M,*p_frq_vt_5g_10M,*p_frq_vt_2g_20M,*p_frq_vt_5g_20M;
+
+	//DLOG_Warning("e_bw=%d",e_bw);
 
     if (e_bw == BW_10M)
     {
-        RF8003s_CalcFctNode2RegTable(FACTORY_SUBNODE_BAND0_VT_10M_FRQ_ID, pstru_itFreq_2g, &u8_itFreqCnt_2g);
+        RF8003s_CalcFctNode2RegTable(FACTORY_SUBNODE_BAND0_VT_10M_FRQ_ID, pstru_itFreq_2g, &itFreqCnt_2g);
         RF8003s_CalcFctNode2RegTable(FACTORY_SUBNODE_BAND1_VT_10M_FRQ_ID, pstru_itFreq_5g, &u8_itFreqCnt_5g);
-        nodeid_band0 = FACTORY_SUBNODE_BAND0_VT_10M_FRQ_ID;
-        nodeid_band1 = FACTORY_SUBNODE_BAND1_VT_10M_FRQ_ID;
+		nodeid_band0 = FACTORY_SUBNODE_BAND0_VT_10M_FRQ_ID;
+		nodeid_band1 = FACTORY_SUBNODE_BAND1_VT_10M_FRQ_ID;
     }
     else
     {
-        RF8003s_CalcFctNode2RegTable(FACTORY_SUBNODE_BAND0_VT_20M_FRQ_ID, pstru_itFreq_2g, &u8_itFreqCnt_2g);
+        RF8003s_CalcFctNode2RegTable(FACTORY_SUBNODE_BAND0_VT_20M_FRQ_ID, pstru_itFreq_2g, &itFreqCnt_2g);
         RF8003s_CalcFctNode2RegTable(FACTORY_SUBNODE_BAND1_VT_20M_FRQ_ID, pstru_itFreq_5g, &u8_itFreqCnt_5g);
-        nodeid_band0 = FACTORY_SUBNODE_BAND0_VT_20M_FRQ_ID;
-        nodeid_band1 = FACTORY_SUBNODE_BAND1_VT_20M_FRQ_ID;
+		nodeid_band0 = FACTORY_SUBNODE_BAND0_VT_20M_FRQ_ID;
+		nodeid_band1 = FACTORY_SUBNODE_BAND1_VT_20M_FRQ_ID;
     }
-
-    p_frq = (STRU_RF_CHANNEL *)FCT_GetNodeAndData(FACTORY_SUBNODE_BAND0_RC_10M_FRQ_ID, &node);
-    if (NULL == p_frq)
+	 // DLOG_Warning("itFreqCnt_2g=%d,u8_itFreqCnt_5g=%d",itFreqCnt_2g,u8_itFreqCnt_5g);
+    p_frq_2g = (STRU_RF_CHANNEL *)FCT_GetNodeAndData(FACTORY_SUBNODE_BAND0_RC_10M_FRQ_ID, &node);
+    if (NULL == p_frq_2g)
     {
-        DLOG_Error("Fail Node = %x", FACTORY_SUBNODE_BAND0_RC_10M_FRQ_ID);
+       // DLOG_Error("Fail Node = %x", FACTORY_SUBNODE_BAND0_RC_10M_FRQ_ID);
         return;
     }
 
-    if(p_frq->u32_rfChCount > 0 && p_frq->u16_rfChFrqList[0] < 100)//real freq value must > 100, e.g 2400,5800
+   /* if(p_frq_2g->u32_rfChCount > 0 && p_frq_2g->u16_rfChFrqList[0] < 100)//real freq value must > 100, e.g 2400,5800
     {
-        DLOG_Warning("2g auto generate rc freq");
+        //DLOG_Warning("2g auto generate rc freq");
         p_frq_vt = (STRU_RF_CHANNEL *)FCT_GetNodeAndData(nodeid_band0, &node_vt);
         if (NULL == p_frq_vt)
         {
-            DLOG_Error("Fail Node = %x", nodeid_band0);
+           // DLOG_Error("Fail Node = %x", nodeid_band0);
             return;
         }
-
-        freq_cnt = p_frq->u32_rfChCount;
-        if(p_frq->u32_rfChCount * p_frq_vt->u32_rfChCount > 240)
+		pItFreqlist_2g = p_frq_vt->u16_rfChFrqList;
+        freq_cnt = p_frq_2g->u32_rfChCount;
+        if(p_frq_2g->u32_rfChCount * p_frq_vt->u32_rfChCount > 240)
         {
             freq_cnt = 240 / p_frq_vt->u32_rfChCount;
-            DLOG_Warning("2g force sub rc %d->%d",p_frq->u32_rfChCount,freq_cnt);
+           // DLOG_Warning("2g force sub rc %d->%d",p_frq_2g->u32_rfChCount,freq_cnt);
         }
 
         for(i=0;i<p_frq_vt->u32_rfChCount;i++)
         {
             for(j=0;j<freq_cnt;j++)
             {
-                Gen2GrcFreq[i*freq_cnt+j] = p_frq_vt->u16_rfChFrqList  [i] + p_frq->u16_rfChFrqList[j];
-                RF8003xCalcFrq2Register(p_frq_vt->u16_rfChFrqList  [i] + p_frq->u16_rfChFrqList[j], (pstru_rcFreq_2g + i*freq_cnt+j));
+                Gen2GrcFreq[i*freq_cnt+j] = p_frq_vt->u16_rfChFrqList  [i] + p_frq_2g->u16_rfChFrqList[j];
+                RF8003xCalcFrq2Register(p_frq_vt->u16_rfChFrqList  [i] + p_frq_2g->u16_rfChFrqList[j], (pstru_rcFreq_2g + i*freq_cnt+j));
             }
         }
-        u8_rcFreqCnt_2g = freq_cnt * p_frq_vt->u32_rfChCount;
+        rcFreqCnt_2g = freq_cnt * p_frq_vt->u32_rfChCount;
         u8_subBand10MrcFreqNum = freq_cnt;
-        DLOG_Warning("2g rc frq %d %d",u8_subBand10MrcFreqNum,u8_rcFreqCnt_2g);
+        //DLOG_Warning("2g rc frq %d %d",u8_subBand10MrcFreqNum,rcFreqCnt_2g);
     }
-    else
+  */
+  //  else  
     {
-        RF8003s_CalcFctNode2RegTable(FACTORY_SUBNODE_BAND0_RC_10M_FRQ_ID, pstru_rcFreq_2g, &u8_rcFreqCnt_2g);
+        RF8003s_CalcFctNode2RegTable(FACTORY_SUBNODE_BAND0_RC_10M_FRQ_ID, pstru_rcFreq_2g, &rcFreqCnt_2g);
+		p_frq_2g = (STRU_RF_CHANNEL *)FCT_GetNodeAndData(FACTORY_SUBNODE_BAND0_RC_10M_FRQ_ID, &node);
+		pRcFreqlist_2g = p_frq_2g->u16_rfChFrqList;
     }
     
-    p_frq = (STRU_RF_CHANNEL *)FCT_GetNodeAndData(FACTORY_SUBNODE_BAND1_RC_10M_FRQ_ID, &node);
-    if (NULL == p_frq)
+    p_frq_5g = (STRU_RF_CHANNEL *)FCT_GetNodeAndData(FACTORY_SUBNODE_BAND1_RC_10M_FRQ_ID, &node);
+    if (NULL == p_frq_5g)
     {
-        DLOG_Error("Fail Node = %x", FACTORY_SUBNODE_BAND1_RC_10M_FRQ_ID);
+       // DLOG_Error("Fail Node = %x", FACTORY_SUBNODE_BAND1_RC_10M_FRQ_ID);
         return;
     }
-
-    if(p_frq->u32_rfChCount > 0 && p_frq->u16_rfChFrqList[0] < 100)
+/*
+    if(p_frq_5g->u32_rfChCount > 0 && p_frq_5g->u16_rfChFrqList[0] < 100)
     {
-        DLOG_Warning("5g auto generate rc freq");
+        //DLOG_Warning("5g auto generate rc freq");
         p_frq_vt = (STRU_RF_CHANNEL *)FCT_GetNodeAndData(nodeid_band1, &node_vt);
         if (NULL == p_frq_vt)
         {
-            DLOG_Error("Fail Node = %x", nodeid_band1);
+            //DLOG_Error("Fail Node = %x", nodeid_band1);
             return;
         }
-
-        freq_cnt = p_frq->u32_rfChCount;
-        if(p_frq->u32_rfChCount * p_frq_vt->u32_rfChCount > 240)
+		pItFreqlist_5g = p_frq_vt->u16_rfChFrqList;
+        freq_cnt = p_frq_5g->u32_rfChCount;
+        if(p_frq_5g->u32_rfChCount * p_frq_vt->u32_rfChCount > 240)
         {
             freq_cnt = 240 / p_frq_vt->u32_rfChCount;
-            DLOG_Warning("5g force sub rc %d->%d",p_frq->u32_rfChCount,freq_cnt);
+            //DLOG_Warning("5g force sub rc %d->%d",p_frq_5g->u32_rfChCount,freq_cnt);
         }
 
         for(i=0;i<p_frq_vt->u32_rfChCount;i++)
         {
             for(j=0;j<freq_cnt;j++)
             {
-                Gen5GrcFreq[i*freq_cnt+j] = p_frq_vt->u16_rfChFrqList  [i] + p_frq->u16_rfChFrqList[j];
-                RF8003xCalcFrq2Register(p_frq_vt->u16_rfChFrqList  [i] + p_frq->u16_rfChFrqList[j], (pstru_rcFreq_5g + i*freq_cnt+j));
+                Gen5GrcFreq[i*freq_cnt+j] = p_frq_vt->u16_rfChFrqList  [i] + p_frq_5g->u16_rfChFrqList[j];
+                RF8003xCalcFrq2Register(p_frq_vt->u16_rfChFrqList  [i] + p_frq_5g->u16_rfChFrqList[j], (pstru_rcFreq_5g + i*freq_cnt+j));
             }
         }
         u8_rcFreqCnt_5g = freq_cnt * p_frq_vt->u32_rfChCount;
         u8_subBand20MrcFreqNum = freq_cnt;
-        DLOG_Warning("5g rc frq %d %d",u8_subBand20MrcFreqNum,u8_rcFreqCnt_5g);
+       // DLOG_Warning("5g rc frq %d %d",u8_subBand20MrcFreqNum,u8_rcFreqCnt_5g);
 
+    }
+    */
+   // else
+    {
+        RF8003s_CalcFctNode2RegTable(FACTORY_SUBNODE_BAND1_RC_10M_FRQ_ID, pstru_rcFreq_5g, &u8_rcFreqCnt_5g);
+		p_frq_5g = (STRU_RF_CHANNEL *)FCT_GetNodeAndData(FACTORY_SUBNODE_BAND1_RC_10M_FRQ_ID, &node);
+    	pRcFreqlist_5g = p_frq_5g->u16_rfChFrqList;
+    }
+
+	if (e_bw == BW_10M)
+    {
+	
+	    p_frq_vt_5g_10M = FCT_GetNodeAndData(FACTORY_SUBNODE_BAND1_VT_10M_FRQ_ID, &node_vt);
+	    pItFreqlist_5g = p_frq_vt_5g_10M->u16_rfChFrqList;
+		p_frq_vt_2g_10M = FCT_GetNodeAndData(FACTORY_SUBNODE_BAND0_VT_10M_FRQ_ID, &node_vt);
+		pItFreqlist_2g = p_frq_vt_2g_10M->u16_rfChFrqList;
+		
     }
     else
     {
-        RF8003s_CalcFctNode2RegTable(FACTORY_SUBNODE_BAND1_RC_10M_FRQ_ID, pstru_rcFreq_5g, &u8_rcFreqCnt_5g);
+		
+	    p_frq_vt_5g_20M = FCT_GetNodeAndData(FACTORY_SUBNODE_BAND1_VT_20M_FRQ_ID, &node_vt);
+	    pItFreqlist_5g = p_frq_vt_5g_20M->u16_rfChFrqList;
+		p_frq_vt_2g_20M = FCT_GetNodeAndData(FACTORY_SUBNODE_BAND0_VT_20M_FRQ_ID, &node_vt);
+		 pItFreqlist_2g = p_frq_vt_2g_20M->u16_rfChFrqList;
     }
+	//DLOG_Critical("cnt = %d", itp_frq->u32_rfChCount);
+	//for(i=0;i<itFreqCnt_2g;i++)
+	//	DLOG_Critical("it2g[%d]=%d",i,pItFreqlist_2g[i]);
+	//for(i=0;i<u8_rcFreqCnt_5g;i++)
+	//	DLOG_Critical("it5g[%d]=%d",i,pRcFreqlist_5g[i]);
+	
+	//DLOG_Critical("itFreqCnt_2g=%d,u8_rcFreqCnt_5g=%d",itFreqCnt_2g,u8_rcFreqCnt_5g);
 
-    DLOG_Warning("e_bw = %d", e_bw);
 }
 
 #define  RF8003S_RF_CLOCKRATE    (1)    //1MHz clockrate
@@ -1006,7 +1017,7 @@ uint8_t BB_GetRcFrqNum(ENUM_RF_BAND e_rfBand)
 {
     if (e_rfBand == RF_2G)
     {
-        return u8_rcFreqCnt_2g;
+        return rcFreqCnt_2g;
     }
     else if (e_rfBand == RF_5G)
     {
@@ -1019,7 +1030,7 @@ uint8_t BB_GetItFrqNum(ENUM_RF_BAND e_rfBand)
 {
     if (e_rfBand == RF_2G)
     {
-        return u8_itFreqCnt_2g;
+        return itFreqCnt_2g;
     }
     else if (e_rfBand == RF_5G)
     {
@@ -1241,7 +1252,7 @@ void BB_freq_power_table_byGenRcFreq(ENUM_RF_BAND band,STRU_BB_CH_OPEN_POWER_REF
 
 	if(band == RF_2G)
 	{
-		for(i=0;i<u8_rcFreqCnt_2g;i++)
+		for(i=0;i<rcFreqCnt_2g;i++)
 		{
 			u8_2g_bb_power_a[i] = BB_calu_power_reg(Gen2GrcFreq[i],
 									pst_PowerOpenRefValue->u8_2p4g_ref_power,
@@ -1562,7 +1573,7 @@ uint8_t BB_GetRcFrqNumPerFilter(void)
 {
     if(RF_2G == context.e_curBand)
     {
-        return u8_rcFreqCnt_2g;
+        return rcFreqCnt_2g;
     }
     else
     {
@@ -1576,12 +1587,37 @@ uint8_t BB_GetItFrqNumPerFilter(void)
 
 uint16_t BB_GetRcFrqByCh(uint8_t ch)
 {
-    return 0;
+  //DLOG_Warning("2g_5g rc size %d",rcFreqCnt_2g);
+
+  if(RF_2G == context.e_curBand)
+  {
+	 if(pRcFreqlist_2g ==NULL)return 0;
+	 if(ch > rcFreqCnt_2g )return 0;
+	return pRcFreqlist_2g[ch];
+  }
+ else if(RF_5G == context.e_curBand)
+  {
+  	 if(ch > u8_rcFreqCnt_5g )return 0;
+	 if(pRcFreqlist_5g ==NULL)return 0;
+	return pRcFreqlist_5g[ch];
+  }
+
 }
 
 uint16_t BB_GetItFrqByCh(uint8_t ch)
 {
-    return 0;
+   if(RF_2G == context.e_curBand)
+  {
+	if(pItFreqlist_2g ==NULL)return 0;
+	if(ch > itFreqCnt_2g )return 0;
+    return pItFreqlist_2g[ch];
+  }
+  else if(RF_5G == context.e_curBand)
+  {
+	if(pItFreqlist_5g ==NULL)return 0;
+	if(ch > u8_itFreqCnt_5g )return 0;
+   	return pItFreqlist_5g[ch];
+   }
 }
 
 uint8_t BB_GetItChInOneFilter(uint8_t ch)

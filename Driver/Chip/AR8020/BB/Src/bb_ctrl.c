@@ -845,7 +845,7 @@ void  __attribute__ ((section(".h264"))) BB_init(ENUM_BB_MODE en_mode, STRU_CUST
 
     SYS_EVENT_RegisterHandler(SYS_EVENT_ID_USER_CFG_CHANGE, BB_HandleEventsCallback);
     SYS_EVENT_RegisterHandler(SYS_EVENT_ID_REMOTE_EVENT, BB_SendRmoteEvent);
-    BB_ResetRcMap();
+    //BB_ResetRcMap();
 
 //  DLOG_Warning("cfg:%d %d %d", context.st_bandMcsOpt.e_bandwidth, context.e_curBand, context.st_bandMcsOpt.e_bandsupport);
     context.freq_band_mode = context.st_bandMcsOpt.frq_band_mode;
@@ -855,6 +855,7 @@ void  __attribute__ ((section(".h264"))) BB_init(ENUM_BB_MODE en_mode, STRU_CUST
         context.st_chSelectionParam.u8_rcChSelectionEnable = 0;
         DLOG_Warning("subBB no rcChSel");
     }
+	/*
     if(BB_GetRcFrqNum(context.e_curBand) != RC_SKIP_CNT ||
         context.freq_band_mode == SUB_BAND || 
         RF_600M == context.e_curBand || context.enable_rc_random_skip_patten == 0)
@@ -865,10 +866,10 @@ void  __attribute__ ((section(".h264"))) BB_init(ENUM_BB_MODE en_mode, STRU_CUST
     else
     {
         //context.enable_rc_skip_patten = 0;
-        context.rc_skip_patten = 0xff;
+        //context.rc_skip_patten = 0xff;
         DLOG_Warning("en rcRandom");
     }
-
+	*/
     memset(cmds_poll, 0x00, sizeof(cmds_poll));
     memset(rf_cmds_poll, 0x00, sizeof(rf_cmds_poll));
     context.rc_start = 0;
@@ -879,9 +880,10 @@ void  __attribute__ ((section(".h264"))) BB_init(ENUM_BB_MODE en_mode, STRU_CUST
 	context.rf_info.rc_ch_dynamic_working_patten_max_len=SKY_PATTEN_MAX_Dynamic_SIZE_2G;
 	context.rf_info.rc_patten_nextchg_delay = SysTicks_GetTickCount();
 	bb_update_rc_patten_size();
-	DLOG_Warning("rc_set_unlock_patten");
+	
 	rc_set_unlock_patten();
 	context.rf_info.rc_patten_set_by_usr=0;
+	//DLOG_Warning("eband=%d,rc_size=%d",context.e_curBand,BB_GetRcFrqNum(context.e_curBand));
 
 	
 }
@@ -2645,12 +2647,12 @@ static void reset_working_table_statistics()
 	uint8_t row=0;
 	uint8_t ch=0;
 	for(ch=0;ch<MAX_RC_FRQ_SIZE;ch++){
-		context.rf_info.work_snr_avrg_value[ch].value=0;
+		//context.rf_info.work_snr_avrg_value[ch].value=0;
 		context.rf_info.work_rc_error_value[ch].value=0;
-		context.rf_info.work_snr_fluct_value[ch].value=0;
+		//context.rf_info.work_snr_fluct_value[ch].value=0;
 	    for (row = 0; row < SWEEP_FREQ_BLOCK_ROWS; row++){
 	        context.rf_info.work_rc_unlock_table[row][ch].value=0;
-			context.rf_info.work_snr_table[row][ch].value=0;
+			//context.rf_info.work_snr_table[row][ch].value=0;
 	    }
 	}
 }
@@ -2678,9 +2680,8 @@ void __attribute__ ((section(".h264")))rc_update_working_patten(void)
 			if((id & context.rcChgPatten.patten[i]) == id)
 			{
 				context.rf_info.rc_ch_working_patten[k] = i*8+j;
-				//DLOG_Warning("syncnt=%d,new_patten[%d]=%d,freq=%d",context.sync_cnt, k,context.rf_info.rc_ch_working_patten[k],BB_GetRcFrqByCh(context.rf_info.rc_ch_working_patten[k]));
+				//DLOG_Warning("syncnt=%d,new_patten[%d]=%d,freq=%d,frq_size=%d",context.sync_cnt, k,context.rf_info.rc_ch_working_patten[k],BB_GetRcFrqByCh(context.rf_info.rc_ch_working_patten[k]),BB_GetRcFrqNum(context.e_curBand));
 				k++;
-				
 			}
 			id = id <<1;
 		}
@@ -2716,12 +2717,14 @@ void __attribute__ ((section(".h264")))bb_get_rc_channel()
 }
 void __attribute__ ((section(".h264")))bb_update_rc_patten_size()
 {
-	int mod = BB_GetRcFrqNum(context.e_curBand)%8;
-	context.rf_info.rc_ch_patten_need_id_size= BB_GetRcFrqNum(context.e_curBand)/8+(mod >0);
-	//DLOG_Critical("rc_ch_patten_need_id_size=%d",context.rf_info.rc_ch_patten_need_id_size);
+	//int mod = BB_GetRcFrqNum(context.e_curBand)%8;
+	//context.rf_info.rc_ch_patten_need_id_size= BB_GetRcFrqNum(context.e_curBand)/8+(mod >0);
+	context.rf_info.rc_ch_patten_need_id_size=5;
+	DLOG_Critical("rc_ch_patten_need_id_size=%d",context.rf_info.rc_ch_patten_need_id_size);
+	
 }
 
-void CalcAverageSweepPower(uint8_t ch){
+void __attribute__ ((section(".h264")))CalcAverageSweepPower(uint8_t ch){
     uint8_t row;
 	int temp = 0;
 	int tempfluct = 0;

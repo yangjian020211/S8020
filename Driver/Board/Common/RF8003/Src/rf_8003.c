@@ -179,9 +179,9 @@ void RF8003_GetFctFreqTable(ENUM_CH_BW e_bw)
         nodeid_band0 = FACTORY_SUBNODE_BAND0_VT_20M_FRQ_ID;
 		itp_frq = FCT_GetNodeAndData(nodeid_band0, &itnode);
 		pItFreqlist = itp_frq->u16_rfChFrqList;
-		DLOG_Critical("cnt = %d", itp_frq->u32_rfChCount);
-		for(i=0;i<itp_frq->u32_rfChCount;i++)
-			DLOG_Critical("it[%d]=%d",i,pItFreqlist[i]);
+		//DLOG_Critical("cnt = %d", itp_frq->u32_rfChCount);
+		//for(i=0;i<itp_frq->u32_rfChCount;i++)
+		//	DLOG_Critical("it[%d]=%d",i,pItFreqlist[i]);
     }
     
     p_frq = (STRU_RF_CHANNEL *)FCT_GetNodeAndData(FACTORY_SUBNODE_BAND0_RC_10M_FRQ_ID, &node);
@@ -636,7 +636,9 @@ uint8_t BB_set_SweepFrq(ENUM_RF_BAND band, ENUM_CH_BW e_bw, uint8_t ch)
 
 uint8_t BB_GetRcFrqNum(ENUM_RF_BAND e_rfBand)
 {
+	
     return u8_rcFreqCnt_2g;
+	DLOG_Warning("2g rc size %d",u8_rcFreqCnt_2g);
 }
 
 

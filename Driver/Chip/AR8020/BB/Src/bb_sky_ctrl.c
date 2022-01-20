@@ -874,19 +874,6 @@ static void process_check_lock_state()
 		  DLOG_Warning("Lock %d: %d ms", stru_skystatus.check_lock_times, time - stru_skystatus.rst_start_time);
 		  stru_skystatus.check_lock_times --;
 		}
-		/*
-		if(context.enable_rc_skip_patten && !stru_skystatus.flag_groundInSearching && !context.inSearching)
-		{
-			context.rc_skip_patten = BB_ReadRcPatten();
-			DLOG_Warning("rcPatten %d, rc ch %d",context.rc_skip_patten,context.sky_rc_channel);
-			context.sky_rc_channel = BB_RcPattenUnMap(context.rc_skip_patten,context.sky_rc_channel);
-			DLOG_Warning("unMap ch %d,%d",context.sky_rc_channel);
-		}
-		else
-		{
-			DLOG_Info("%d %d",stru_skystatus.flag_groundInSearching,context.inSearching);
-		}
-		*/
 	}
 	else
 	{
@@ -901,10 +888,7 @@ static void process_check_lock_state()
 			//sky_notify_grd_goto_unlock_patten();
 			DLOG_Warning("CHECK_LOCK-> SEARCH_ID");
 		}
-		else if ( (context.st_bandMcsOpt.e_rfbandMode == AUTO && context.st_bandMcsOpt.e_bandsupport == RF_2G_5G))// &&
-				  //(context.stru_bandSwitchParam.u8_bandSwitchAfterUnlock == 0x81 || //u8_bandSwitchAfterUnlock == 0x81, switch 2G, 5G
-				  //context.e_curBand == RF_5G))  //if context.e_curBand==RF_5G, but u8_bandSwitchAfterUnlock != 0x81, need to switch to 2G;
-												//It hanppen in WAIT_VT_LOCK case, if state not enter into LOCK state but already switch to 5G
+		else if ( (context.st_bandMcsOpt.e_rfbandMode == AUTO && context.st_bandMcsOpt.e_bandsupport == RF_2G_5G))	 
 		{
 			sky_rcUnLockHopBand();				//switch band, toggle agc, change channel each 1s
 		}
@@ -938,7 +922,7 @@ static void process_wait_it_lock_state()
         BB_SetTrxMode(BB_RECEIVE_ONLY_MODE);
         sky_soft_reset();
         DLOG_Warning("WAIT_VT_LOCK -> CHECK_LOCK");
-        context.rc_skip_patten = 0xff;
+        //context.rc_skip_patten = 0xff;
     }
 
 	if (stru_skystatus.check_lock_times > 0)
@@ -946,7 +930,7 @@ static void process_wait_it_lock_state()
         context.dev_state = CHECK_LOCK;
         stru_skystatus.rst_start_time = HAL_GetSysMsTick();
         sky_soft_reset();
-        DLOG_Warning("rst time: %d", stru_skystatus.rst_start_time);
+        //DLOG_Warning("rst time: %d", stru_skystatus.rst_start_time);
 	}
 
     flag_rchop = 1;
@@ -960,8 +944,8 @@ static void process_wait_it_lock_state()
         BB_SetTrxMode(BB_RECEIVE_ONLY_MODE);
         sky_switchSetPower(context.e_curBand);
         sky_soft_reset();
-        DLOG_Warning("LOCK->CHECK_LOCK reset");
-        context.rc_skip_patten = 0xff;
+        //DLOG_Warning("LOCK->CHECK_LOCK reset");
+        //context.rc_skip_patten = 0xff;
     }
     else if (sky_checkRcLock(stru_skystatus.u8_rcStatus))
     {
@@ -1022,7 +1006,7 @@ static void process_lock_state()
 		rc_set_unlock_patten();
 		//sky_notify_grd_goto_unlock_patten();
 		sky_soft_reset();
-		context.rc_skip_patten = 0xff;
+		//context.rc_skip_patten = 0xff;
 	}
 	
 	//handler in rc lock
@@ -1037,7 +1021,7 @@ static void process_lock_state()
 		sky_switchSetPower(context.e_curBand);
 		sky_soft_reset();
 		DLOG_Warning("LOCK->CHECK_LOCK reset");
-		context.rc_skip_patten = 0xff;
+		//context.rc_skip_patten = 0xff;
 	}
 	else if (sky_checkRcLock(stru_skystatus.u8_rcStatus))
 	{
@@ -1406,7 +1390,7 @@ static uint8_t get_rc_status(void)
 	#endif
 	
 	sky_statistics_rc_ch_error(islocked);
-	sky_statistics_rc_snr(islocked);
+	//sky_statistics_rc_snr(islocked);
 	
     lock_count += islocked;
     nr_lock    += ((lock & 0x04) ? 1 : 0);

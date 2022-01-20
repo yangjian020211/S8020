@@ -135,10 +135,10 @@ typedef struct
 typedef struct
 {
     uint8_t  u8_band0SweepChannelCnt;
-    uint16_t u16_band0SweepFrq[10];
+    uint16_t u16_band0SweepFrq[50];
 
     uint8_t  u8_band1SweepChannelCnt;
-    uint16_t u16_band1SweepFrq[10];
+    uint16_t u16_band1SweepFrq[50];
 
     int8_t   i8_SkyBand0SwitchBand1SweepBase;      //the diff for 2.4G switch to 5.8G,  int(7.66 + sensitivity diff) 
     int8_t   i8_diffBand1SwitchBand0;              //the diff for 5.8G switch to 2.4G    
