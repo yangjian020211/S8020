@@ -325,7 +325,7 @@ void sky_rcFrqStatusStatistics600m(void)
 void sky_rcHopFreq(void)
 {
     uint8_t flag;
-    
+    #ifdef RFSUB_BAND
     if(context.freq_band_mode == SUB_BAND)
     {
         flag = 0;
@@ -402,6 +402,7 @@ void sky_rcHopFreq(void)
         }
     }
     else
+	#endif	
     {
         bb_get_rc_channel();
     }

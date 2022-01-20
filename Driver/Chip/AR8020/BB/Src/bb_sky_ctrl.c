@@ -230,12 +230,14 @@ static void sky_checkRcUnlockTimeSwitchChannelAgc(uint8_t u8_lockStatus)
 #ifdef RF_8003X
     //else
     {
+    	#ifdef RFSUB_BAND
         if(context.freq_band_mode == SUB_BAND)
         {
             feq_num = BB_GetSubBandEndCH(context.e_curBand,context.st_bandMcsOpt.e_bandwidth,0) -
                 BB_GetSubBandStartCH(context.e_curBand,context.st_bandMcsOpt.e_bandwidth,0);
         }
         else
+		#endif	
         {
         	feq_num = BB_GetRcFrqNum(context.e_curBand);
         }
@@ -290,6 +292,7 @@ void sky_agcGainToggle(void)
         DLOG_Info("FAR_AGC");
         return;
     }
+#ifdef RFSUB_BAND
 
     if(context.freq_band_mode == SUB_BAND)
     {
@@ -329,7 +332,7 @@ void sky_agcGainToggle(void)
         }
         return;
     }
-
+#endif
     if(FAR_AGC == stru_skystatus.en_agcmode)
     {
         //BB_SetAgcGain(context.e_curBand, AAGC_GAIN_NEAR);
@@ -837,10 +840,12 @@ static void process_searchid_state()
 
 static void process_check_lock_state()
 {
+	#ifdef RFSUB_BAND
 	if(context.freq_band_mode == SUB_BAND)
 	{
 		context.sub_band_value = INVALIDE_SUB_BAND_VALUE;
 	}
+	#endif
 	if (1 == stru_skystatus.flag_errorConnect || SKY_RC_ERR(stru_skystatus.u8_rcStatus))
 	{
 		sky_soft_reset();
@@ -1252,12 +1257,12 @@ static void Sky_TIM2_6_IRQHandler(uint32_t u32_vectorNum)
         sky_filter_chg_process();
     }
     #endif
-
+	#ifdef RFSUB_BAND
     if(context.freq_band_mode == SUB_BAND)
     {
         sky_band_mode_run();
     }
-
+	#endif
 	
     sky_handle_all_cmds();
     sky_doRfBandChange(stru_skystatus.u8_rcStatus);
@@ -3066,6 +3071,7 @@ static void sky_handle_sub_band_set_cmd(uint8_t *arg)
     band_mode_chg_delay.valid = 1;
     band_mode_chg_delay.cnt = arg[1];
 }
+
 
 void sky_sub_band_excute(uint8_t value)
 {

@@ -109,13 +109,16 @@ uint8_t __attribute__ ((section(".h264"))) sky_rcUnLockHopBand(void)
 	static uint8_t frq_pre = 0;
     static uint8_t cnt = 0;
     uint32_t feq_num;
-
+	
+	#ifdef RFSUB_BAND
     if(context.freq_band_mode == SUB_BAND)
     {
         feq_num = BB_GetSubBandEndCH(context.e_curBand,context.st_bandMcsOpt.e_bandwidth,0) -
             BB_GetSubBandStartCH(context.e_curBand,context.st_bandMcsOpt.e_bandwidth,0);
     }
     else
+	#endif
+	
     {
         feq_num = BB_GetRcFrqNum(context.e_curBand);
     }
@@ -144,12 +147,12 @@ uint8_t __attribute__ ((section(".h264"))) sky_rcUnLockHopBand(void)
 			RF8003s_GetFctFreqTable(context.st_bandMcsOpt.e_bandwidth);
 			rc_set_unlock_patten();
             sky_rcHopFreq();
-
+			#ifdef RFSUB_BAND
             if(context.freq_band_mode == SUB_BAND)
             {
                 sky_agcGainToggle();
             }
-
+			#endif
             sky_switchSetPower(context.e_curBand);
             sky_soft_reset();
 
@@ -228,12 +231,14 @@ void __attribute__ ((section(".h264"))) sky_doRfBandChange(uint8_t u8_lockStatus
             BB_set_RF_Band(BB_SKY_MODE, context.e_curBand);
 			reset_sweep_table(context.e_curBand);
             sky_switchSetPower(context.e_curBand);
+			#ifdef RFSUB_BAND
             if(context.freq_band_mode == SUB_BAND)// && SKY_ID_CRC_MATCH(u8_lockStatus))
             {
                 context.sub_band_value = context.stru_bandChange.u8_ItCh;
                 sky_sub_band_excute(context.stru_bandChange.u8_ItCh);
             }
             else
+			#endif	
             {
                 context.sky_rc_channel = 0;
             }

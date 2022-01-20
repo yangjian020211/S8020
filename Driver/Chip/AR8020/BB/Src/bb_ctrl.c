@@ -849,12 +849,14 @@ void  __attribute__ ((section(".h264"))) BB_init(ENUM_BB_MODE en_mode, STRU_CUST
 
 //  DLOG_Warning("cfg:%d %d %d", context.st_bandMcsOpt.e_bandwidth, context.e_curBand, context.st_bandMcsOpt.e_bandsupport);
     context.freq_band_mode = context.st_bandMcsOpt.frq_band_mode;
+	#ifdef RFSUB_BAND
     if(context.freq_band_mode == SUB_BAND)
     {
         context.sub_band_value = INVALIDE_SUB_BAND_VALUE;
         context.st_chSelectionParam.u8_rcChSelectionEnable = 0;
         DLOG_Warning("subBB no rcChSel");
     }
+	#endif
 	/*
     if(BB_GetRcFrqNum(context.e_curBand) != RC_SKIP_CNT ||
         context.freq_band_mode == SUB_BAND || 
@@ -2680,7 +2682,7 @@ void __attribute__ ((section(".h264")))rc_update_working_patten(void)
 			if((id & context.rcChgPatten.patten[i]) == id)
 			{
 				context.rf_info.rc_ch_working_patten[k] = i*8+j;
-				//DLOG_Warning("syncnt=%d,new_patten[%d]=%d,freq=%d,frq_size=%d",context.sync_cnt, k,context.rf_info.rc_ch_working_patten[k],BB_GetRcFrqByCh(context.rf_info.rc_ch_working_patten[k]),BB_GetRcFrqNum(context.e_curBand));
+				DLOG_Warning("syncnt=%d,new_patten[%d]=%d,freq=%d,frq_size=%d",context.sync_cnt, k,context.rf_info.rc_ch_working_patten[k],BB_GetRcFrqByCh(context.rf_info.rc_ch_working_patten[k]),BB_GetRcFrqNum(context.e_curBand));
 				k++;
 			}
 			id = id <<1;

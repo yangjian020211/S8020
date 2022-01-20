@@ -192,7 +192,7 @@ void sky_statistics_rc_ch_error(uint8_t locked)
 	sky_CalcAverage_rc_ch_error_cnt(ch);
 }
 
-/*
+#if 0
 void  sky_CalcAverage_rc_ch_snr(uint8_t ch)
 {
     uint8_t row=0,total=0;
@@ -251,7 +251,7 @@ void sky_statistics_rc_snr(uint8_t locked)
 	context.rf_info.i32_working_times[ch]++; 
 	
 }
-*/
+#endif
 void sky_SetNextSweepCh(void)
 {
 	//if need to change patten,need to sweep the selections more 
@@ -789,7 +789,7 @@ static uint8_t check_working_channel_snr(){
 	return 0;
 }
 
-static void __attribute__ ((section(".h264")))find_best_patten()
+static void find_best_patten()
 {
 	int i=0;
 
@@ -863,19 +863,19 @@ static void __attribute__ ((section(".h264")))find_best_patten()
 	context.rcChgPatten.timeout_cnt=context.sync_cnt+STATUS_CHG_DELAY;
 }
 
-void __attribute__ ((section(".h264")))begin_lock_sweep_noise_for_selection(){
+void begin_lock_sweep_noise_for_selection(){
 	context.rf_info.sweep_finished=0;
 	context.rf_info.fine_sweep_id=0;
 	context.rf_info.lock_sweep=1;
 }
 
-void __attribute__ ((section(".h264")))end_lock_sweep_noise_for_selection(){
+void end_lock_sweep_noise_for_selection(){
 	context.rf_info.sweep_finished=0;
 	context.rf_info.fine_sweep_id=0;
 	context.rf_info.lock_sweep=0;
 }
 
-void __attribute__ ((section(".h264")))sky_gen_rc_working_patten(void)
+void sky_gen_rc_working_patten(void)
 {
 	int sweep_noise_meet=0;
 	int working_error_meet=0;

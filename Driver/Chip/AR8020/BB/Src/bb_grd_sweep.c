@@ -474,7 +474,7 @@ static int __attribute__ ((section(".h264"))) BB_SweepBeforeFull( void )
                 #endif
                 
                 context.rf_info.u8_cycleCnt = MAIN_CH_CYCLE;
-                
+                #ifdef RFSUB_BAND
                 if(context.freq_band_mode == SUB_BAND)
                 {
                     context.sub_band_main_ch = mainch;
@@ -486,7 +486,7 @@ static int __attribute__ ((section(".h264"))) BB_SweepBeforeFull( void )
                     context.sub_rc_end = BB_GetSubBandEndCH(context.e_curBand,context.st_bandMcsOpt.e_bandwidth,context.sub_band_value);
                     context.grd_rc_channel = context.sub_rc_start;
                 }
-
+				#endif
                 BB_SetTrxMode(BB_NORMAL_MODE);
 
                 return result;
@@ -758,10 +758,12 @@ uint8_t __attribute__ ((section(".h264"))) BB_GetSweepedChResult( uint8_t flag )
     else if ( !context.rf_info.u8_isFull )
     {
         ret = BB_SweepBeforeFull( );
+		#ifdef RFSUB_BAND
         if(context.freq_band_mode == SUB_BAND && ret)
         {
             BB_softReset(BB_GRD_MODE);
         }
+		#endif
     }
     else
     {
@@ -1506,7 +1508,7 @@ uint8_t BB_get_cur_opt_ch(void)
 }
 
 
-static uint8_t __attribute__ ((section(".h264"))) grd_check_sweep_noise(uint8_t mustchg){
+static uint8_t  grd_check_sweep_noise(uint8_t mustchg){
 	STRU_RF_DATA list[MAX_RC_FRQ_SIZE]={0};
 	STRU_RF_DATA listr[MAX_RC_FRQ_SIZE]={0};
 	uint8_t i=0,j=0;
@@ -1539,7 +1541,7 @@ static uint8_t __attribute__ ((section(".h264"))) grd_check_sweep_noise(uint8_t 
 	 return 1;
 }
 
-void  __attribute__ ((section(".h264"))) grd_gen_it_working_ch(uint8_t mode)
+void   grd_gen_it_working_ch(uint8_t mode)
 {
 	uint8_t ret=0;
 	ret = grd_check_sweep_noise(0);
