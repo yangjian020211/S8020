@@ -176,7 +176,7 @@ static void RF8003s_CalcFctNode2RegTable(uint32_t nodeid, STRU_FRQ_CHANNEL *frq_
         return;
     }
 
-    DLOG_Warning("Node id = %x %d", nodeid, p_frq->u32_rfChCount);
+    DLOG_Info("Node id = %x %d", nodeid, p_frq->u32_rfChCount);
 
     if(p_frq->u32_rfChCount > 40)
     {

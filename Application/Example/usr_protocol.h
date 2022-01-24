@@ -19,6 +19,7 @@ extern uint8_t usb_send_packet_start;
 #define CMD_GET_AUTOTEST_STATUS  0x89
 #define CMD_MTP_VIDEO_STREAM     0x90
 #define CMD_MANUL_RC_PATTEN		0x91
+#define CMD_MANUL_SET_BW		0x92
 
 uint8_t cmd_ack_handle(void *msg, uint8_t port_id);
 
@@ -43,6 +44,10 @@ uint8_t get_grd_status_info(unsigned char *buf, int *len);
 uint8_t get_sky_status_info(unsigned char *buf, int *len);
 
 uint8_t set_rc_patten_by_manul(void *msg, uint8_t port_id);
+
+uint8_t set_bw_by_manul(void *msg, uint8_t port_id);
+
+	
 
 
 #ifdef __cplusplus

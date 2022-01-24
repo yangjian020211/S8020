@@ -34,88 +34,6 @@ void __attribute__ ((section(".h264"))) sky_startSweep(ENUM_RF_BAND band)
    // DLOG_Critical("%d %d %d 0x%x",context.rf_info.sweep_freqsize, context.rf_info.bandCnt, context.st_bandMcsOpt.e_bandsupport, context.u_bandSwitchParam);
 }
 
-void  reset_sweep_table(ENUM_RF_BAND cur_band){
-	int i=0,j=0;
-    DLOG_Warning("cur_band=%d,en_bbmode=%d",cur_band,context.en_bbmode);
-	if(context.en_bbmode==BB_SKY_MODE){
-		if(cur_band==RF_2G){
-			context.rf_info.sweepBand[0] = RF_2G;
-			context.rf_info.sweep_freqsize = BB_GetSkySweepFrqNum(RF_2G);
-	        context.rf_info.bandCnt = 1;
-			context.rf_info.rc_avr_sweep_result_size =  context.rf_info.sweep_freqsize;
-		}else if(cur_band==RF_5G){
-			context.rf_info.sweepBand[0] = RF_5G;
-	        context.rf_info.sweep_freqsize = BB_GetSkySweepFrqNum(RF_5G);
-	        context.rf_info.bandCnt = 1;
-			context.rf_info.rc_avr_sweep_result_size = context.rf_info.sweep_freqsize;
-		}else if(cur_band==RF_2G_5G){
-			context.rf_info.sweepBand[0] = RF_2G;
-	        context.rf_info.sweepBand[1] = RF_5G;
-			context.rf_info.sweep_freqsize = BB_GetSkySweepFrqNum(RF_2G);
-	        context.rf_info.bandCnt = 2;
-			context.rf_info.rc_avr_sweep_result_size =  context.rf_info.sweep_freqsize;
-		}
-		else{
-			context.rf_info.bandCnt = 1;
-	        context.rf_info.sweepBand[0]    = context.st_bandMcsOpt.e_bandsupport;
-	        context.rf_info.sweep_freqsize = BB_GetSkySweepFrqNum(cur_band);
-			context.rf_info.rc_avr_sweep_result_size = context.rf_info.sweep_freqsize;
-		}
-	}
-	else if(context.en_bbmode==BB_GRD_MODE){
-		context.rf_info.fine_sweep_size=4;
-		if (cur_band == RF_2G_5G)
-	    {
-	        context.rf_info.u8_bb1ItFrqSize = BB_GetItFrqNum(RF_2G);
-	        context.rf_info.u8_bb2ItFrqSize = BB_GetItFrqNum(RF_5G);
-			context.rf_info.sweep_freqsize = context.rf_info.u8_bb1ItFrqSize;
-	        context.e_curBand = RF_2G;
-	    }
-	    else if (RF_5G == cur_band)
-	    {
-	        context.rf_info.u8_bb1ItFrqSize = BB_GetItFrqNum(RF_5G);
-			context.rf_info.sweep_freqsize = context.rf_info.u8_bb1ItFrqSize;
-	        context.e_curBand = RF_5G;
-	    }
-	    else if (RF_2G == cur_band)
-	    {
-	        context.rf_info.u8_bb1ItFrqSize = BB_GetItFrqNum(RF_2G);
-			context.rf_info.sweep_freqsize = context.rf_info.u8_bb1ItFrqSize;
-	        context.e_curBand = RF_2G;
-	    }
-	}
-
-	for(i=0;i<context.rf_info.sweep_freqsize;i++)
-	{
-		context.rf_info.prelist[i].id=i;context.rf_info.prelist[i].value=0;
-		context.rf_info.pre_selection_list[i].id=i;context.rf_info.pre_selection_list[i].value=0;
-		context.rf_info.sweep_pwr_avrg_value[i].id=i;context.rf_info.sweep_pwr_avrg_value[i].value=0;
-		context.rf_info.sweep_pwr_fluct_value[i].id=i;context.rf_info.sweep_pwr_fluct_value[i].value=0;
-		context.rf_info.work_rc_error_value[i].id=i;context.rf_info.work_rc_error_value[i].value=0;
-		//context.rf_info.work_snr_avrg_value[i].id=i;context.rf_info.work_snr_avrg_value[i].value=0;
-		//context.rf_info.work_snr_fluct_value[i].id=i;context.rf_info.work_snr_fluct_value[i].value=0;
-		context.rf_info.error_ch_record[i]=0xff;
-		for(j=0;j<SWEEP_FREQ_BLOCK_ROWS;j++)
-		{
-			context.rf_info.sweep_pwr_table[j][i].id=i;context.rf_info.sweep_pwr_table[j][i].value=0;
-			context.rf_info.work_rc_unlock_table[j][i].id=i;context.rf_info.work_rc_unlock_table[j][i].value=0;
-			//context.rf_info.work_snr_table[j][i].id=i;context.rf_info.work_snr_table[j][i].value=0;
-		}
-	}
-	context.rf_info.fine_sweep_id=0;
-	context.rf_info.curBandIdx = 0;
-	context.rf_info.curSweepCh=0;
-	context.rf_info.curRowCnt  = 0;
-	context.rf_info.currc_statistics_Row=0;
-	context.rf_info.sweep_finished=1;
-	context.rf_info.fine_sweep_size=8;
-	context.rf_info.fine_sweep_id=0;
-	context.rf_info.fine_sweep_row=0;
-	context.rf_info.isFull = 0;
-	context.rf_info.rc_ch_working_patten_len=SKY_PATTEN_SIZE_2G;
-	bb_update_rc_patten_size();
-
-}
 
 static int math_multi(int a,int b){
 	int i=0;
@@ -270,12 +188,6 @@ void sky_SetNextSweepCh(void)
 		//uint8_t num = (context.rf_info.curBandIdx==0) ? context.rf_info.sweep_freqsize:context.rf_info.f5g_freqsize;
 	    if (context.rf_info.curSweepCh == num)  //last channel
 	    {
-		    /*
-	        if (context.rf_info.bandCnt == 2)        //switch band
-	        {
-	            context.rf_info.curBandIdx = (context.rf_info.curBandIdx + 1) % 2;
-	        }
-		    */
 	        context.rf_info.curSweepCh = 0;
 	    }
 	 	BB_set_skySweepfrq(context.rf_info.sweepBand[context.rf_info.curBandIdx], context.rf_info.curSweepCh);
@@ -461,6 +373,7 @@ void GetSweepCh_finesweep(uint8_t u8_bandidx, uint8_t u8_ch,signed char data){
    if((context.rf_info.fine_sweep_id+1)>=context.rf_info.fine_sweep_size){
 		if(context.rf_info.fine_sweep_row >= SWEEP_FREQ_BLOCK_ROWS){
 		   context.rf_info.sweep_finished=1;
+		   context.rf_info.fine_sweep_id=0;
 		   context.rf_info.fine_sweep_row=0;
 		   DLOG_Critical("swwep finished");
 		}
@@ -508,7 +421,7 @@ void GetSweepCh_normalsweep(uint8_t u8_bandidx, uint8_t u8_ch,signed char data,E
 		   if(mode==BB_GRD_MODE) return ;
 		   if(tx_sweep)
 		   {
-			   #if 1
+			   #if 0
 				   k++;
 				   if(k==1){
 					   tx_sweep_pwr_table1();

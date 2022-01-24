@@ -685,4 +685,43 @@ uint8_t set_rc_patten_by_manul(void *msg, uint8_t port_id){
    }
 }
 
+uint8_t set_bw_by_manul(void *msg, uint8_t port_id){
+
+   uint8_t u8_ret,i;
+   STRU_WIRELESS_CONFIG_CHANGE st_cmd;
+   uint16_t msg_len,sum_check,len;
+   uint8_t *cmd = (uint8_t *)msg;
+   uint8_t payload[5] ={0};
+   uint8_t input[100] ={0};
+   uint8_t msg_id = cmd[2];
+    if(msg_id != CMD_MANUL_SET_BW)
+    {
+        DLOG_Warning("msg id error %d",msg_id);
+        return 0;
+    }
+    msg_len = cmd[7] << 8 | cmd[6];
+    sum_check = cmd[9] << 8 | cmd[8];
+    if(data_check(cmd+10,msg_len) != sum_check)
+    {
+        DLOG_Warning("check sum error");
+        return 0;
+    }
+   uint32_t value =cmd[10];
+	if(msg_len)
+	{
+	   st_cmd.u8_configClass  = WIRELESS_OTHER;
+	   st_cmd.u8_configItem   = AUTTO_BW_CHANGE;
+	   st_cmd.u32_configValue = value;//auto set rc patten or manul to set rc patten
+	   u8_ret = SYS_EVENT_NotifyInterCore(SYS_EVENT_ID_USER_CFG_CHANGE, (void *)&st_cmd);
+	   if( u8_ret ){
+		   return 0;
+	   }
+	   else{
+		   return 1;
+	   }
+   }
+}
+
+
+
 

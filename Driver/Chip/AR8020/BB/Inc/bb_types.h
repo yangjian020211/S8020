@@ -130,6 +130,7 @@ typedef enum
     SET_LNA_STATUS,
     SET_NON_LBT,
     SET_BANDEDGE,
+    AUTTO_BW_CHANGE,
 } ENUM_WIRELESS_FREQ_CHANGE_ITEM;
 
 
@@ -417,6 +418,15 @@ typedef struct
 	 uint8_t valid_grd;
 	 uint8_t timeout_cnt_grd;
 } STRU_RCPATTEN_CMD;
+
+typedef struct
+{
+	 uint8_t bw;
+	 uint8_t valid;
+     uint8_t en_flag; 
+     uint8_t timeout_cnt;
+	 
+} STRU_RFBW_CMD;
 
 
 typedef struct

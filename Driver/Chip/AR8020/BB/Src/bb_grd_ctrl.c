@@ -188,6 +188,7 @@ static void grd_do_rcRate(void);
 static void do_debug_process(void);
 
 static void grd_do_rc_patten(void);
+static void grd_do_rf_bw(void);
 static void grd_handle_rc_patten_cmd(uint8_t *arg);
 
 
@@ -402,6 +403,9 @@ static void BB_grd_uartDataHandler(void)
 				context.rcChgPatten.en_flag_grd=0;
 				context.rcChgPatten.valid_grd=0;
 				//DLOG_Warning("grd get ack from grd_rc_chgpatten!");
+			}
+			else if(DT_NUM_AUTO_CH_BW_CHANGE==pid){
+				context.rf_bw.valid=0;
 			}
             grd_handle_cmd_ack(data);
         }
@@ -1282,6 +1286,7 @@ static void time_slice1(){
 }
 static void time_slice2(){
 	grd_do_rc_patten();
+	grd_do_rf_bw();
 	if(context.rcHopMode == AUTO)
 	{
 	    #ifdef RF_9363
@@ -1425,7 +1430,7 @@ static void time_slice7(){
 	   grd_freq_skip_post_judge( );
    }
    if(context.inSearching) return;
-	grd_gen_it_working_ch(1);
+	//grd_gen_it_working_ch(1);
 
 }
 
@@ -1791,6 +1796,12 @@ void BB_grd_notify_rc_skip_freq(uint8_t *u8_rcfrq)
 	
 }
 
+static void grd_ask_auto_bw_set(ENUM_CH_BW bw){
+	context.rf_bw.en_flag=1;
+	context.rf_bw.valid=1;
+	context.rf_bw.bw=bw;
+	context.rf_bw.timeout_cnt=context.sync_cnt+STATUS_CHG_DELAY;
+}
 
 void grd_handle_one_cmd(STRU_WIRELESS_CONFIG_CHANGE* pcmd)
 {
@@ -1941,7 +1952,11 @@ void grd_handle_one_cmd(STRU_WIRELESS_CONFIG_CHANGE* pcmd)
                 grd_handle_CH_bandwitdh_cmd((ENUM_CH_BW)value);
                 break;
             }
-            
+			case AUTTO_BW_CHANGE:
+			{
+				grd_ask_auto_bw_set((ENUM_CH_BW)value);
+				break;
+			}
             case SET_LNA_STATUS:
             {
                 grd_handle_LNA_status_cmd(value);
@@ -2304,6 +2319,52 @@ static void grd_do_rc_patten(void)
 		}
 	}
 }
+
+static void grd_do_rf_bw(void)
+{
+	uint8_t bw=0;
+	if (1 == context.rf_bw.en_flag)
+	{
+		if (context.sync_cnt == context.rf_bw.timeout_cnt)
+		{
+			context.rf_bw.en_flag=0;
+			context.rf_bw.timeout_cnt=0;
+			bw=context.rf_bw.bw;
+			if(context.st_bandMcsOpt.e_bandwidth != bw)
+		    {
+				reset_sweep_table(context.e_curBand);
+				RF8003s_GetFctFreqTable(context.st_bandMcsOpt.e_bandwidth);
+				//rc_set_unlock_patten();
+				BB_set_RF_bandwitdh(BB_GRD_MODE, bw);
+		        context.st_bandMcsOpt.e_bandwidth = bw; 
+				context.grd_rc_channel = 0;
+				if(context.rf_bw.bw==BW_20M)
+				{
+					context.qam_ldpc=context.u8_bbStartMcs;
+					grd_set_txmsg_mcs_change(context.st_bandMcsOpt.e_bandwidth, context.qam_ldpc);
+				}
+				BB_softRxReset(BB_GRD_MODE);
+				DLOG_Critical("set rf bandwidth=%d", context.st_bandMcsOpt.e_bandwidth);
+			}
+		}
+	}
+}
+
+static void grd_notify_rf_bw(){
+	uint8_t buf[10];
+	int i=0;
+	static int gap =0;
+	#define delay (2)
+	gap++;
+	if(context.rf_bw.en_flag==1 && context.rf_bw.valid==1 && gap < delay){
+		buf[0]= context.rf_bw.bw;
+		buf[1]= context.rf_bw.timeout_cnt;
+		BB_Session0SendMsg(DT_NUM_AUTO_CH_BW_CHANGE, buf, 2);
+		DLOG_Critical("grd notify sky :cnt=%d,aim_cnt=%d", context.sync_cnt, context.rf_bw.timeout_cnt);
+	}
+	if(gap > 5) gap = 0;
+}
+
 static void grd_notify_rc_patten()
 {
 	uint8_t buf[10];
@@ -2366,6 +2427,7 @@ static void grd_handle_all_cmds(void)
     grd_do_rcRate();
     BB_grd_uartDataHandler();
 	grd_notify_rc_patten();
+	grd_notify_rf_bw();
 }
 static void grd_handle_all_rf_cmds(void)
 {   

@@ -404,8 +404,8 @@ STRU_FACTORY_SETTING st_Factory_EK_2t2r_cfg __attribute__ ((aligned (4)))=
 
         .st_band0_20M_vtChData = 
         {
-            .u32_rfChCount              = 3,
-            .u16_rfChFrqList            = {2412, 2436, 2460},
+            .u32_rfChCount              = 10,
+            .u16_rfChFrqList            = {2412, 2418, 2424, 2430, 2436, 2442, 2448, 2454, 2460, 3466},
         },
 
         //5.8G 20M vt channel, max 40 channel
@@ -418,8 +418,9 @@ STRU_FACTORY_SETTING st_Factory_EK_2t2r_cfg __attribute__ ((aligned (4)))=
         
         .st_band1_20M_vtChData = 
         {
-            .u32_rfChCount              = 5,
-            .u16_rfChFrqList            = {5745, 5765, 5785, 5805, 5825},
+            .u32_rfChCount              = 18,
+            .u16_rfChFrqList            = {5745, 5750, 5755, 5760, 5765, 5770, 5775, 5780, 5785,
+            							   5790, 5795, 5800, 5805, 5810, 5815, 5820, 5825, 5830},
         },
 
         // agc set

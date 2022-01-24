@@ -18,6 +18,7 @@
 #define SWEEP_FREQ_BLOCK_ROWS           (6)
 
 #define SWEEP_FREQ_STATISTICS_ROWS           (100)
+#define SKY_PATTEN_MAX_Dynamic_SIZE_2G	(6)
 
 
 #define MAX_RC_FRQ_SIZE             (40)
@@ -405,6 +406,8 @@ typedef struct
     uint8_t    uplink_qam_mode;
     STRU_RCRATE_CMD RcChgRate;
 	STRU_RCPATTEN_CMD rcChgPatten;
+	STRU_RFBW_CMD rf_bw;
+	
     uint8_t    aes_off;
 }CONTEXT;
 
@@ -504,6 +507,7 @@ typedef enum
     DT_NUM_SKY_SWEEP_NOISE,			//36
     DT_NUM_SKY_RC_PATTEN,			//37
     DT_NUM_GRD_RC_CHPATTEN,			//38
+    DT_NUM_AUTO_CH_BW_CHANGE,       //39
     DT_NUM_MAX,                     //
 }ENUM_DT_NUM;
 
@@ -557,6 +561,8 @@ void BB_uart10_spi_sel(uint32_t sel_dat);
 int BB_softReset(ENUM_BB_MODE en_mode);
 
 int BB_softTxReset(ENUM_BB_MODE en_mode);
+
+int BB_softRxReset(ENUM_BB_MODE en_mode);
 
 uint8_t BB_ReadReg(ENUM_REG_PAGES page, uint8_t addr);
 

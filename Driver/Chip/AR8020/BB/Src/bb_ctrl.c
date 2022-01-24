@@ -27,7 +27,7 @@
 #define     BB_SPI_UART_SEL     (0x9c)
 
 
-#define 	SKY_PATTEN_MAX_Dynamic_SIZE_2G	7
+
 
 #define 	SKY_PATTEN_SIZE_5G	4
 static uint8_t vector_pwr_avrg_time_r[6]={1,1,1,2,2,3};
@@ -695,8 +695,48 @@ int  __attribute__ ((section(".h264"))) BB_softTxReset(ENUM_BB_MODE en_mode)
     DLOG_Warning("");
     return 0;
 }
+int BB_softRxReset(ENUM_BB_MODE en_mode)
+{
+    uint8_t reg_after_reset;
+    if(en_mode == BB_GRD_MODE)
+    {
+        BB_SPI_curPageWriteByte(0x00,0xB2);
+        BB_SPI_curPageWriteByte(0x00,0xB0);
+        reg_after_reset = 0xB0;
+    }
+    else
+    {        
+        BB_SPI_curPageWriteByte(0x00, 0x82);
+        BB_SPI_curPageWriteByte(0x00, 0x80);
+        reg_after_reset = 0x80;
+    }
 
-int  __attribute__ ((section(".h264"))) BB_softReset(ENUM_BB_MODE en_mode)
+    //bug fix: write reset register may fail. 
+    int count = 0;
+    while(count++ < 5)
+    {
+        uint8_t rst = BB_SPI_curPageReadByte(0x00);
+        if(rst != reg_after_reset)
+        {
+            BB_SPI_curPageWriteByte(0x00, reg_after_reset);
+            count ++;
+        }
+        else
+        {
+            break;
+        }
+    }
+
+    if (count >= 5)
+    {
+        DLOG_Warning("Error");
+    }
+    en_curPage = PAGE2;
+    DLOG_Warning("");
+    return 0;
+}
+
+int  BB_softReset(ENUM_BB_MODE en_mode)
 {
     uint8_t reg_after_reset;
     if(en_mode == BB_GRD_MODE)
@@ -879,7 +919,7 @@ void  __attribute__ ((section(".h264"))) BB_init(ENUM_BB_MODE en_mode, STRU_CUST
     context.vt_start = 0;
     context.vt_end = BB_GetItFrqNumPerFilter();
     BB_WriteReg(PAGE2, SPI_DT_END_ADDR, 0);
-	context.rf_info.rc_ch_dynamic_working_patten_max_len=SKY_PATTEN_MAX_Dynamic_SIZE_2G;
+	
 	context.rf_info.rc_patten_nextchg_delay = SysTicks_GetTickCount();
 	bb_update_rc_patten_size();
 	
@@ -1072,22 +1112,22 @@ void  __attribute__ ((section(".h264")))  BB_set_RF_Band(ENUM_BB_MODE sky_ground
 */
 void  __attribute__ ((section(".h264"))) BB_set_RF_bandwitdh(ENUM_BB_MODE sky_ground, ENUM_CH_BW rf_bw)
 {
-    if (sky_ground == BB_SKY_MODE)
-    {
+    if (sky_ground == BB_SKY_MODE){
         BB_WriteRegMask(PAGE2, TX_2, (rf_bw << 3), 0x38); /*bit[5:3]*/
-        if (BW_20M == (context.st_bandMcsOpt.e_bandwidth))
-        {
+        if (BW_20M == (context.st_bandMcsOpt.e_bandwidth)){
             BB_WriteRegMask(PAGE2, 0x05, 0x80, 0xC0);
         }
     }
-    else
-    {
+    else{
         BB_WriteRegMask(PAGE2, RX_MODULATION, (rf_bw << 0), 0x07); /*bit[2:0]*/
     }
    
-    DLOG_Info("%d", context.st_bandMcsOpt.e_bandwidth);    
+    DLOG_Info("%d", context.st_bandMcsOpt.e_bandwidth);   
+
+	//RF8003s_GetFctFreqTable(context.st_bandMcsOpt.e_bandwidth);
+	//rc_set_unlock_patten();
     //softreset
-    BB_softReset(sky_ground);
+    //BB_softReset(sky_ground);
 }
 
 static void  __attribute__ ((section(".h264"))) BB_after_RF_cali(ENUM_BB_MODE en_mode)
@@ -1609,8 +1649,7 @@ static void __attribute__ ((section(".h264"))) BB_HandleEventsCallback(void *p)
 				context.e_powerMode = value;
 				DLOG_Critical("e_powerMode: %d \n", context.e_powerMode); 
 		}
-		else if((class == WIRELESS_OTHER) && (item == SET_RC_PATTEN))
-		{
+		else if((class == WIRELESS_OTHER) && (item == SET_RC_PATTEN)){
 				uint8_t msg[10]={0};
 				int i=0;
 				context.rf_info.rc_patten_set_by_usr=value;
@@ -1635,6 +1674,13 @@ static void __attribute__ ((section(".h264"))) BB_HandleEventsCallback(void *p)
 				}
 				DLOG_Critical("is_manul=%d,set rc patten %d:%d:%d:%d:%d",value,msg[0],msg[1],msg[2],msg[3],msg[4]); 
 		}
+		else if(class==WIRELESS_OTHER && item==AUTTO_BW_CHANGE){
+				context.rf_bw.en_flag=1;
+				context.rf_bw.valid=1;
+				context.rf_bw.bw=value;
+				context.rf_bw.timeout_cnt=context.sync_cnt+STATUS_CHG_DELAY;
+		}
+	
         int ret = BB_InsertCmd(0, (STRU_WIRELESS_CONFIG_CHANGE * )p);
     }
 }
@@ -2667,6 +2713,20 @@ void __attribute__ ((section(".h264")))rc_set_unlock_patten(void)
 	context.rcChgPatten.patten[3]=0x00;
 	context.rcChgPatten.patten[4]=0x02;
 	DLOG_Error("go to common patten,cnt=%d",context.sync_cnt);
+	
+	if(context.st_bandMcsOpt.e_bandwidth ==BW_20M){
+		context.st_bandMcsOpt.e_bandwidth = BW_10M;
+		reset_sweep_table(context.e_curBand);
+		RF8003s_GetFctFreqTable(context.st_bandMcsOpt.e_bandwidth);
+		if(context.en_bbmode==BB_SKY_MODE){
+			
+			BB_set_RF_bandwitdh(BB_SKY_MODE, BW_10M);
+		}else{
+			BB_set_RF_bandwitdh(BB_GRD_MODE, BW_10M);
+		}
+		DLOG_Error("e_bandwidth=%d",context.st_bandMcsOpt.e_bandwidth);
+	}
+	
 	rc_update_working_patten();
 }
 void __attribute__ ((section(".h264")))rc_update_working_patten(void)
@@ -2743,5 +2803,90 @@ void __attribute__ ((section(".h264")))CalcAverageSweepPower(uint8_t ch){
 	int v2 =  (tempfluct%(SWEEP_FREQ_BLOCK_ROWS-1) > 5) ? 1:0;
 	context.rf_info.sweep_pwr_fluct_value[ch].value=v1+v2;
 	context.rf_info.sweep_pwr_avrg_value[ch].value=vector_1xn_nx1_caculate(vector_pwr_avrg_time_r,buffer,SWEEP_FREQ_BLOCK_ROWS,PRECIESE);
+}
+void  reset_sweep_table(ENUM_RF_BAND cur_band){
+	int i=0,j=0;
+    DLOG_Warning("cur_band=%d,en_bbmode=%d",cur_band,context.en_bbmode);
+	if(context.en_bbmode==BB_SKY_MODE){
+		if(cur_band==RF_2G){
+			context.rf_info.sweepBand[0] = RF_2G;
+			context.rf_info.sweep_freqsize = BB_GetSkySweepFrqNum(RF_2G);
+	        context.rf_info.bandCnt = 1;
+			context.rf_info.rc_avr_sweep_result_size =  context.rf_info.sweep_freqsize;
+		}else if(cur_band==RF_5G){
+			context.rf_info.sweepBand[0] = RF_5G;
+	        context.rf_info.sweep_freqsize = BB_GetSkySweepFrqNum(RF_5G);
+	        context.rf_info.bandCnt = 1;
+			context.rf_info.rc_avr_sweep_result_size = context.rf_info.sweep_freqsize;
+		}else if(cur_band==RF_2G_5G){
+			context.rf_info.sweepBand[0] = RF_2G;
+	        context.rf_info.sweepBand[1] = RF_5G;
+			context.rf_info.sweep_freqsize = BB_GetSkySweepFrqNum(RF_2G);
+	        context.rf_info.bandCnt = 2;
+			context.rf_info.rc_avr_sweep_result_size =  context.rf_info.sweep_freqsize;
+		}
+		else{
+			context.rf_info.bandCnt = 1;
+	        context.rf_info.sweepBand[0]    = context.st_bandMcsOpt.e_bandsupport;
+	        context.rf_info.sweep_freqsize = BB_GetSkySweepFrqNum(cur_band);
+			context.rf_info.rc_avr_sweep_result_size = context.rf_info.sweep_freqsize;
+		}
+	}
+	else if(context.en_bbmode==BB_GRD_MODE){
+		context.rf_info.fine_sweep_size=4;
+		if (cur_band == RF_2G_5G)
+	    {
+	        context.rf_info.u8_bb1ItFrqSize = BB_GetItFrqNum(RF_2G);
+	        context.rf_info.u8_bb2ItFrqSize = BB_GetItFrqNum(RF_5G);
+			context.rf_info.sweep_freqsize = context.rf_info.u8_bb1ItFrqSize;
+	        context.e_curBand = RF_2G;
+	    }
+	    else if (RF_5G == cur_band)
+	    {
+	        context.rf_info.u8_bb1ItFrqSize = BB_GetItFrqNum(RF_5G);
+			context.rf_info.sweep_freqsize = context.rf_info.u8_bb1ItFrqSize;
+	        context.e_curBand = RF_5G;
+	    }
+	    else if (RF_2G == cur_band)
+	    {
+	        context.rf_info.u8_bb1ItFrqSize = BB_GetItFrqNum(RF_2G);
+			context.rf_info.sweep_freqsize = context.rf_info.u8_bb1ItFrqSize;
+	        context.e_curBand = RF_2G;
+	    }
+	}
+
+	for(i=0;i<context.rf_info.sweep_freqsize;i++)
+	{
+		context.rf_info.prelist[i].id=i;context.rf_info.prelist[i].value=0;
+		context.rf_info.pre_selection_list[i].id=i;context.rf_info.pre_selection_list[i].value=0;
+		context.rf_info.sweep_pwr_avrg_value[i].id=i;context.rf_info.sweep_pwr_avrg_value[i].value=0;
+		context.rf_info.sweep_pwr_fluct_value[i].id=i;context.rf_info.sweep_pwr_fluct_value[i].value=0;
+		context.rf_info.work_rc_error_value[i].id=i;context.rf_info.work_rc_error_value[i].value=0;
+		//context.rf_info.work_snr_avrg_value[i].id=i;context.rf_info.work_snr_avrg_value[i].value=0;
+		//context.rf_info.work_snr_fluct_value[i].id=i;context.rf_info.work_snr_fluct_value[i].value=0;
+		context.rf_info.error_ch_record[i]=0xff;
+		for(j=0;j<SWEEP_FREQ_BLOCK_ROWS;j++)
+		{
+			context.rf_info.sweep_pwr_table[j][i].id=i;context.rf_info.sweep_pwr_table[j][i].value=0;
+			context.rf_info.work_rc_unlock_table[j][i].id=i;context.rf_info.work_rc_unlock_table[j][i].value=0;
+			//context.rf_info.work_snr_table[j][i].id=i;context.rf_info.work_snr_table[j][i].value=0;
+		}
+	}
+	context.rf_info.fine_sweep_id=0;
+	context.rf_info.curBandIdx = 0;
+	context.rf_info.curSweepCh=0;
+	context.rf_info.curRowCnt  = 0;
+	context.rf_info.currc_statistics_Row=0;
+	context.rf_info.sweep_finished=1;
+	context.rf_info.lock_sweep=0;
+	context.rf_info.fine_sweep_size=8;
+	context.rf_info.fine_sweep_id=0;
+	context.rf_info.fine_sweep_row=0;
+	context.rf_info.isFull = 0;
+	context.rf_info.sweep_cycle=0;
+	context.rf_info.rc_ch_working_patten_len=SKY_PATTEN_SIZE_2G;
+	context.rf_info.rc_ch_dynamic_working_patten_max_len=SKY_PATTEN_MAX_Dynamic_SIZE_2G;
+	bb_update_rc_patten_size();
+
 }
   

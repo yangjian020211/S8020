@@ -141,6 +141,9 @@ static uint16_t sky_read_usb1_senddata(void);
 
 static void sky_vtSkip_process(void);
 
+static void sky_handle_mcs_mode_cmd(uint8_t *arg);
+
+
 //static void check_pwr_mode_status(void);
 
 
@@ -765,6 +768,41 @@ static void sky_do_rc_patten(void)
         }
     }
 }
+
+static void sky_do_rf_bw(void)
+{
+	if (1 == context.rf_bw.en_flag)
+    {
+        if (context.sync_cnt == context.rf_bw.timeout_cnt)
+        {
+			
+            context.rf_bw.en_flag = 0;
+            context.rf_bw.timeout_cnt = 0;
+			reset_sweep_table(context.e_curBand);
+			RF8003s_GetFctFreqTable(context.st_bandMcsOpt.e_bandwidth);
+			//rc_set_unlock_patten();
+			BB_set_RF_bandwitdh(BB_SKY_MODE, (ENUM_CH_BW)context.rf_bw.bw);
+        	context.st_bandMcsOpt.e_bandwidth = (ENUM_CH_BW)context.rf_bw.bw;
+			context.sky_rc_channel = 0;
+			
+			if(context.rf_bw.bw==BW_20M){
+        		ENUM_RUN_MODE mode = AUTO;
+				context.qam_ldpc=context.u8_bbStartMcs;
+				sky_handle_mcs_mode_cmd((uint8_t*)&mode);
+			}
+			
+			
+            //sky_switchSetPower(context.e_curBand);
+            //sky_rcHopFreq();
+           	//BB_set_ItFrqByCh(context.e_curBand, context.cur_IT_ch);
+            //sky_bandSwitchLnaSwitch();
+			DLOG_Critical("set rf bandwidth=%d",context.st_bandMcsOpt.e_bandwidth);
+			//BB_softReset(BB_SKY_MODE);
+			
+        }
+    }
+}
+
 static void Sky_TIM2_5_IRQHandler(uint32_t u32_vectorNum)
 {
     Reg_Read32(BASE_ADDR_TIMER2 + TMRNEOI_5);
@@ -1229,6 +1267,7 @@ static void Sky_TIM2_6_IRQHandler(uint32_t u32_vectorNum)
 
 	context.sync_cnt += 1;
 	sky_do_rc_patten();
+	sky_do_rf_bw();
     if(AUTO == context.rcHopMode && 1 == flag_rchop)
     {
         #ifdef RF_9363
@@ -1588,9 +1627,7 @@ static void sky_handle_IT_frq_cmd(uint8_t *arg)
 }
 
 
-/*
- *  handle command for 10M, 20M
-*/
+
 static void sky_handle_CH_bandwitdh_cmd(uint8_t *arg)
 {
     ENUM_CH_BW bw = (ENUM_CH_BW)(arg[0]);
@@ -1602,6 +1639,21 @@ static void sky_handle_CH_bandwitdh_cmd(uint8_t *arg)
         context.st_bandMcsOpt.e_bandwidth = bw;
         //DLOG_Info("band:%d", context.st_bandMcsOpt.e_bandwidth);
     }
+}
+
+
+/*
+ *  handle command for 10M, 20M
+*/
+static void sky_handle_auto_bandwitdh_cmd(uint8_t *arg)
+{
+    ENUM_CH_BW bw = (ENUM_CH_BW)(arg[0]);
+	if(context.st_bandMcsOpt.e_bandwidth != bw){
+		context.rf_bw.bw = arg[0];
+	    context.rf_bw.timeout_cnt = arg[1];
+	    context.rf_bw.en_flag = 1;
+	    DLOG_Warning("%d %d",arg[0],arg[1]);
+	}
 }
 
 static void sky_handle_CH_qam_cmd(uint8_t *arg)
@@ -2003,6 +2055,11 @@ static void sky_handle_all_grd_cmds(uint8_t *arg, uint8_t len)
             sky_handle_CH_bandwitdh_cmd(&arg[1]);
             break;
         }
+		case  DT_NUM_AUTO_CH_BW_CHANGE:
+		{
+			sky_handle_auto_bandwitdh_cmd(&arg[1]);
+			break;
+		}
         case DT_NUM_MCS_MODE_SELECT:
         {
             sky_handle_mcs_mode_cmd(&arg[1]);
@@ -2078,9 +2135,6 @@ static void sky_handle_all_grd_cmds(uint8_t *arg, uint8_t len)
 		{
 			context.rcChgPatten.valid=0;
 			DLOG_Warning("sky get ack,cnt=%d",context.sync_cnt);
-
-			//sky_handle_rc_patten_cmd(&arg[1]);
-
 			break;
 
 		}
