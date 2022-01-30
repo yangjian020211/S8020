@@ -197,6 +197,7 @@ void BB_GRD_start(void)
     context.dev_state = INIT_DATA;
     context.qam_ldpc = context.u8_bbStartMcs;
     context.flag_mrc = 0;
+	context.rf_bw.autobw =1;
     context.st_bandMcsOpt.e_rfbandMode = MANUAL; //grd defualt manual
     context.flag_in_upgrade=0;
 	BB_SetTrxMode(BB_RECEIVE_ONLY_MODE); // receive only
@@ -249,11 +250,32 @@ void BB_GRD_start(void)
 }
 #if 1
 static void gptf(uint32_t *str,int i){
-	DLOG_Critical("type=%d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d",
+#if 0
+	switch(str[1])
+	{
+		case 0xaa:DLOG_Critical("corse_sweep_pwr");break;
+		case 0x01:DLOG_Critical("corse_avrg_sweep_pwr");break;
+		case 0x02:DLOG_Critical("corse_fluct_sweep_pwr");break;
+		case 0x03:DLOG_Critical("corse_sortid_sweep_pwr_avrg");break;
+		case 0x04:DLOG_Critical("corse_sortvalue_sweep_pwr_avrg");break;
+		case 0x05:DLOG_Critical("working_avrg_id");break;
+		case 0xbb:DLOG_Critical("fine_selected_id_to_sweep");break;
+		case 0x06:DLOG_Critical("working_sort_sweep_avrg");break;
+		case 0x55:DLOG_Critical("fine_sweep_pwr");break;
+		case 0x07:DLOG_Critical("fine_avrg_sweep_pwr");break;
+		case 0x08:DLOG_Critical("fine_fluct_sweep_pwr");break;
+		case 0x09:DLOG_Critical("fine_sweepid");break;
+		case 0x0a:DLOG_Critical("fine_sweep_avrg_value");break;
+		case 0x0b:DLOG_Critical("fine_sortid");break;
+		case 0x0c:DLOG_Critical("fine_sortid_avrg_pwr_value");break;
+	}
+#endif
+
+	DLOG_Critical("len=%d type=%2x %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d",
 					str[0],str[1],str[2],str[3],str[4],str[5],str[6],str[7],str[8],str[9],
 					str[10],str[11],str[12],str[13],str[14],str[15],str[16],str[17],str[18],str[19],
 					str[20],str[21],str[22],str[23],str[24],str[25],str[26],str[27],str[28],str[29],
-					str[30],str[31],str[32],str[33],str[34],str[35],str[36],str[37],str[38],str[39],str[40]);
+					str[30],str[31],str[32],str[33],str[34],str[35],str[36],str[37],str[38],str[39],str[40],str[41]);
 }
 
 static void gprtit(uint32_t *str,int i){
@@ -341,29 +363,39 @@ static void BB_grd_uartDataHandler(void)
 				
 				uint32_t buff[50]={0};
 				int i=0,j=0;	
+				uint32_t type = data[2];
+				uint32_t len = data[1];
+				for(i=0;i<50;i++)buff[i]=0;
 				
-				if(data[1]==0x00 || data[1]==0x01){
-					for(i=0;i<42;i++) buff[i]=0-data[i+1];
-					buff[0]=data[1];
-				}else if(data[1]==0x02 || data[1]==0x03 || data[1]==0x04 || data[1]==0x05 || data[1]==0x06){
-					for(i=0;i<42;i++) buff[i]=data[i+1];
-					buff[0]=data[1];
-				}
-				gptf(buff,0);
-				
-				#if 1
-				
-				if(data[1]==0x01)
+				if(len > 50) return;
+				if(len < 2) return;
+				if(type==0xaa || type==0x55 || type==0x01 || type==0x04 || type==0x06 || type==0x07 || type==0x0a || type==0x0c )
 				{
-					//DLOG_Critical("cur_IT_ch=%d,freq=%d£¬main_ch=%d,option_ch=%d",context.cur_IT_ch,BB_GetItFrqByCh(context.cur_IT_ch),context.rf_info.u8_mainSweepCh,context.rf_info.u8_optSweepCh);
+					for(i=0;i<len-2;i++) buff[i+2]=0-data[i+3];
+					buff[0]=len;
+					buff[1]=type;
+					gptf(buff,0);
+				}
+				else if(type!=0x0d)
+				{
+					for(i=0;i<len-2;i++) buff[i+2]=data[i+3];
+					buff[0]=len;
+					buff[1]=type;
+					gptf(buff,0);
+				}
+
+				#if 1
+								
+				if(type==0x0d)
+				{
 					DLOG_Critical("rc_error=%d,rc_agca=%d,rc_agcb=%d",(100-g_stru_skyStatus.u8_rcCrcLockCnt),g_stru_skyStatus.u8_skyagc1,g_stru_skyStatus.u8_skyagc2);
 					DLOG_Critical("rc work patten ");
 					uint32_t str2[50]={0};
 					for(j=0;j<context.rf_info.rc_ch_working_patten_size;j++)str2[j]=BB_GetRcFrqByCh(context.rf_info.rc_ch_working_patten[j]);
-							gprtit(str2, 0);
+					gprtit(str2, 0);
 				}
 				
-				if(data[1]==0x01)
+				if(type==0x0d)
 				{
 					uint32_t str[50]={0};
 					int j=0;
@@ -1258,6 +1290,8 @@ void Grd_TIM2_6_IRQHandler(uint32_t u32_vectorNum)
 
 static void time_slice0(){
 	grd_getSignalStatus();
+	rf_pwr_statistics();
+	grd_auto_change_rf_bw();
 	#ifdef RF_8003X
 	{
 		BB_GetSweepedChResult(0);
@@ -2333,16 +2367,13 @@ static void grd_do_rf_bw(void)
 			if(context.st_bandMcsOpt.e_bandwidth != bw)
 		    {
 				reset_sweep_table(context.e_curBand);
+				 context.st_bandMcsOpt.e_bandwidth = bw; 
 				RF8003s_GetFctFreqTable(context.st_bandMcsOpt.e_bandwidth);
 				//rc_set_unlock_patten();
 				BB_set_RF_bandwitdh(BB_GRD_MODE, bw);
-		        context.st_bandMcsOpt.e_bandwidth = bw; 
-				context.grd_rc_channel = 0;
-				if(context.rf_bw.bw==BW_20M)
-				{
-					context.qam_ldpc=context.u8_bbStartMcs;
-					grd_set_txmsg_mcs_change(context.st_bandMcsOpt.e_bandwidth, context.qam_ldpc);
-				}
+				context.qam_ldpc=context.rf_bw.ldpc;
+				BB_set_ItFrqByCh(context.e_curBand, context.stru_bandChange.u8_ItCh);
+				grd_set_txmsg_mcs_change(context.st_bandMcsOpt.e_bandwidth, context.qam_ldpc);
 				BB_softRxReset(BB_GRD_MODE);
 				DLOG_Critical("set rf bandwidth=%d", context.st_bandMcsOpt.e_bandwidth);
 			}
@@ -2359,8 +2390,10 @@ static void grd_notify_rf_bw(){
 	if(context.rf_bw.en_flag==1 && context.rf_bw.valid==1 && gap < delay){
 		buf[0]= context.rf_bw.bw;
 		buf[1]= context.rf_bw.timeout_cnt;
-		BB_Session0SendMsg(DT_NUM_AUTO_CH_BW_CHANGE, buf, 2);
-		DLOG_Critical("grd notify sky :cnt=%d,aim_cnt=%d", context.sync_cnt, context.rf_bw.timeout_cnt);
+		buf[2]= context.rf_bw.ldpc;
+		buf[3]= context.rf_bw.autobw;
+		BB_Session0SendMsg(DT_NUM_AUTO_CH_BW_CHANGE, buf,4);
+		//DLOG_Critical("grd notify sky :cnt=%d,aim_cnt=%d", context.sync_cnt, context.rf_bw.timeout_cnt);
 	}
 	if(gap > 5) gap = 0;
 }
@@ -2402,13 +2435,13 @@ static void grd_handle_rc_patten_cmd(uint8_t *arg)
 		for(i=0;i<context.rf_info.rc_ch_patten_need_id_size;i++)context.rcChgPatten.patten[i]=0;
 		context.rcChgPatten.en_flag=1;
 		context.rcChgPatten.timeout_cnt=arg[0];
-		DLOG_Critical("grd get new patten ,sync_cnt=%d,aim=%d",context.sync_cnt,context.rcChgPatten.timeout_cnt);
+		//DLOG_Critical("grd get new patten ,sync_cnt=%d,aim=%d",context.sync_cnt,context.rcChgPatten.timeout_cnt);
 		for(i=0;i<context.rf_info.rc_ch_patten_need_id_size;i++){
 			context.rcChgPatten.patten[i]=arg[i+2];
 			buf[0] = arg[i+2];
 		}
 		BB_Session0SendMsg(DT_NUM_SKY_RC_PATTEN, &buf[0], context.rf_info.rc_ch_patten_need_id_size+2);
-		DLOG_Critical("ack to sky grd notify sky :cnt=%d,aim_cnt=%d", context.sync_cnt, context.rcChgPatten.timeout_cnt);
+		//DLOG_Critical("ack to sky grd notify sky :cnt=%d,aim_cnt=%d", context.sync_cnt, context.rcChgPatten.timeout_cnt);
 	}
 }
 

@@ -15,8 +15,8 @@ extern uint32_t SysTicks_GetTickCount(void);
 
 static uint8_t header[] = {0xFF, 0x5A, 0x0F};
 static STRU_BBComSession g_BBComSessionArray[BB_COM_SESSION_MAX] = {0};
-static uint8_t g_BBUARTComSession0RxBuffer[256] = {0};
-static uint8_t g_BBUARTComSession0TxBuffer[256] = {0};
+static uint8_t g_BBUARTComSession0RxBuffer[512] = {0};
+static uint8_t g_BBUARTComSession0TxBuffer[512] = {0};
 static STRU_BBComTxQueue *g_pstBBComTxQueue[BB_COM_SESSION_PRIORITY_MAX+1]; //one use for session0
 static STRU_BBComRxFIFO     g_BBComRxFIFO;
 static STRU_BBComTxFIFO     g_BBComTxFIFO;

@@ -44,8 +44,13 @@ extern STRU_GRD_STATUS stru_grdstatus;
 
 
 uint16_t qam_change_threshold[QAM_CHANGE_THRESHOLD_COUNT][2] =  
-         {{0, 0x6A},      {0x54, 0x129},    {0xec, 0x388}, 
-         {0x2ce, 0xa3e}, {0x823, 0x1d94},  {0x12aa, 0xffff}};
+         {{0, 0x6A},      
+          {0x54, 0x129},    
+          {0xec, 0x388}, 
+          {0x2ce, 0xa3e}, 
+          {0x823, 0x1d94},  
+          {0x12aa, 0xffff}
+		 };
 /*
   * return type: 1:  snr check pass
   *              0:  snr check Fail
@@ -604,7 +609,7 @@ void grd_judge_qam_band_switch(void)
     QAMUPDONW harq_qamupdown = QAMKEEP;
     QAMUPDONW ldpc_qamupdown = QAMKEEP;
     uint8_t flag_changemcs = 0;
-    uint8_t thresh = ((BW_20M == (context.st_bandMcsOpt.e_bandwidth)) ? (QAM_CHANGE_THRESHOLD_COUNT - 2) : (QAM_CHANGE_THRESHOLD_COUNT - 1));
+    uint8_t thresh = ((BW_20M == (context.st_bandMcsOpt.e_bandwidth)) ? (QAM_CHANGE_THRESHOLD_COUNT - 1) : (QAM_CHANGE_THRESHOLD_COUNT - 1));
 
     grd_get_snr();
 

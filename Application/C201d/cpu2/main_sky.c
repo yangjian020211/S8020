@@ -57,7 +57,7 @@ int main(void)
     console_init(2, 115200);   
     dlog_set_output_level(LOG_LEVEL_WARNING);
     DLOG_Critical("cpu2 start!!! \n");
-	#if 1
+	#if 0
     STRU_HAL_H264_CONFIG st_h264Cfg;
     st_h264Cfg.u8_view0En = 1;
     st_h264Cfg.u8_view0Gop = 10;

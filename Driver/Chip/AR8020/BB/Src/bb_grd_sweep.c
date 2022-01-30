@@ -1459,8 +1459,8 @@ int32_t __attribute__ ((section(".h264"))) grd_RfBandSelectChannelDoSwitch(void)
     BB_selectBestCh(context.e_curBand, SELECT_MAIN_OPT, &main_ch, &opt_ch, NULL, 0);
 
     BB_set_RF_Band(BB_GRD_MODE, context.e_curBand);
-	//RF8003s_GetFctFreqTable(context.st_bandMcsOpt.e_bandwidth);
-	//reset_sweep_table(context.e_curBand);
+	RF8003s_GetFctFreqTable(context.st_bandMcsOpt.e_bandwidth);
+	reset_sweep_table(context.e_curBand);
     BB_SweepChangeBand(context.e_curBand, main_ch, opt_ch);
     BB_set_sweepChannel();              //re-set the sweepChannel            
 
@@ -1484,20 +1484,69 @@ void __attribute__ ((section(".h264"))) grd_SetSweepMode(uint8_t mode)
     if(mode <= 1)
     {
         sweep_with_filter = mode;
-        //DLOG_Warning("sweep mode:%d", sweep_with_filter);
     }
-    else
-    {
-        //DLOG_Warning("err mode:%d", mode);
-    }
+
 }
 
-uint8_t __attribute__ ((section(".h264"))) BB_isSweepFull(void)
+void rf_pwr_statistics(){
+	static int pwr_id=0;
+	static int isfull=0;
+	
+	int i=0;
+	int temp=0;
+
+	if(stru_grdstatus.agc_value1==0 || stru_grdstatus.agc_value2==0 )return;
+
+	uint8_t agca = BB_RssiOffset(stru_grdstatus.agc_value1);
+    uint8_t agcb = BB_RssiOffset(stru_grdstatus.agc_value2);
+	
+	int value = (agca > agcb) ? agcb: agca;
+
+	if(isfull){
+		for(i=0;i<MAX_IT_PWR_STATICS-1;i++){
+			context.rf_info.working_pwr[i] = context.rf_info.working_pwr[i+1];
+			temp +=context.rf_info.working_pwr[i];
+		}  
+		context.rf_info.working_pwr[MAX_IT_PWR_STATICS-1]=value;
+		temp +=value;
+		context.rf_info.working_pwr_avrg=temp/MAX_IT_PWR_STATICS;
+	}
+	else{
+		context.rf_info.working_pwr[pwr_id] = value;
+		pwr_id++;
+		if(pwr_id>=MAX_IT_PWR_STATICS){
+			isfull=1;
+		}
+	}
+	#if 0
+		static int k=0;
+		k++;
+		if(k==100){
+			k=0;
+			DLOG_Critical("working pwr %d %d %d %d %d %d %d %d %d %d",
+			context.rf_info.working_pwr[0],
+			context.rf_info.working_pwr[1],
+			context.rf_info.working_pwr[2],
+			context.rf_info.working_pwr[3],
+			context.rf_info.working_pwr[4],
+			context.rf_info.working_pwr[5],
+			context.rf_info.working_pwr[6],
+			context.rf_info.working_pwr[7],
+			context.rf_info.working_pwr[8],
+			context.rf_info.working_pwr[9]
+			);
+			DLOG_Critical("pwr avrg= %d",context.rf_info.working_pwr_avrg);
+		}
+	#endif
+	
+}
+
+uint8_t  BB_isSweepFull(void)
 {
     return context.rf_info.u8_isFull;
 }
 
-void __attribute__ ((section(".h264"))) BB_resetSweepFull(void)
+void BB_resetSweepFull(void)
 {
     context.rf_info.u8_isFull = 0;
 }
@@ -1560,6 +1609,31 @@ void   grd_gen_it_working_ch(uint8_t mode)
 	}
 }
 
-
+void grd_auto_change_rf_bw(void){
+	static uint32_t timegap=0;
+	if(context.rf_bw.autobw==0) return;
+	if(context.rf_info.working_pwr_avrg==0)return;
+	if((SysTicks_GetDiff(timegap,SysTicks_GetTickCount())) < 5000)return;
+	if(context.rf_info.working_pwr_avrg < 78)
+	{
+		if(context.rf_bw.bw==BW_20M) return;
+		context.rf_bw.en_flag=1;
+		context.rf_bw.valid=1;
+		context.rf_bw.bw=BW_20M;
+		context.rf_bw.timeout_cnt=context.sync_cnt+STATUS_CHG_DELAY;
+		if(context.qam_ldpc < 3) context.rf_bw.ldpc=1;
+		else  context.rf_bw.ldpc=context.qam_ldpc-1;
+	}
+	else if(context.rf_info.working_pwr_avrg > 82)
+	{
+		if(context.rf_bw.bw==BW_10M) return;
+		context.rf_bw.en_flag=1;
+		context.rf_bw.valid=1;
+		context.rf_bw.bw=BW_10M;
+		context.rf_bw.timeout_cnt=context.sync_cnt+STATUS_CHG_DELAY;
+	}
+	timegap = SysTicks_GetTickCount();
+	
+}
 
 

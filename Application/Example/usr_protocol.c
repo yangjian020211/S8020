@@ -707,11 +707,13 @@ uint8_t set_bw_by_manul(void *msg, uint8_t port_id){
         return 0;
     }
    uint32_t value =cmd[10];
+   uint32_t value1 = cmd[11];
 	if(msg_len)
 	{
 	   st_cmd.u8_configClass  = WIRELESS_OTHER;
 	   st_cmd.u8_configItem   = AUTTO_BW_CHANGE;
 	   st_cmd.u32_configValue = value;//auto set rc patten or manul to set rc patten
+	   st_cmd.u32_configValue1 = value1;
 	   u8_ret = SYS_EVENT_NotifyInterCore(SYS_EVENT_ID_USER_CFG_CHANGE, (void *)&st_cmd);
 	   if( u8_ret ){
 		   return 0;

@@ -15,14 +15,15 @@
 
 #define VT_CONTINUE_UNLOCK_NUM      (36)
 
-#define SWEEP_FREQ_BLOCK_ROWS           (6)
+#define SWEEP_FREQ_BLOCK_ROWS           (10)
 
 #define SWEEP_FREQ_STATISTICS_ROWS           (100)
-#define SKY_PATTEN_MAX_Dynamic_SIZE_2G	(6)
+#define SKY_PATTEN_MAX_Dynamic_SIZE_2G	(5)
 
 
 #define MAX_RC_FRQ_SIZE             (40)
 #define MAX_IT_FRQ_SIZE             (40)
+#define MAX_IT_PWR_STATICS          (10)
 
 #define RC_FRQ_MAX_MASK_NUM         (10)
 #define RC_FRQ_MASK_THRESHOLD       (5)
@@ -189,7 +190,7 @@ typedef struct
 	//STRU_RF_DATA work_snr_fluct_value[MAX_RC_FRQ_SIZE];
 	STRU_RF_DATA work_rc_error_value[MAX_RC_FRQ_SIZE];
 	
-	int32_t 		 i32_working_times[MAX_RC_FRQ_SIZE];//
+	int32_t i32_working_times[MAX_RC_FRQ_SIZE];//
 
 	uint8_t   rc_ch_working_patten[MAX_RC_FRQ_SIZE];
 	uint8_t	  rc_ch_working_patten_size; /// the number of rc channels
@@ -236,7 +237,8 @@ typedef struct
 	uint8_t	   u8_optSweepCh;
 	uint8_t	   u8_bestBb1ChCnt[MAX_IT_FRQ_SIZE];
 	uint8_t	   u8_bestBb2ChCnt[MAX_IT_FRQ_SIZE];
-
+    uint32_t   working_pwr[MAX_IT_PWR_STATICS];
+	uint32_t   working_pwr_avrg;
 	uint8_t      u8_spareSweepCh;       //channel number
     uint8_t      u8_optBandSweepCh;     //use to sweep another band channel.
 

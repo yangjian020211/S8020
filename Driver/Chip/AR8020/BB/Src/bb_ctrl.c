@@ -30,9 +30,9 @@
 
 
 #define 	SKY_PATTEN_SIZE_5G	4
-static uint8_t vector_pwr_avrg_time_r[6]={1,1,1,2,2,3};
-static uint8_t vector_snr_avrg_time_r[6]={1,1,1,2,2,3};
-#define PRECIESE	10
+static uint8_t vector_pwr_avrg_time_r[SWEEP_FREQ_BLOCK_ROWS]={5,5,5,5,10,10,10,20,30};
+static uint8_t vector_snr_avrg_time_r[SWEEP_FREQ_BLOCK_ROWS]={5,5,5,5,10,10,10,20,30};
+#define PRECIESE	100
 
 
 pfun pfun_lna_open=NULL,pfun_lna_bypass=NULL;
@@ -812,7 +812,7 @@ void  __attribute__ ((section(".h264"))) BB_init(ENUM_BB_MODE en_mode, STRU_CUST
     context.itHopMode = pstru_customerCfg->itHopMode;
     context.rcHopMode = pstru_customerCfg->rcHopMode;
     context.qam_skip_mode = pstru_customerCfg->qam_skip_mode;
-
+	context.rf_bw.bw=BW_10M;
 
     BB_GetRcIdVtIdFromFlash((uint8_t *)context.rcid, (uint8_t *)context.vtid);
     BB_GenHashId((uint8_t *)context.rcid, (uint8_t *)context.vtid,BB_SKY_MODE);
@@ -1674,11 +1674,18 @@ static void __attribute__ ((section(".h264"))) BB_HandleEventsCallback(void *p)
 				}
 				DLOG_Critical("is_manul=%d,set rc patten %d:%d:%d:%d:%d",value,msg[0],msg[1],msg[2],msg[3],msg[4]); 
 		}
-		else if(class==WIRELESS_OTHER && item==AUTTO_BW_CHANGE){
+		else if(class==WIRELESS_OTHER && item==AUTTO_BW_CHANGE && context.en_bbmode==BB_GRD_MODE){
 				context.rf_bw.en_flag=1;
 				context.rf_bw.valid=1;
-				context.rf_bw.bw=value;
+				context.rf_bw.autobw=value;
+				context.rf_bw.bw=value1;
 				context.rf_bw.timeout_cnt=context.sync_cnt+STATUS_CHG_DELAY;
+				if(value1==BW_20M){
+					if(context.qam_ldpc < 3) context.rf_bw.ldpc=1;
+					else  context.rf_bw.ldpc=context.qam_ldpc-2;
+				}else{
+					 context.rf_bw.ldpc=context.qam_ldpc;
+				}
 		}
 	
         int ret = BB_InsertCmd(0, (STRU_WIRELESS_CONFIG_CHANGE * )p);
@@ -2712,19 +2719,22 @@ void __attribute__ ((section(".h264")))rc_set_unlock_patten(void)
 	context.rcChgPatten.patten[2]=0x00;
 	context.rcChgPatten.patten[3]=0x00;
 	context.rcChgPatten.patten[4]=0x02;
-	DLOG_Error("go to common patten,cnt=%d",context.sync_cnt);
+	DLOG_Warning("go to common patten,cnt=%d",context.sync_cnt);
 	
-	if(context.st_bandMcsOpt.e_bandwidth ==BW_20M){
+	if(context.st_bandMcsOpt.e_bandwidth ==BW_20M)
+	{
 		context.st_bandMcsOpt.e_bandwidth = BW_10M;
 		reset_sweep_table(context.e_curBand);
 		RF8003s_GetFctFreqTable(context.st_bandMcsOpt.e_bandwidth);
-		if(context.en_bbmode==BB_SKY_MODE){
-			
+		if(context.en_bbmode==BB_SKY_MODE)
+		{
 			BB_set_RF_bandwitdh(BB_SKY_MODE, BW_10M);
-		}else{
+		}
+		else
+		{
 			BB_set_RF_bandwitdh(BB_GRD_MODE, BW_10M);
 		}
-		DLOG_Error("e_bandwidth=%d",context.st_bandMcsOpt.e_bandwidth);
+		DLOG_Warning("e_bandwidth=%d",context.st_bandMcsOpt.e_bandwidth);
 	}
 	
 	rc_update_working_patten();
@@ -2872,6 +2882,7 @@ void  reset_sweep_table(ENUM_RF_BAND cur_band){
 			//context.rf_info.work_snr_table[j][i].id=i;context.rf_info.work_snr_table[j][i].value=0;
 		}
 	}
+	context.rf_info.e_bw = context.st_bandMcsOpt.e_bandwidth;
 	context.rf_info.fine_sweep_id=0;
 	context.rf_info.curBandIdx = 0;
 	context.rf_info.curSweepCh=0;

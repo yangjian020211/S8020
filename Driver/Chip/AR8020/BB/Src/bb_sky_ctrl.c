@@ -779,26 +779,18 @@ static void sky_do_rf_bw(void)
             context.rf_bw.en_flag = 0;
             context.rf_bw.timeout_cnt = 0;
 			reset_sweep_table(context.e_curBand);
-			RF8003s_GetFctFreqTable(context.st_bandMcsOpt.e_bandwidth);
-			//rc_set_unlock_patten();
 			BB_set_RF_bandwitdh(BB_SKY_MODE, (ENUM_CH_BW)context.rf_bw.bw);
         	context.st_bandMcsOpt.e_bandwidth = (ENUM_CH_BW)context.rf_bw.bw;
-			context.sky_rc_channel = 0;
-			
-			if(context.rf_bw.bw==BW_20M){
-        		ENUM_RUN_MODE mode = AUTO;
-				context.qam_ldpc=context.u8_bbStartMcs;
+			RF8003s_GetFctFreqTable(context.st_bandMcsOpt.e_bandwidth);
+			BB_set_ItFrqByCh(context.e_curBand, context.stru_bandChange.u8_ItCh);
+			if(context.qam_ldpc!=context.rf_bw.ldpc)
+			{
+	    		ENUM_RUN_MODE mode = AUTO;
+				context.qam_ldpc=context.rf_bw.ldpc;
 				sky_handle_mcs_mode_cmd((uint8_t*)&mode);
 			}
-			
-			
-            //sky_switchSetPower(context.e_curBand);
-            //sky_rcHopFreq();
-           	//BB_set_ItFrqByCh(context.e_curBand, context.cur_IT_ch);
-            //sky_bandSwitchLnaSwitch();
-			DLOG_Critical("set rf bandwidth=%d",context.st_bandMcsOpt.e_bandwidth);
-			//BB_softReset(BB_SKY_MODE);
-			
+			BB_softTxReset(BB_SKY_MODE);
+			DLOG_Critical("set rf bandwidth=%d",context.st_bandMcsOpt.e_bandwidth);	
         }
     }
 }
@@ -1133,7 +1125,7 @@ static void sky_notify_rc_patten()
 		buf[0]= context.rcChgPatten.timeout_cnt;
 		buf[1]= context.rf_info.rc_patten_set_by_usr;
 		BB_Session0SendMsg(DT_NUM_SKY_RC_PATTEN, buf, context.rf_info.rc_ch_patten_need_id_size+2);
-		DLOG_Warning("sky notify grd :cnt=%d,aim_cnt=%d", context.sync_cnt, context.rcChgPatten.timeout_cnt);
+		//DLOG_Warning("sky notify grd :cnt=%d,aim_cnt=%d", context.sync_cnt, context.rcChgPatten.timeout_cnt);
 	}
 	if(gap > 10) gap = 0;
 }
@@ -1648,11 +1640,15 @@ static void sky_handle_CH_bandwitdh_cmd(uint8_t *arg)
 static void sky_handle_auto_bandwitdh_cmd(uint8_t *arg)
 {
     ENUM_CH_BW bw = (ENUM_CH_BW)(arg[0]);
-	if(context.st_bandMcsOpt.e_bandwidth != bw){
+	if(context.rf_bw.timeout_cnt ==arg[1] && context.rf_bw.bw == arg[0]) return;
+	if(context.st_bandMcsOpt.e_bandwidth != bw)
+	{
 		context.rf_bw.bw = arg[0];
 	    context.rf_bw.timeout_cnt = arg[1];
+	    context.rf_bw.ldpc = arg[2];
+		context.rf_bw.autobw = arg[3];
 	    context.rf_bw.en_flag = 1;
-	    DLOG_Warning("%d %d",arg[0],arg[1]);
+	    DLOG_Warning("sky get: bw=%d ldpc=%d,auto=%d",arg[0],arg[2],arg[3]);
 	}
 }
 

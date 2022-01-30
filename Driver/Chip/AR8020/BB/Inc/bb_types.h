@@ -422,9 +422,11 @@ typedef struct
 typedef struct
 {
 	 uint8_t bw;
+	 uint8_t ldpc;
 	 uint8_t valid;
      uint8_t en_flag; 
      uint8_t timeout_cnt;
+	 uint8_t autobw;
 	 
 } STRU_RFBW_CMD;
 

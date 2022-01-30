@@ -65,12 +65,16 @@ void BB_CmdSweepStart(ENUM_RF_BAND e_bandsupport, ENUM_CH_BW e_bw);
 int BB_SetNewItCh_600m( uint8_t ch );
 
 void grd_SetSweepMode(uint8_t mode);
+void rf_pwr_statistics();
 
 uint8_t BB_isSweepFull(void);
 
 void BB_resetSweepFull(void);
 uint8_t BB_get_cur_opt_ch(void);
 void grd_gen_it_working_ch(uint8_t mode);
+
+void grd_auto_change_rf_bw(void);
+
 //void grd_gen_rc_working_patten(void);
 
 #endif
