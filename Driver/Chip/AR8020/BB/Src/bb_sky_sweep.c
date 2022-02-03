@@ -20,7 +20,7 @@
 
 
 
-#define OPENMSG 1
+#define OPENMSG 0
 
  uint32_t sweep_pwr_table1[SWEEP_FREQ_BLOCK_ROWS/2][42]={0};
  uint32_t sweep_pwr_table2[SWEEP_FREQ_BLOCK_ROWS/2][42]={0};
@@ -579,13 +579,13 @@ static uint8_t corse_check_sweep_noise(uint8_t mustchg){
 			{
 				context.rf_info.pre_selection_list[j].id=context.rf_info.sort_result_list[j].id;
 				context.rf_info.pre_selection_list[j].value=context.rf_info.sort_result_list[i].value;
+				#if OPENMSG
 				fine_sweep_id[j+2]=context.rf_info.sort_result_list[j].id;
+				#endif
 			}
+			#if OPENMSG
 			fine_sweep_id[0]=context.rf_info.fine_sweep_size+2;
 			fine_sweep_id[1]=0xbb;
-
-			#if OPENMSG
-			
 			for(j=0;j<context.rf_info.rc_ch_working_patten_len;j++)
 			{
 				working_avrg_id[j+2]=listcomp[j].id;
@@ -740,15 +740,18 @@ static void find_best_patten()
 	{
 		context.rf_info.prelist[i].id =context.rf_info.sort_result_list[i].id;
 		context.rf_info.prelist[i].value = context.rf_info.sort_result_list[i].value;
+		#if OPENMSG
 		select_fine_sweep_id[i+2]=context.rf_info.sort_result_list[i].id;
 		sweep_pwr_avrg_fine[i+2]=context.rf_info.sort_result_list[i].value;
 		//DLOG_Critical("prelist[%d] = %d,value=%d",i,context.rf_info.prelist[i].id,context.rf_info.prelist[i].value);
+		#endif
 	}
+	#if OPENMSG
 	select_fine_sweep_id[0]=context.rf_info.rc_ch_working_patten_len+2;
 	sweep_pwr_avrg_fine[0]=context.rf_info.rc_ch_working_patten_len+2;
 	select_fine_sweep_id[1]=0x09;
 	sweep_pwr_avrg_fine[1]=0xa;
-	
+	#endif
 	//step5 sort by id,find the low to high list for generate the patten codes
 	for(i=0;i<context.rf_info.rc_ch_working_patten_len;i++)
 	{

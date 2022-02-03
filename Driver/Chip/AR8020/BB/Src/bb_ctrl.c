@@ -1682,7 +1682,7 @@ static void __attribute__ ((section(".h264"))) BB_HandleEventsCallback(void *p)
 				context.rf_bw.timeout_cnt=context.sync_cnt+STATUS_CHG_DELAY;
 				if(value1==BW_20M){
 					if(context.qam_ldpc < 3) context.rf_bw.ldpc=1;
-					else  context.rf_bw.ldpc=context.qam_ldpc-2;
+					else  context.rf_bw.ldpc=context.qam_ldpc-1;
 				}else{
 					 context.rf_bw.ldpc=context.qam_ldpc;
 				}
