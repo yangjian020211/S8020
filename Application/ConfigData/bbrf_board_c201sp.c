@@ -156,6 +156,23 @@ STRU_BB_LAN_AUTO stru_TEST8003_bb_lna_boardCfg __attribute__ ((aligned (4)))=
     .u8_5g_lna       = 20,   //lna gain (dbm)
 };
 
+extern STRU_BOARD_RF_BW_CHG stru_rf_bw_chg__boardCfg;
+
+STRU_cfgNode rf_bw_chg_nodeInfo= 
+{
+    .nodeId       = BB_BW_AUTO_CHG_ID,
+    .nodeElemCnt  = 1,    
+    .nodeDataSize = sizeof(stru_rf_bw_chg__boardCfg)
+};
+
+STRU_BOARD_RF_BW_CHG stru_rf_bw_chg__boardCfg __attribute__ ((aligned (4)))= 
+{
+    .en_auto  = 0,    	   // enbale
+    .thd_10   = 80,        // > u8_agcThdL, select_10MHz
+    .thd_20   = 74,        // < u8_agcThdH, select_20MHz
+    .en_it_hoping_quickly=1,
+};
+
 extern STRU_BB_AOC stru_TEST8003_bb_aoc_boardCfg;
 
 STRU_cfgNode TEST8003_bb_aoc_cfg_nodeInfo= 

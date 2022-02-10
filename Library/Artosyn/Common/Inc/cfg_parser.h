@@ -44,6 +44,8 @@
 
 #define BB_LNA_AUTO_CFG_ID                              (29)
 
+#define BB_BW_AUTO_CHG_ID                               (30)
+
 
 //////Factory setting node id
 #define FACTORY_NODE_ID_MASK                            (0xa5000000)

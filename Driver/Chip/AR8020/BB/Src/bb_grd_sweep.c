@@ -13,6 +13,7 @@
 #include "cfg_parser.h"
 #include "rf_if.h"
 #include "filter.h"
+#include "bb_snr_service.h"
 
 
 
@@ -95,7 +96,8 @@ void __attribute__ ((section(".h264"))) BB_SweepStart(ENUM_RF_BAND e_bandsupport
     #ifdef RF_8003X
     //else
     {
-        context.rf_info.u8_totalCyc   = (context.rf_info.e_bandsupport == RF_2G_5G) ? 0x04 : 0x03;
+        //context.rf_info.u8_totalCyc   = (context.rf_info.e_bandsupport == RF_2G_5G) ? 0x04 : 0x03;
+		context.rf_info.u8_totalCyc = 0x03;
     }
     #endif
 
@@ -252,7 +254,8 @@ static uint8_t __attribute__ ((section(".h264"))) BB_GetSweepPower(ENUM_RF_BAND 
     uint8_t  u8_maxCh = BB_GetSweepTotalCh(e_rfBand, bw);
     if(sweep_ch >= u8_maxCh)
     {
-       // DLOG_Error("Ch overflow:%d %d %d", e_rfBand, sweep_ch, u8_maxCh);
+       DLOG_Error("Ch overflow:%d %d %d %d %d", e_rfBand, sweep_ch, u8_maxCh,bw,context.rf_info.sweep_freqsize);
+	  //context.rf_info.u8_prevSweepCh=0;
        return 0;
 		
     }
@@ -569,14 +572,17 @@ static int __attribute__ ((section(".h264"))) BB_set_sweepChannel(void)
     {
         ENUM_RF_BAND newband = OTHER_BAND( context.e_curBand );
         u8_maxCh = BB_GetSweepTotalCh(newband, e_bw);
+		//u8_maxCh = BB_GetSweepTotalCh(context.e_curBand, e_bw);
 
         context.rf_info.u8_optBandSweepCh = NEXT_NUM(context.rf_info.u8_optBandSweepCh, u8_maxCh);
         context.rf_info.u8_prevSweepCh    = context.rf_info.u8_optBandSweepCh;
+		//context.rf_info.e_prevSweepBand  = e_curBand;
         context.rf_info.e_prevSweepBand   = newband;
 
         if ( context.rf_info.u8_prevSweepCh == 0 ) //start channel from 0, new row.
         {
             if ( newband == RF_5G )
+			//if (context.e_curBand == RF_5G )
             {
                 context.rf_info.u8_curBb2Row = NEXT_NUM(context.rf_info.u8_curBb2Row, SWEEP_FREQ_BLOCK_ROWS);
             }
@@ -740,6 +746,7 @@ static int __attribute__ ((section(".h264"))) BB_SweepAfterFull( uint8_t flag )
     if (result)
     {
         context.rf_info.u8_cycleCnt ++;
+		
         BB_set_sweepChannel();
     }
 
@@ -755,7 +762,7 @@ uint8_t __attribute__ ((section(".h264"))) BB_GetSweepedChResult( uint8_t flag )
     {
         BB_CmdSweep();
     }
-    else if ( !context.rf_info.u8_isFull )
+    else if (!context.rf_info.u8_isFull )
     {
         ret = BB_SweepBeforeFull( );
 		#ifdef RFSUB_BAND
@@ -912,11 +919,9 @@ uint8_t __attribute__ ((section(".h264"))) BB_selectBestCh(ENUM_RF_BAND e_band, 
     uint8_t next_ch;
     uint8_t tmpCh;
 
-    if (!context.rf_info.u8_isFull)
-    {
+    if (!context.rf_info.u8_isFull){
         return 0;
     }
-    
     BB_GetItMinMaxCh(e_band, e_bw, &min_ch, &max_ch);
     
     //select main channel
@@ -986,8 +991,7 @@ uint8_t __attribute__ ((section(".h264"))) BB_selectBestCh(ENUM_RF_BAND e_band, 
         }
     }
 
-    if ( log )
-    {
+    if ( log ){
         DLOG_Info("--ch--: %d %d %d", bestCh, betterCh, e_opt);
     }    
 
@@ -1168,7 +1172,7 @@ void __attribute__ ((section(".h264"))) bubble_sort(int * data, int datasize, in
 /*
  *  start to sweep another band
  */
-static void __attribute__ ((section(".h264"))) BB_SweepChangeBand(ENUM_RF_BAND e_toRfBand, uint8_t u8_mainCh, uint8_t u8_optCh)
+void __attribute__ ((section(".h264"))) BB_SweepChangeBand(ENUM_RF_BAND e_toRfBand, uint8_t u8_mainCh, uint8_t u8_optCh)
 {
     context.rf_info.u8_spareSweepCh   =  0;
     context.rf_info.u8_optBandSweepCh =  0;
@@ -1363,7 +1367,17 @@ int32_t __attribute__ ((section(".h264"))) grd_notifyRfbandChange(ENUM_RF_BAND e
         context.stru_bandChange.u8_eqCntChg     = eq_cnt_chg;
         context.stru_bandChange.u8_ItCh   = u8_itCh;
         context.stru_bandChange.u8_optCh  = u8_optCh;
-
+		context.stru_bandChange.chg_mcs = 1;
+		if(context.st_bandMcsOpt.e_bandwidth==BW_20M)
+		{
+			context.stru_bandChange.chg_mcs = 1;
+		}
+		else
+		{
+			if(context.qam_ldpc < 3) context.stru_bandChange.chg_mcs = 1;
+			else  context.stru_bandChange.chg_mcs = context.qam_ldpc-2;;
+		}
+		
         BB_DtSendToBuf(DT_NUM_RF_BAND_CHANGE, (uint8_t *)&(context.stru_bandChange));
 
         DLOG_Critical("Band:%d chgBand %d %d", context.e_curBand, e_band, sizeof(context.stru_bandChange));
@@ -1388,13 +1402,13 @@ int32_t __attribute__ ((section(".h264"))) grd_doRfbandChange( uint8_t *pu8_main
         {            
             context.stru_bandChange.flag_bandchange = 0;
             context.e_curBand = OTHER_BAND(context.e_curBand);  //switch to another band
-
-            BB_set_RF_Band(BB_GRD_MODE, context.e_curBand);
 			RF8003s_GetFctFreqTable(context.st_bandMcsOpt.e_bandwidth);
+            BB_set_RF_Band(BB_GRD_MODE, context.e_curBand);
 			reset_sweep_table(context.e_curBand);
+			
             BB_SweepChangeBand(context.e_curBand, context.stru_bandChange.u8_ItCh, context.stru_bandChange.u8_optCh);
-            BB_set_sweepChannel(); //re-set the sweepChannel            
-			rc_set_unlock_patten();
+            BB_set_sweepChannel();         
+			rc_set_unlock_patten(0);
 			//grd_rc_hopfreq();
             if ( pu8_mainCh )
             {
@@ -1417,6 +1431,9 @@ int32_t __attribute__ ((section(".h264"))) grd_doRfbandChange( uint8_t *pu8_main
             }
             BB_set_power(context.e_curBand,context.pwr);
             context.u8_aocAdjustPwr = context.pwr;
+
+			context.qam_ldpc=context.stru_bandChange.chg_mcs;
+			grd_set_txmsg_mcs_change(context.st_bandMcsOpt.e_bandwidth, context.qam_ldpc);
 
             //stop send out the band switch message
             BB_DtStopSend(DT_NUM_RF_BAND_MODE);
@@ -1457,16 +1474,13 @@ int32_t __attribute__ ((section(".h264"))) grd_RfBandSelectChannelDoSwitch(void)
     context.e_curBand = OTHER_BAND(context.e_curBand);  //switch to another band
 
     BB_selectBestCh(context.e_curBand, SELECT_MAIN_OPT, &main_ch, &opt_ch, NULL, 0);
-
     BB_set_RF_Band(BB_GRD_MODE, context.e_curBand);
 	RF8003s_GetFctFreqTable(context.st_bandMcsOpt.e_bandwidth);
 	reset_sweep_table(context.e_curBand);
     BB_SweepChangeBand(context.e_curBand, main_ch, opt_ch);
-    BB_set_sweepChannel();              //re-set the sweepChannel            
-
+    BB_set_sweepChannel();  
     //clear the result, re-start statistic again
     context.rf_info.u8_bandSelCnt = 0;
-    
     context.stru_bandChange.u8_ItCh   = main_ch;
     context.stru_bandChange.u8_optCh  = opt_ch;
 
@@ -1474,7 +1488,7 @@ int32_t __attribute__ ((section(".h264"))) grd_RfBandSelectChannelDoSwitch(void)
     BB_grd_NotifyItFreqByCh(context.e_curBand, context.stru_bandChange.u8_ItCh);
     BB_softReset(BB_GRD_MODE);
 
-    DLOG_Info("Band switch: %d %d %d %d", context.sync_cnt, context.stru_bandChange.u8_eqCntChg, context.stru_bandChange.u8_ItCh, context.e_curBand);
+    //DLOG_Info("Band switch: %d %d %d %d", context.sync_cnt, context.stru_bandChange.u8_eqCntChg, context.stru_bandChange.u8_ItCh, context.e_curBand);
 
     return 1;
 }
@@ -1563,8 +1577,6 @@ static uint8_t  grd_check_sweep_noise(uint8_t mustchg){
 	uint8_t i=0,j=0;
 	int sweep_noise=0;
 	int sweep_noise_fluct=0;
-	
-	
 	//sort by value,find the low to high list, sort all sweep channel
 	for(i=0;i<context.rf_info.sweep_freqsize;i++){
 		sweep_noise = context.rf_info.sweep_pwr_avrg_value[i].value ;
@@ -1573,25 +1585,16 @@ static uint8_t  grd_check_sweep_noise(uint8_t mustchg){
 		list[i].id=context.rf_info.sweep_pwr_avrg_value[i].id;
 	}
 	selectionSortBy(listr,context.rf_info.sweep_freqsize,list,1);
-	for(i=0;i<context.rf_info.sweep_freqsize;i++)
-	{
+	for(i=0;i<context.rf_info.sweep_freqsize;i++){
 		context.rf_info.sort_result_list[i].id=listr[i].id;
 		context.rf_info.sort_result_list[i].value=listr[i].value;
 	}
 	 int current_sweep_now = context.rf_info.sweep_pwr_avrg_value[context.cur_IT_ch].value;
-	 
 	 if((current_sweep_now - listr[0].value) < IT_CHANGE_THD) return 0;
-	 /*
-	 for(j=0;j<context.rf_info.sweep_freqsize;j++)
-	 {
-		DLOG_Critical("[%d] %d %d %d",j,listr[j].id,BB_GetItFrqByCh(listr[j].id),listr[j].value);
-	 }
-	 */
 	 return 1;
 }
 
-void   grd_gen_it_working_ch(uint8_t mode)
-{
+void   grd_gen_it_working_ch(uint8_t mode){
 	uint8_t ret=0;
 	ret = grd_check_sweep_noise(0);
 	int oldch=context.cur_IT_ch;
@@ -1611,10 +1614,27 @@ void   grd_gen_it_working_ch(uint8_t mode)
 
 void grd_auto_change_rf_bw(void){
 	static uint32_t timegap=0;
-	if(context.rf_bw.autobw==0) return;
+
+	#if 1
+	static int k=0;
+	k++;
+	if(k==200)
+	{
+		k=0;
+		  DLOG_Critical("en_auto=%d,working_pwr_avrg=%d,thd_10=%d,thd_20=%d",
+		  context.rf_info.rf_bw_cg_info.en_auto,
+		  context.rf_info.working_pwr_avrg,
+		  context.rf_info.rf_bw_cg_info.thd_10,
+		  context.rf_info.rf_bw_cg_info.thd_20
+		  );
+	}
+	#endif
+	
+	if(context.rf_info.rf_bw_cg_info.en_auto==0)return;
 	if(context.rf_info.working_pwr_avrg==0)return;
 	if((SysTicks_GetDiff(timegap,SysTicks_GetTickCount())) < 5000)return;
-	if(context.rf_info.working_pwr_avrg < 78)
+
+	if(context.rf_info.working_pwr_avrg < context.rf_info.rf_bw_cg_info.thd_20)
 	{
 		if(context.rf_bw.bw==BW_20M) return;
 		context.rf_bw.en_flag=1;
@@ -1622,9 +1642,9 @@ void grd_auto_change_rf_bw(void){
 		context.rf_bw.bw=BW_20M;
 		context.rf_bw.timeout_cnt=context.sync_cnt+STATUS_CHG_DELAY;
 		if(context.qam_ldpc < 3) context.rf_bw.ldpc=1;
-		else  context.rf_bw.ldpc=context.qam_ldpc-1;
+		else  context.rf_bw.ldpc=context.qam_ldpc-2;
 	}
-	else if(context.rf_info.working_pwr_avrg > 82)
+	else if(context.rf_info.working_pwr_avrg > context.rf_info.rf_bw_cg_info.thd_10)
 	{
 		if(context.rf_bw.bw==BW_10M) return;
 		context.rf_bw.en_flag=1;

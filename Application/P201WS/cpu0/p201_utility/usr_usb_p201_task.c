@@ -347,11 +347,11 @@ void bitrate_change_callback(void* p)
 {
     uint8_t br_idx  = ((STRU_SysEvent_BB_ModulationChange *)p)->encoder_brcidx;
     uint8_t ch      = ((STRU_SysEvent_BB_ModulationChange *)p)->u8_bbCh;
-
+	uint8_t bw      = ((STRU_SysEvent_BB_ModulationChange *)p)->bw;
     if (0 == ch)
     {
-        enc_brcidx_change(br_idx);
-        DLOG_Info("H264 bitidx ch0: %d \r\n", br_idx);
+        enc_brcidx_change(br_idx,bw);
+        DLOG_Warning("H264 bitidx ch0: %d, bw=%d \r\n", br_idx,bw);
     }
 }
 

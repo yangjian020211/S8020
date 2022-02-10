@@ -141,8 +141,6 @@ static uint16_t sky_read_usb1_senddata(void);
 
 static void sky_vtSkip_process(void);
 
-static void sky_handle_mcs_mode_cmd(uint8_t *arg);
-
 
 //static void check_pwr_mode_status(void);
 
@@ -404,6 +402,7 @@ void sky_notify_encoder_brc(uint8_t u8_ch, uint8_t bridx)
     {
         event.u8_bbCh = 1;
     }
+	event.bw = context.st_bandMcsOpt.e_bandwidth;
     SYS_EVENT_NotifyInterCore(SYS_EVENT_ID_BB_SUPPORT_BR_CHANGE, (void*)&event);
     //DLOG_Info("ch%d brc =%d \n", u8_ch, bridx);
 }
@@ -778,10 +777,10 @@ static void sky_do_rf_bw(void)
 			
             context.rf_bw.en_flag = 0;
             context.rf_bw.timeout_cnt = 0;
+			context.st_bandMcsOpt.e_bandwidth = (ENUM_CH_BW)context.rf_bw.bw;
+			RF8003s_GetFctFreqTable(context.st_bandMcsOpt.e_bandwidth);
 			reset_sweep_table(context.e_curBand);
 			BB_set_RF_bandwitdh(BB_SKY_MODE, (ENUM_CH_BW)context.rf_bw.bw);
-        	context.st_bandMcsOpt.e_bandwidth = (ENUM_CH_BW)context.rf_bw.bw;
-			RF8003s_GetFctFreqTable(context.st_bandMcsOpt.e_bandwidth);
 			BB_set_ItFrqByCh(context.e_curBand, context.stru_bandChange.u8_ItCh);
 			if(context.qam_ldpc!=context.rf_bw.ldpc)
 			{
@@ -835,7 +834,7 @@ static void process_searchid_state()
 				context.dev_state = CHECK_LOCK;
 				DLOG_Warning("SEARCH_ID->CHECK_LOCK");
 				DLOG_Warning("rc_set_unlock_patten");
-				rc_set_unlock_patten();
+				rc_set_unlock_patten(1);
 			}
 		}
 		else
@@ -843,7 +842,7 @@ static void process_searchid_state()
 			context.dev_state = CHECK_LOCK;
 			DLOG_Warning("rc_set_unlock_patten");
 			DLOG_Warning("SEARCH_ID->CHECK_LOCK");
-			rc_set_unlock_patten();
+			rc_set_unlock_patten(1);
 		}
 	}
 	else if (1 == stru_skystatus.flag_errorConnect || SKY_RC_ERR(stru_skystatus.u8_rcStatus))
@@ -919,7 +918,7 @@ static void process_check_lock_state()
 			u32_contiousUnlock = 0;
 			context.dev_state  = SEARCH_ID;
 			DLOG_Warning("rc_set_unlock_patten");
-			rc_set_unlock_patten();
+			rc_set_unlock_patten(1);
 			//sky_notify_grd_goto_unlock_patten();
 			DLOG_Warning("CHECK_LOCK-> SEARCH_ID");
 		}
@@ -953,7 +952,7 @@ static void process_wait_it_lock_state()
     {
         u32_contiousUnlock = 0;
         context.dev_state  = CHECK_LOCK;
-		rc_set_unlock_patten();
+		rc_set_unlock_patten(1);
         BB_SetTrxMode(BB_RECEIVE_ONLY_MODE);
         sky_soft_reset();
         DLOG_Warning("WAIT_VT_LOCK -> CHECK_LOCK");
@@ -975,7 +974,7 @@ static void process_wait_it_lock_state()
         u32_contiousUnlock = 0;
         context.dev_state  = CHECK_LOCK;
 		DLOG_Warning("rc_set_unlock_patten");
-		rc_set_unlock_patten();
+		rc_set_unlock_patten(1);
         BB_SetTrxMode(BB_RECEIVE_ONLY_MODE);
         sky_switchSetPower(context.e_curBand);
         sky_soft_reset();
@@ -1038,7 +1037,7 @@ static void process_lock_state()
 	{
 		context.dev_state = CHECK_LOCK;
 		DLOG_Warning("rc_set_unlock_patten");
-		rc_set_unlock_patten();
+		rc_set_unlock_patten(1);
 		//sky_notify_grd_goto_unlock_patten();
 		sky_soft_reset();
 		//context.rc_skip_patten = 0xff;
@@ -1050,7 +1049,7 @@ static void process_lock_state()
 		u32_contiousUnlock = 0;
 		context.dev_state  = CHECK_LOCK;
 		DLOG_Warning("rc_set_unlock_patten");
-		rc_set_unlock_patten();
+		rc_set_unlock_patten(1);
 		//sky_notify_grd_goto_unlock_patten();
 		BB_SetTrxMode(BB_RECEIVE_ONLY_MODE);
 		sky_switchSetPower(context.e_curBand);
@@ -1644,9 +1643,11 @@ static void sky_handle_auto_bandwitdh_cmd(uint8_t *arg)
 	if(context.st_bandMcsOpt.e_bandwidth != bw)
 	{
 		context.rf_bw.bw = arg[0];
+		//context.st_bandMcsOpt.e_bandwidth=context.rf_bw.bw ;
 	    context.rf_bw.timeout_cnt = arg[1];
 	    context.rf_bw.ldpc = arg[2];
 		context.rf_bw.autobw = arg[3];
+		context.rf_info.rf_bw_cg_info.en_auto=context.rf_bw.autobw;
 	    context.rf_bw.en_flag = 1;
 	    DLOG_Warning("sky get: bw=%d ldpc=%d,auto=%d",arg[0],arg[2],arg[3]);
 	}
@@ -1673,7 +1674,7 @@ static void sky_handle_CH_ldpc_cmd(uint8_t *arg)
         //DLOG_Info("CH_ldpc=>%d", context.ldpc);
     }
 }
-static void sky_handle_mcs_mode_cmd(uint8_t *arg)
+void sky_handle_mcs_mode_cmd(uint8_t *arg)
 {
     ENUM_RUN_MODE mode = (ENUM_RUN_MODE)arg[0];
 

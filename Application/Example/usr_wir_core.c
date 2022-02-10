@@ -70,10 +70,10 @@ char get_mcs(void)
     return wir_info.encoder_brcidx;
 }
 
-void enc_brcidx_change(uint8_t enc_brcidx)
+void enc_brcidx_change(uint8_t enc_brcidx,uint8_t bw)
 {
     wir_info.encoder_brcidx = enc_brcidx;
-    wir_info.bandwidth = 0;
+    wir_info.bandwidth = bw;
     wir_info.freq_range = 0;
     wir_info.freq_mode = 0;
     wir_info.freq_chanl = 0;

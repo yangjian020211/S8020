@@ -196,6 +196,7 @@ typedef struct _SysEvent_BB_ModulationChange
 {
     uint8_t  encoder_brcidx;
     uint8_t  u8_bbCh; // 
+    uint8_t  bw;
     uint8_t  reserve[SYS_EVENT_HANDLER_PARAMETER_LENGTH - 2];
 } STRU_SysEvent_BB_ModulationChange;
 

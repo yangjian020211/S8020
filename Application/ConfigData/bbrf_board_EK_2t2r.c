@@ -168,6 +168,22 @@ STRU_BB_AOC stru_EK_2t2r_bb_aoc_boardCfg __attribute__ ((aligned (4)))=
     .u16_ldpcStacCnt = 100,// statistics ldpc err count
     .u16_ldpcThd     = 50,//ldpc err rate percent
 };
+extern STRU_BOARD_RF_BW_CHG stru_rf_bw_chg__boardCfg;
+
+STRU_cfgNode rf_bw_chg_nodeInfo= 
+{
+    .nodeId       = BB_BW_AUTO_CHG_ID,
+    .nodeElemCnt  = 1,    
+    .nodeDataSize = sizeof(stru_rf_bw_chg__boardCfg)
+};
+
+STRU_BOARD_RF_BW_CHG stru_rf_bw_chg__boardCfg __attribute__ ((aligned (4)))= 
+{
+    .en_auto  = 0,    	   // enbale
+    .thd_10   = 80,        // > u8_agcThdL, select_10MHz
+    .thd_20   = 74,        // < u8_agcThdH, select_20MHz
+    .en_it_hoping_quickly=1,
+};
 
 extern STRU_BB_LAN_AUTO stru_EK_2t2r_bb_lna_boardCfg;
 
@@ -210,6 +226,7 @@ STRU_SKY_BAND_SWITCH_PARAM stru_EK_2t2r_sky_band_switch __attribute__ ((aligned 
     .i8_SkyBand0_2_Band1SweepAverBlock      = 27,
     .i8_SkyBand1_2_Band0SweepAverBlock      = 17,
 };
+
 
 
 

@@ -120,6 +120,7 @@ void sky_statistics_rc_snr(uint8_t locked);
 
 void sky_gen_rc_working_patten(void);
 
+void sky_handle_mcs_mode_cmd(uint8_t *arg);
 
 void reset_table_for_5g();
 

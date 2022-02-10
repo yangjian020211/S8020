@@ -19,7 +19,7 @@ extern "C"
 
     }WIR_INFO;
 
-    void enc_brcidx_change(uint8_t enc_brcidx);
+    void enc_brcidx_change(uint8_t enc_brcidx,uint8_t bw);
     int Wir_Info_Handler(WIR_INFO *usrbuf);
     int Wir_Freq_Range_Handler(char mode);
     int Wir_Set_Freq_Handler(char *param,char *ret_data);

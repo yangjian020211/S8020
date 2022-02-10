@@ -239,8 +239,6 @@ void RF8003s_GetFctFreqTable(ENUM_CH_BW e_bw)
 		pItFreqlist_2g = p_frq_vt_2g_20M->u16_rfChFrqList;
 		p_frq_vt_5g_20M = FCT_GetNodeAndData(FACTORY_SUBNODE_BAND1_VT_20M_FRQ_ID, &node_vt);
 	    pItFreqlist_5g = p_frq_vt_5g_20M->u16_rfChFrqList;
-		//for(i=0;i<p_frq_vt_2g_20M->u32_rfChCount;i++)
-		//	DLOG_Critical("it[%d]=%d",i,pItFreqlist_2g[i]);
     }
 
 	#ifdef RFSUB_BAND
@@ -1170,7 +1168,7 @@ uint8_t BB_calu_power_reg(uint16_t frq,uint16_t refPower,uint8_t refValueBase,ui
 
 	if(!bFind)
 	{
-		DLOG_Warning("%d Not Find Open Power Ref Freq Value",frq);
+		DLOG_Info("%d Not Find Open Power Ref Freq Value",frq);
 		if(frq > pst_PowerOpenRefValue[refValueCnt-1].freq)
 		{
 			pwr = (float)(pst_PowerOpenRefValue[refValueCnt-1].real_power);

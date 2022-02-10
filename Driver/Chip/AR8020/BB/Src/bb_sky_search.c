@@ -169,7 +169,7 @@ void BB_sky_handleRcSearchCmd(void)
 
         context.dev_state = SEARCH_ID;
 		DLOG_Warning("rc_set_unlock_patten");
-		rc_set_unlock_patten();
+		rc_set_unlock_patten(1);
         sky_soft_reset();
 
         BB_SetTrxMode(BB_RECEIVE_ONLY_MODE);

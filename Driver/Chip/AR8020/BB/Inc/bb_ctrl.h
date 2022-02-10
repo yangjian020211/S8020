@@ -111,7 +111,7 @@ void BB_fem_close(uint8_t ch);
 void BB_config_uplink_qam_mode(uint8_t val);
 void BB_Register_freq2g5g_switch(pfun open_2g_function, pfun open_5g_function);
 void rc_update_working_patten(void);
-void rc_set_unlock_patten();
+void rc_set_unlock_patten(uint8_t chg_bw);
 void bb_get_rc_channel();
 void bb_update_rc_patten_size();
 void sky_notify_grd_goto_unlock_patten();

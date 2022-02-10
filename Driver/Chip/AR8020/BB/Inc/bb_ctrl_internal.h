@@ -151,6 +151,7 @@ typedef struct _STRU_BandChange
     uint8_t             u8_ItCh;
     uint8_t             u8_optCh;
     uint8_t             e_toBand;
+	uint8_t				chg_mcs;
     uint16_t            u16_unlockLoopCnt;
 }STRU_BandChange;
 
@@ -225,6 +226,8 @@ typedef struct
 	STRU_RF_DATA sort_result_list[MAX_RC_FRQ_SIZE];
 	STRU_RF_DATA pre_selection_list[MAX_RC_FRQ_SIZE];
 	STRU_RF_DATA prelist[MAX_RC_FRQ_SIZE];	
+
+	STRU_BOARD_RF_BW_CHG rf_bw_cg_info;
 
 	//vt
 	ENUM_RF_BAND e_bandsupport;

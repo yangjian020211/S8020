@@ -20,7 +20,7 @@
 
 
 
-#define OPENMSG 0
+#define OPENMSG 1
 
  uint32_t sweep_pwr_table1[SWEEP_FREQ_BLOCK_ROWS/2][42]={0};
  uint32_t sweep_pwr_table2[SWEEP_FREQ_BLOCK_ROWS/2][42]={0};
@@ -47,7 +47,7 @@ void __attribute__ ((section(".h264"))) sky_startSweep(ENUM_RF_BAND band)
 	//context.rf_info.rc_avr_sweep_result_size
 	reset_sweep_table(band);
 	context.rf_info.e_bw = context.st_bandMcsOpt.e_bandwidth;
-    BB_set_SweepFrq(context.rf_info.sweepBand[context.rf_info.curBandIdx], context.rf_info.e_bw, context.rf_info.curSweepCh);
+    BB_set_SweepFrq(context.rf_info.sweepBand[context.rf_info.curBandIdx], context.st_bandMcsOpt.e_bandwidth, context.rf_info.curSweepCh);
     context.u_bandSwitchParam = (UNION_BandSwitchParm *)CFGBIN_GetNodeAndData((STRU_cfgBin *)SRAM_CONFIGURE_MEMORY_ST_ADDR, RF_SKY_BAND_SWITCH_CFG_ID, NULL);
 
    // DLOG_Critical("%d %d %d 0x%x",context.rf_info.sweep_freqsize, context.rf_info.bandCnt, context.st_bandMcsOpt.e_bandsupport, context.u_bandSwitchParam);
@@ -339,10 +339,8 @@ void GetSweepCh_finesweep(uint8_t u8_bandidx, uint8_t u8_ch,signed char data){
 void GetSweepCh_normalsweep(uint8_t u8_bandidx, uint8_t u8_ch,signed char data,ENUM_BB_MODE mode)
 {
 	int i=0,j=0; 
-	static int tx_sweep=0;
-	static int k=0;
-	static uint8_t full=0;
-	 if(full==1)
+	
+	 if(context.rf_info.isFull==1)
 	   {
 		   for(i=0;i<SWEEP_FREQ_BLOCK_ROWS-1;i++)
 		   {
@@ -350,33 +348,41 @@ void GetSweepCh_normalsweep(uint8_t u8_bandidx, uint8_t u8_ch,signed char data,E
 		   }
 	   }
 	  context.rf_info.sweep_pwr_table[context.rf_info.curRowCnt][u8_ch].value = data;
-	   int last =0;
-	  last = ((u8_ch + 1) == context.rf_info.sweep_freqsize);
-	   if (last)
-	   {
+	  int last =0;
+	  #if 0
+	  if(context.en_bbmode==BB_GRD_MODE)
+	  {
+		  static int k=0;
+		  k++;
+		  if(k==200)
+		  {
+			k=0;
+			 DLOG_Critical("curRowCnt=%d,ch=%d,sweep_freqsize=%d",context.rf_info.curRowCnt,u8_ch,context.rf_info.sweep_freqsize);
+		  }
+	  }
+	  #endif
+	  last = ((u8_ch + 1) >= context.rf_info.sweep_freqsize);
+	  if (last)
+	  {
 	   	    if (context.rf_info.curRowCnt < SWEEP_FREQ_BLOCK_ROWS-1) 
 			{
 				context.rf_info.curRowCnt++;
 	   	    }
-
 			context.rf_info.sweep_cycle++;
 		  	//next cycle
 		   if (context.rf_info.sweep_cycle >= SWEEP_FREQ_BLOCK_ROWS)
 		   {
 			   context.rf_info.sweep_cycle = 0;
 			   context.rf_info.isFull	  = 1;
-			   full = 1;
+			   context.rf_info.u8_isFull =1;
+			  
 			   context.rf_info.curRowCnt = SWEEP_FREQ_BLOCK_ROWS-1;
-			   //sky_print_sweep_pwr_table();
-			   tx_sweep=1;
 		   }
-		   else
-		   {
-			  // context.rf_info.isFull	  = 0;
+		   else{
+				context.rf_info.u8_isFull =0;
 		   }
-		   if(mode==BB_GRD_MODE) return ;
-		   
-	   }
+
+	  }
 
 }
 

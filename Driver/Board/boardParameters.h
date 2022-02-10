@@ -95,6 +95,15 @@ typedef struct
     STRU_RF_REG  *pstru_rf2GrdRegsAfterCali;
 }STRU_BOARD_RF_REG;
 
+typedef struct 
+{
+    uint8_t  en_auto;
+    uint8_t  thd_10;
+    uint8_t  thd_20;
+	uint8_t  en_it_hoping_quickly;
+
+}STRU_BOARD_RF_BW_CHG;
+
 
 typedef struct
 {

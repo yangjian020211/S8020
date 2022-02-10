@@ -75,6 +75,8 @@ void grd_gen_it_working_ch(uint8_t mode);
 
 void grd_auto_change_rf_bw(void);
 
+void BB_SweepChangeBand(ENUM_RF_BAND e_toRfBand, uint8_t u8_mainCh, uint8_t u8_optCh);
+
 //void grd_gen_rc_working_patten(void);
 
 #endif

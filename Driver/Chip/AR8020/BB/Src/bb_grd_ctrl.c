@@ -52,6 +52,8 @@ static STRU_SkyStatus g_stru_skyStatus;
 
 //uint8_t grd_rc_channel = 0;
 static uint8_t non_lbt_opt_ch = 0xff;
+static int print_grd=0;
+
 
 STRU_CALC_DIST_DATA s_st_calcDistData = 
 {
@@ -190,14 +192,64 @@ static void do_debug_process(void);
 static void grd_do_rc_patten(void);
 static void grd_do_rf_bw(void);
 static void grd_handle_rc_patten_cmd(uint8_t *arg);
+static void gprtit(uint32_t *str,int i);
 
+static void grd_plot_itsweep(){
+#if 1
+int i=0;
+int j=0;
+ if(print_grd==0x01)
+ {
+		DLOG_Critical("rc_error=%d,rc_agca=%d,rc_agcb=%d",(100-g_stru_skyStatus.u8_rcCrcLockCnt),g_stru_skyStatus.u8_skyagc1,g_stru_skyStatus.u8_skyagc2);
+		DLOG_Critical("rc work patten ");
+		uint32_t str2[50]={0};
+		for(j=0;j<context.rf_info.rc_ch_working_patten_size;j++)str2[j]=BB_GetRcFrqByCh(context.rf_info.rc_ch_working_patten[j]);
+		gprtit(str2, 0);
+		print_grd++;
+		
+ }
+	
+  else if(print_grd==0x02)
+  {
+		uint32_t str[50]={0};
+		int j=0;
+		DLOG_Critical("grd sweep table");
+		for(i=0;i<SWEEP_FREQ_BLOCK_ROWS;i++)
+		{
+			for(j=0;j<context.rf_info.sweep_freqsize;j++)str[j]=context.rf_info.sweep_pwr_table[i][j].value;
+				gprtit(str,i);
+		}
+		DLOG_Critical("grd sweep avrg");
+		for(j=0;j<context.rf_info.sweep_freqsize;j++)str[j]=context.rf_info.sweep_pwr_avrg_value[j].value;
+				gprtit(str,0);
+				
+		DLOG_Critical("grd sweep fluct");
+		for(j=0;j<context.rf_info.sweep_freqsize;j++)str[j]=context.rf_info.sweep_pwr_fluct_value[j].value;
+				gprtit(str,0);
+
+		DLOG_Critical("grd sort avrg ");
+		for(j=0;j<context.rf_info.sweep_freqsize;j++)str[j]=context.rf_info.sort_result_list[j].value;
+				gprtit(str,0);
+
+		DLOG_Critical("rc work patten ");
+		uint32_t str2[50]={0};
+		for(j=0;j<context.rf_info.rc_ch_working_patten_size;j++)str2[j]=BB_GetRcFrqByCh(context.rf_info.rc_ch_working_patten[j]);
+				gprtit(str2, 0);
+
+		print_grd = 0x00;
+   }
+
+	
+#endif
+
+}
 
 void BB_GRD_start(void)
 {
     context.dev_state = INIT_DATA;
     context.qam_ldpc = context.u8_bbStartMcs;
     context.flag_mrc = 0;
-	context.rf_bw.autobw =1;
+	
     context.st_bandMcsOpt.e_rfbandMode = MANUAL; //grd defualt manual
     context.flag_in_upgrade=0;
 	BB_SetTrxMode(BB_RECEIVE_ONLY_MODE); // receive only
@@ -280,10 +332,11 @@ static void gptf(uint32_t *str,int i){
 
 static void gprtit(uint32_t *str,int i){
 	
-	DLOG_Critical("%d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d",
-					i,
+	DLOG_Critical(" %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d",
 					str[0],str[1],str[2],str[3],str[4],str[5],str[6],str[7],str[8],str[9],
-					str[10],str[11],str[12],str[13],str[14],str[15],str[16],str[17],str[18],str[19],str[20]);
+					str[10],str[11],str[12],str[13],str[14],str[15],str[16],str[17],str[18],str[19],
+					str[20],str[21],str[22],str[23],str[24],str[25],str[26],str[27],str[28],str[29],
+					str[30],str[31],str[32],str[33],str[34],str[35],str[36],str[37],str[38],str[39],str[40],str[41]);
 	
 }
 #endif
@@ -365,6 +418,7 @@ static void BB_grd_uartDataHandler(void)
 				int i=0,j=0;	
 				uint32_t type = data[2];
 				uint32_t len = data[1];
+				
 				for(i=0;i<50;i++)buff[i]=0;
 				
 				if(len > 50) return;
@@ -382,49 +436,10 @@ static void BB_grd_uartDataHandler(void)
 					buff[0]=len;
 					buff[1]=type;
 					gptf(buff,0);
+					print_grd =0x01;
 				}
 
-				#if 1
-								
-				if(type==0x0d)
-				{
-					DLOG_Critical("rc_error=%d,rc_agca=%d,rc_agcb=%d",(100-g_stru_skyStatus.u8_rcCrcLockCnt),g_stru_skyStatus.u8_skyagc1,g_stru_skyStatus.u8_skyagc2);
-					DLOG_Critical("rc work patten ");
-					uint32_t str2[50]={0};
-					for(j=0;j<context.rf_info.rc_ch_working_patten_size;j++)str2[j]=BB_GetRcFrqByCh(context.rf_info.rc_ch_working_patten[j]);
-					gprtit(str2, 0);
-				}
 				
-				if(type==0x0d)
-				{
-					uint32_t str[50]={0};
-					int j=0;
-					DLOG_Critical("grd sweep table");
-					for(i=0;i<SWEEP_FREQ_BLOCK_ROWS;i++)
-					{
-						for(j=0;j<context.rf_info.sweep_freqsize;j++)str[j]=context.rf_info.sweep_pwr_table[i][j].value;
-							gprtit(str,i);
-					}
-					DLOG_Critical("grd sweep avrg");
-					for(j=0;j<context.rf_info.sweep_freqsize;j++)str[j]=context.rf_info.sweep_pwr_avrg_value[j].value;
-							gprtit(str,0);
-							
-					DLOG_Critical("grd sweep fluct");
-					for(j=0;j<context.rf_info.sweep_freqsize;j++)str[j]=context.rf_info.sweep_pwr_fluct_value[j].value;
-							gprtit(str,0);
-
-					DLOG_Critical("grd sort avrg ");
-					for(j=0;j<context.rf_info.sweep_freqsize;j++)str[j]=context.rf_info.sort_result_list[j].value;
-							gprtit(str,0);
-
-					DLOG_Critical("rc work patten ");
-					uint32_t str2[50]={0};
-					for(j=0;j<context.rf_info.rc_ch_working_patten_size;j++)str2[j]=BB_GetRcFrqByCh(context.rf_info.rc_ch_working_patten[j]);
-							gprtit(str2, 0);
-			   }
-			
-				
-				#endif
 			}
 			else if(pid == DT_NUM_SKY_RC_PATTEN)
 			{
@@ -562,7 +577,7 @@ void grd_fec_judge(void)
             {
                 context.dev_state = CHECK_FEC_LOCK;
 				//DLOG_Warning("rc_set_unlock_patten");
-				rc_set_unlock_patten();
+				rc_set_unlock_patten(1);
                 DLOG_Info("CHECK_FEC_LOCK");
 				#ifdef RFSUB_BAND
                 if(context.freq_band_mode == SUB_BAND)
@@ -768,7 +783,7 @@ int grd_freq_skip_pre_judge(void)
             //context.cur_IT_ch, context.cycle_count, ((BB_ReadReg(PAGE2, FEC_5_RD)& 0xF0) >> 4), grd_get_it_snr());
             context.dev_state = DELAY_14MS;
 
-			grd_gen_it_working_ch(0);
+			//grd_gen_it_working_ch(0);
 			
             return 0;
         }
@@ -798,8 +813,8 @@ int grd_freq_skip_pre_judge(void)
             BB_grd_NotifyItFreqByCh(context.e_curBand, context.cur_IT_ch);
             
             
-            //DLOG_Info("Set Ch0:%d %d %d %x\n",
-            //           context.cur_IT_ch, context.cycle_count, ((BB_ReadReg(PAGE2, FEC_5_RD)& 0xF0) >> 4), grd_get_it_snr());
+            DLOG_Warning("Set Ch0:%d %d %d %x\n",
+                       context.cur_IT_ch, context.cycle_count, ((BB_ReadReg(PAGE2, FEC_5_RD)& 0xF0) >> 4), grd_get_it_snr());
             context.dev_state = DELAY_14MS;
             return 0;
 
@@ -829,8 +844,8 @@ void grd_freq_skip_post_judge(void)
             context.cur_IT_ch = context.next_IT_ch;
             BB_Sweep_updateCh(context.e_curBand, context.cur_IT_ch );
             BB_grd_NotifyItFreqByCh(context.e_curBand, context.cur_IT_ch);
-            //DLOG_Info("Set Ch1:%d %d %d %x\n", context.cur_IT_ch, context.cycle_count,
-            //                                 ((BB_ReadReg(PAGE2, FEC_5_RD)& 0xF0) >> 4), grd_get_it_snr());
+            DLOG_Warning("Set Ch1:%d %d %d %x\n", context.cur_IT_ch, context.cycle_count,
+                                             ((BB_ReadReg(PAGE2, FEC_5_RD)& 0xF0) >> 4), grd_get_it_snr());
         }
 
         context.dev_state = DELAY_14MS;        
@@ -1284,7 +1299,7 @@ void Grd_TIM2_6_IRQHandler(uint32_t u32_vectorNum)
         BB_ComCycleMsgProcess();
         BB_ComCycleSendMsg(BB_COM_TYPE_UART, 0, NULL);
     }
-
+	grd_plot_itsweep();
     Timer1_Delay1_Cnt = 0;
 }
 
@@ -1298,11 +1313,6 @@ static void time_slice0(){
 	}
 	#endif
 	BB_grd_checkSearchEnd();
-	/*
-	if(context.enable_rc_skip_patten)
-	{
-	    grd_init_rc_skip_patten();
-	}*/
 }
 static void time_slice1(){
 	grd_fec_judge();
@@ -1464,7 +1474,9 @@ static void time_slice7(){
 	   grd_freq_skip_post_judge( );
    }
    if(context.inSearching) return;
-	//grd_gen_it_working_ch(1);
+
+   if(context.rf_info.rf_bw_cg_info.en_it_hoping_quickly)
+		grd_gen_it_working_ch(1);
 
 }
 
@@ -2366,10 +2378,23 @@ static void grd_do_rf_bw(void)
 			bw=context.rf_bw.bw;
 			if(context.st_bandMcsOpt.e_bandwidth != bw)
 		    {
-				reset_sweep_table(context.e_curBand);
-				 context.st_bandMcsOpt.e_bandwidth = bw; 
+		    	context.st_bandMcsOpt.e_bandwidth = bw; 
 				RF8003s_GetFctFreqTable(context.st_bandMcsOpt.e_bandwidth);
-				//rc_set_unlock_patten();
+				reset_sweep_table(context.e_curBand);
+				
+				context.rf_info.e_bw=bw;
+				context.rf_info.u8_prevSweepCh=0;
+				
+				uint8_t main_ch = 0, opt_ch = 0;
+    			BB_selectBestCh(context.e_curBand, SELECT_MAIN_OPT, &main_ch, &opt_ch, NULL, 0);
+				//BB_SweepChangeBand(context.e_curBand, main_ch, opt_ch);
+				context.rf_info.u8_cycleCnt      =  MAIN_CH_CYCLE;
+			    context.rf_info.u8_mainSweepRow  =  0;
+			    context.rf_info.u8_optSweepRow   =  0;
+			    context.rf_info.u8_prevSweepCh   = 0x0;
+			    context.rf_info.u16_preMainCount = 0x0;
+			    context.rf_info.u8_mainSweepCh = main_ch;
+			    context.rf_info.u8_prevSweepCh = main_ch;
 				BB_set_RF_bandwitdh(BB_GRD_MODE, bw);
 				context.qam_ldpc=context.rf_bw.ldpc;
 				BB_set_ItFrqByCh(context.e_curBand, context.stru_bandChange.u8_ItCh);
@@ -2393,7 +2418,6 @@ static void grd_notify_rf_bw(){
 		buf[2]= context.rf_bw.ldpc;
 		buf[3]= context.rf_bw.autobw;
 		BB_Session0SendMsg(DT_NUM_AUTO_CH_BW_CHANGE, buf,4);
-		//DLOG_Critical("grd notify sky :cnt=%d,aim_cnt=%d", context.sync_cnt, context.rf_bw.timeout_cnt);
 	}
 	if(gap > 5) gap = 0;
 }
