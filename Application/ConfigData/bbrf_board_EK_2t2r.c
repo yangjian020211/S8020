@@ -179,9 +179,9 @@ STRU_cfgNode rf_bw_chg_nodeInfo=
 
 STRU_BOARD_RF_BW_CHG stru_rf_bw_chg__boardCfg __attribute__ ((aligned (4)))= 
 {
-    .en_auto  = 0,    	   // enbale
-    .thd_10   = 80,        // > u8_agcThdL, select_10MHz
-    .thd_20   = 74,        // < u8_agcThdH, select_20MHz
+    .en_auto  = 1,    	   // enbale
+    .thd_10   = 84,        // > u8_agcThdL, select_10MHz
+    .thd_20   = 81,        // < u8_agcThdH, select_20MHz
     .en_it_hoping_quickly=1,
 };
 
@@ -269,11 +269,17 @@ STRU_cfgNode EK_2t2r_sky_sweep_cfg_nodeInfo __attribute__ ((aligned (4)))=
 
 STRU_SKYSWEEPFRQ EK_2t2r_sky_sweep_boardCfg __attribute__ ((aligned (4)))= 
 {
-    .u8_band0SweepChannelCnt = 7,
-    .u16_band0SweepFrq       = {2409, 2419, 2429, 2439, 2449, 2459, 2469},
-
-    .u8_band1SweepChannelCnt = 7,
-    .u16_band1SweepFrq       = {5735, 5745, 5755, 5765, 5775, 5785, 5795},
+    .u8_band0SweepChannelCnt = 38,
+    .u16_band0SweepFrq       = {      2405, 2407, 2409, 2411, 2413, 2415, 2417, 2419, 2421,
+                                2423, 2425, 2427, 2429, 2431, 2433, 2435, 2437, 2439, 2441,
+                                2443, 2445, 2447, 2449, 2451, 2453, 2455, 2457, 2459, 2461, 
+                                2463, 2465, 2467, 2469, 2471, 2473, 2475, 2477, 2479	   },
+    .u8_band1SweepChannelCnt = 40,
+    .u16_band1SweepFrq       = {5735, 5737, 5739, 5741, 5743, 5745, 5747, 5749,5751, 5753, 
+                                5755, 5757, 5759, 5761, 5763, 5765, 5767, 5769,5771, 5773, 
+                                5775, 5777, 5779, 5781, 5783, 5785, 5787, 5789,5791, 5793,  
+                                5795, 5797, 5799, 5801, 5803, 5805, 5807, 5809,5811, 5813, 
+                                5815, 5817, 5819, 5821, 5823, 5825, 5827, 5829,5831, 5833},
 };
 
 
@@ -348,11 +354,11 @@ STRU_FACTORY_SETTING st_Factory_EK_2t2r_cfg __attribute__ ((aligned (4)))=
 
         .st_band0_rcChData = 
         {
-            .u32_rfChCount              =  40,
-            .u16_rfChFrqList            =  {2403, 2405, 2407, 2409, 2411, 2413, 2415, 2417, 2419, 2421,
+           .u32_rfChCount              =  38,
+            .u16_rfChFrqList            =  {	  2405, 2407, 2409, 2411, 2413, 2415, 2417, 2419, 2421,
                                             2423, 2425, 2427, 2429, 2431, 2433, 2435, 2437, 2439, 2441,
                                             2443, 2445, 2447, 2449, 2451, 2453, 2455, 2457, 2459, 2461, 
-                                            2463, 2465, 2467, 2469, 2471, 2473, 2475, 2477, 2479, 2481 },
+                                            2463, 2465, 2467, 2469, 2471, 2473, 2475, 2477, 2479  	   },
         },
 
         //5.8G rc channel, max 40 channel
@@ -382,10 +388,11 @@ STRU_FACTORY_SETTING st_Factory_EK_2t2r_cfg __attribute__ ((aligned (4)))=
         
         .st_band0_10M_vtChData = 
         {
-            .u32_rfChCount              = 19,
-            .u16_rfChFrqList            = {2406, 2410, 2414, 2418, 2422, 2426, 2430,2434,
-            							   2438, 2442, 2446, 2450, 2454, 2458, 2462,2466,
-            							   2470, 2474, 2476},
+           .u32_rfChCount              = 33,
+            .u16_rfChFrqList            = {2408,2410,2412,2414,2416,2418,2420,2422,2424,2426,
+            							   2428,2430,2432,2434,2436,2438,2440,2442,2444,2446,
+            							   2448,2450,2452,2454,2456,2458,2460,2462,2464,2466,
+            							   2468,2470,2472},
         },
         
         //5.8G 10M vt channel, max 40 channel
@@ -398,8 +405,10 @@ STRU_FACTORY_SETTING st_Factory_EK_2t2r_cfg __attribute__ ((aligned (4)))=
         
         .st_band1_10M_vtChData = 
         {
-            .u32_rfChCount              = 10,
-            .u16_rfChFrqList            = {5740, 5750, 5760, 5770, 5780, 5790, 5800, 5810, 5820, 5830},
+            .u32_rfChCount              = 26,
+            .u16_rfChFrqList            = {5736,5740,5744,5748,5752,5756,5760,5764,5768,5772,
+            							   5776,5780,5784,5788,5792,5796,5800,5804,5808,5812,
+            							   5816,5820,5824,5830,5834,5838},
         },
         
         /////////////////////////////////////////////////
@@ -414,8 +423,10 @@ STRU_FACTORY_SETTING st_Factory_EK_2t2r_cfg __attribute__ ((aligned (4)))=
         
         .st_band0_20M_vtChData = 
         {
-            .u32_rfChCount              = 3,
-            .u16_rfChFrqList            = {2412, 2436, 2460},
+            .u32_rfChCount              = 28,
+            .u16_rfChFrqList            = {2413,2415,2417,2419,2421,2423,2425,2427,2429,2431,
+            							   2433,2435,2437,2439,2441,2443,2445,2447,2449,2451,
+            							   2453,2455,2457,2459,2461,2463,2465,2467},
         },
         
         //5.8G 20M vt channel, max 40 channel
@@ -428,8 +439,10 @@ STRU_FACTORY_SETTING st_Factory_EK_2t2r_cfg __attribute__ ((aligned (4)))=
         
         .st_band1_20M_vtChData = 
         {
-            .u32_rfChCount              = 5,
-            .u16_rfChFrqList            = {5745, 5765, 5785, 5805, 5825},
+            .u32_rfChCount              = 24,
+            .u16_rfChFrqList            = {5741, 5745, 5749, 5753, 5757, 5761, 5765, 5769, 5773,5777,
+            							   5781, 5785, 5789, 5793, 5797, 5801, 5805, 5809, 5813,5817,
+            							   5821, 5825, 5829, 5833},
         },
 
 

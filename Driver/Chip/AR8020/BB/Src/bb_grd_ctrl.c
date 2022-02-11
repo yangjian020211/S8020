@@ -436,9 +436,10 @@ static void BB_grd_uartDataHandler(void)
 					buff[0]=len;
 					buff[1]=type;
 					gptf(buff,0);
-					print_grd =0x01;
 				}
-
+				if(type==0x0d){
+					print_grd =0x00;
+				}
 				
 			}
 			else if(pid == DT_NUM_SKY_RC_PATTEN)
@@ -2379,7 +2380,7 @@ static void grd_do_rf_bw(void)
 			if(context.st_bandMcsOpt.e_bandwidth != bw)
 		    {
 		    	context.st_bandMcsOpt.e_bandwidth = bw; 
-				RF8003s_GetFctFreqTable(context.st_bandMcsOpt.e_bandwidth);
+				RF_GetFctFreqTable(context.st_bandMcsOpt.e_bandwidth);
 				reset_sweep_table(context.e_curBand);
 				
 				context.rf_info.e_bw=bw;

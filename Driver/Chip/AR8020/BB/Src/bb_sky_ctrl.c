@@ -778,7 +778,7 @@ static void sky_do_rf_bw(void)
             context.rf_bw.en_flag = 0;
             context.rf_bw.timeout_cnt = 0;
 			context.st_bandMcsOpt.e_bandwidth = (ENUM_CH_BW)context.rf_bw.bw;
-			RF8003s_GetFctFreqTable(context.st_bandMcsOpt.e_bandwidth);
+			RF_GetFctFreqTable(context.st_bandMcsOpt.e_bandwidth);
 			reset_sweep_table(context.e_curBand);
 			BB_set_RF_bandwitdh(BB_SKY_MODE, (ENUM_CH_BW)context.rf_bw.bw);
 			BB_set_ItFrqByCh(context.e_curBand, context.stru_bandChange.u8_ItCh);
@@ -2670,6 +2670,7 @@ static void BB_skyPlot(void)
     osdptr->sdram_buf_size[1] = 0x100000 - H264_SDRAM_GetBufferLevel(1);
 	
 	osdptr->current_pwr = context.u8_TargetPower[0];
+	osdptr->e_bandwidth = context.st_bandMcsOpt.e_bandwidth;
 	j++;
 	
 	#if 0

@@ -1368,6 +1368,9 @@ int32_t __attribute__ ((section(".h264"))) grd_notifyRfbandChange(ENUM_RF_BAND e
         context.stru_bandChange.u8_ItCh   = u8_itCh;
         context.stru_bandChange.u8_optCh  = u8_optCh;
 		context.stru_bandChange.chg_mcs = 1;
+		if(context.qam_ldpc < 3) context.stru_bandChange.chg_mcs = 1;
+		else  context.stru_bandChange.chg_mcs = context.qam_ldpc-1;
+		/*
 		if(context.st_bandMcsOpt.e_bandwidth==BW_20M)
 		{
 			context.stru_bandChange.chg_mcs = 1;
@@ -1375,9 +1378,9 @@ int32_t __attribute__ ((section(".h264"))) grd_notifyRfbandChange(ENUM_RF_BAND e
 		else
 		{
 			if(context.qam_ldpc < 3) context.stru_bandChange.chg_mcs = 1;
-			else  context.stru_bandChange.chg_mcs = context.qam_ldpc-2;;
+			else  context.stru_bandChange.chg_mcs = context.qam_ldpc-1;
 		}
-		
+		*/
         BB_DtSendToBuf(DT_NUM_RF_BAND_CHANGE, (uint8_t *)&(context.stru_bandChange));
 
         DLOG_Critical("Band:%d chgBand %d %d", context.e_curBand, e_band, sizeof(context.stru_bandChange));
@@ -1402,7 +1405,7 @@ int32_t __attribute__ ((section(".h264"))) grd_doRfbandChange( uint8_t *pu8_main
         {            
             context.stru_bandChange.flag_bandchange = 0;
             context.e_curBand = OTHER_BAND(context.e_curBand);  //switch to another band
-			RF8003s_GetFctFreqTable(context.st_bandMcsOpt.e_bandwidth);
+			RF_GetFctFreqTable(context.st_bandMcsOpt.e_bandwidth);
             BB_set_RF_Band(BB_GRD_MODE, context.e_curBand);
 			reset_sweep_table(context.e_curBand);
 			
@@ -1475,7 +1478,7 @@ int32_t __attribute__ ((section(".h264"))) grd_RfBandSelectChannelDoSwitch(void)
 
     BB_selectBestCh(context.e_curBand, SELECT_MAIN_OPT, &main_ch, &opt_ch, NULL, 0);
     BB_set_RF_Band(BB_GRD_MODE, context.e_curBand);
-	RF8003s_GetFctFreqTable(context.st_bandMcsOpt.e_bandwidth);
+	RF_GetFctFreqTable(context.st_bandMcsOpt.e_bandwidth);
 	reset_sweep_table(context.e_curBand);
     BB_SweepChangeBand(context.e_curBand, main_ch, opt_ch);
     BB_set_sweepChannel();  
@@ -1642,7 +1645,7 @@ void grd_auto_change_rf_bw(void){
 		context.rf_bw.bw=BW_20M;
 		context.rf_bw.timeout_cnt=context.sync_cnt+STATUS_CHG_DELAY;
 		if(context.qam_ldpc < 3) context.rf_bw.ldpc=1;
-		else  context.rf_bw.ldpc=context.qam_ldpc-2;
+		else  context.rf_bw.ldpc=context.qam_ldpc-1;
 	}
 	else if(context.rf_info.working_pwr_avrg > context.rf_info.rf_bw_cg_info.thd_10)
 	{

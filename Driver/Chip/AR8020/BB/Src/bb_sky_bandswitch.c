@@ -145,7 +145,7 @@ uint8_t __attribute__ ((section(".h264"))) sky_rcUnLockHopBand(void)
             }
 		
 			//context.rf_info.e_bw = context.st_bandMcsOpt.e_bandwidth;
-			RF8003s_GetFctFreqTable(context.st_bandMcsOpt.e_bandwidth);
+			RF_GetFctFreqTable(context.st_bandMcsOpt.e_bandwidth);
 			rc_set_unlock_patten(1);
             sky_rcHopFreq();
 			#ifdef RFSUB_BAND
@@ -230,7 +230,7 @@ void __attribute__ ((section(".h264"))) sky_doRfBandChange(uint8_t u8_lockStatus
             context.stru_bandChange.flag_bandchange = 0;
             context.stru_bandChange.u8_eqCntChg = 0;
             context.e_curBand =  context.stru_bandChange.e_toBand;
-			RF8003s_GetFctFreqTable(context.st_bandMcsOpt.e_bandwidth);
+			RF_GetFctFreqTable(context.st_bandMcsOpt.e_bandwidth);
 			reset_sweep_table(context.e_curBand);
 			BB_set_RF_Band(BB_SKY_MODE, context.e_curBand);
             sky_switchSetPower(context.e_curBand);
@@ -276,7 +276,7 @@ void __attribute__ ((section(".h264"))) sky_handle_RF_band_cmd_pure_vt( ENUM_RF_
         context.sky_rc_channel = 0;
         context.stru_bandChange.u8_ItCh = 0;
         context.cur_IT_ch  = 0;
-		RF8003s_GetFctFreqTable(context.st_bandMcsOpt.e_bandwidth);
+		RF_GetFctFreqTable(context.st_bandMcsOpt.e_bandwidth);
 		rc_set_unlock_patten(0);
         sky_rcHopFreq();
         BB_set_ItFrqByCh( context.e_curBand, context.stru_bandChange.u8_ItCh);

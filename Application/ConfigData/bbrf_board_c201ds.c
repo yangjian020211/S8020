@@ -101,6 +101,22 @@ STRU_BOARD_RF_PARA stru_EK_2t2r_rf_boardCfg __attribute__ ((aligned (4)))=
     .boardCfgName                = "C201-DS",
 };
 
+extern STRU_BOARD_RF_BW_CHG stru_rf_bw_chg__boardCfg;
+
+STRU_cfgNode rf_bw_chg_nodeInfo= 
+{
+    .nodeId       = BB_BW_AUTO_CHG_ID,
+    .nodeElemCnt  = 1,    
+    .nodeDataSize = sizeof(stru_rf_bw_chg__boardCfg)
+};
+
+STRU_BOARD_RF_BW_CHG stru_rf_bw_chg__boardCfg __attribute__ ((aligned (4)))= 
+{
+    .en_auto  = 1,    	   // enbale
+    .thd_10   = 84,        // > u8_agcThdL, select_10MHz
+    .thd_20   = 81,        // < u8_agcThdH, select_20MHz
+    .en_it_hoping_quickly=1,
+};
 
 
 extern STRU_RF_REG EK_2t2r_rf_boardReg[13];

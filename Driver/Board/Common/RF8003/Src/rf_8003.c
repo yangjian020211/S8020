@@ -152,6 +152,8 @@ void RF8003_CalcFctNode2RegTable(uint32_t nodeid, STRU_FRQ_CHANNEL *frq_regvalue
 
 }
 
+
+
 void RF8003_GetFctFreqTable(ENUM_CH_BW e_bw)
 {
     uint8_t i = 0,j=0;
@@ -179,9 +181,6 @@ void RF8003_GetFctFreqTable(ENUM_CH_BW e_bw)
         nodeid_band0 = FACTORY_SUBNODE_BAND0_VT_20M_FRQ_ID;
 		itp_frq = FCT_GetNodeAndData(nodeid_band0, &itnode);
 		pItFreqlist = itp_frq->u16_rfChFrqList;
-		//DLOG_Critical("cnt = %d", itp_frq->u32_rfChCount);
-		//for(i=0;i<itp_frq->u32_rfChCount;i++)
-		//	DLOG_Critical("it[%d]=%d",i,pItFreqlist[i]);
     }
     
     p_frq = (STRU_RF_CHANNEL *)FCT_GetNodeAndData(FACTORY_SUBNODE_BAND0_RC_10M_FRQ_ID, &node);
@@ -191,7 +190,7 @@ void RF8003_GetFctFreqTable(ENUM_CH_BW e_bw)
         return;
     }
 	
-
+	#ifdef RFSUB_BAND
     if(p_frq->u32_rfChCount > 0 && p_frq->u16_rfChFrqList[0] < 100)//real freq value must > 100, e.g 2400,5800
     {
         DLOG_Warning("2g auto generate rc freq");
@@ -224,6 +223,7 @@ void RF8003_GetFctFreqTable(ENUM_CH_BW e_bw)
         DLOG_Warning("2g rc frq %d %d",u8_subBand10MrcFreqNum,u8_rcFreqCnt_2g);
     }
     else
+	#endif
     {
         RF8003_CalcFctNode2RegTable(FACTORY_SUBNODE_BAND0_RC_10M_FRQ_ID, pstru_rcFreq_2g, &u8_rcFreqCnt_2g);
 		rcp_frq = FCT_GetNodeAndData(FACTORY_SUBNODE_BAND0_RC_10M_FRQ_ID, &rcnode);
@@ -232,6 +232,11 @@ void RF8003_GetFctFreqTable(ENUM_CH_BW e_bw)
 
     DLOG_Warning("e_bw = %d,rc_cnt = %d", e_bw,u8_rcFreqCnt_2g);
 }
+
+void RF_GetFctFreqTable(ENUM_CH_BW e_bw){
+	RF8003_GetFctFreqTable(e_bw);
+}
+
 #define  RF8003_RF_CLOCKRATE    (1)    //1MHz clockrate
 
 static int RF8003_SPI_WriteReg_internal(uint8_t u8_addr, uint8_t u8_data)

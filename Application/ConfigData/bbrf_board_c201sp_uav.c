@@ -167,9 +167,9 @@ STRU_cfgNode rf_bw_chg_nodeInfo=
 
 STRU_BOARD_RF_BW_CHG stru_rf_bw_chg__boardCfg __attribute__ ((aligned (4)))= 
 {
-    .en_auto  = 0,    	   // enbale
-    .thd_10   = 80,        // > u8_agcThdL, select_10MHz
-    .thd_20   = 74,        // < u8_agcThdH, select_20MHz
+    .en_auto  = 1,    	   // enbale
+    .thd_10   = 84,        // > u8_agcThdL, select_10MHz
+    .thd_20   = 80,        // < u8_agcThdH, select_20MHz
     .en_it_hoping_quickly=1,
 };
 
@@ -333,10 +333,11 @@ STRU_FACTORY_SETTING st_Factory_TEST8003_2t2r_cfg __attribute__ ((aligned (4)))=
 
         .st_band0_10M_vtChData = 
         {
-            .u32_rfChCount              = 19,
-            .u16_rfChFrqList            = {2406, 2410, 2414, 2418, 2422, 2426, 2430,2434,
-            							   2438, 2442, 2446, 2450, 2454, 2458, 2462,2466,
-            							   2470, 2474, 2476},
+            .u32_rfChCount              = 33,
+            .u16_rfChFrqList            = {2408,2410,2412,2414,2416,2418,2420,2422,2424,2426,
+            							   2428,2430,2432,2434,2436,2438,2440,2442,2444,2446,
+            							   2448,2450,2452,2454,2456,2458,2460,2462,2464,2466,
+            							   2468,2470,2472},
 
         },
 
@@ -364,8 +365,10 @@ STRU_FACTORY_SETTING st_Factory_TEST8003_2t2r_cfg __attribute__ ((aligned (4)))=
 
         .st_band0_20M_vtChData = 
         {
-            .u32_rfChCount              = 3,
-            .u16_rfChFrqList            = {2412, 2436, 2460},
+           .u32_rfChCount              = 28,
+           .u16_rfChFrqList            = {2413,2415,2417,2419,2421,2423,2425,2427,2429,2431,
+            							  2433,2435,2437,2439,2441,2443,2445,2447,2449,2451,
+            							  2453,2455,2457,2459,2461,2463,2465,2467},
         },
 
         //5.8G 20M vt channel, max 40 channel

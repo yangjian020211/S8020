@@ -320,6 +320,9 @@ void RF8003s_GetFctFreqTable(ENUM_CH_BW e_bw)
 	
 
 }
+void RF_GetFctFreqTable(ENUM_CH_BW e_bw){
+	RF8003s_GetFctFreqTable(e_bw);
+}
 
 #define  RF8003S_RF_CLOCKRATE    (1)    //1MHz clockrate
 
@@ -400,7 +403,7 @@ void RF_init(ENUM_BB_MODE en_mode)
 
     STRU_RF_REG * pstru_rfReg = NULL;
 
-    RF8003s_GetFctFreqTable(context.st_bandMcsOpt.e_bandwidth);
+    RF_GetFctFreqTable(context.st_bandMcsOpt.e_bandwidth);
 
     BB_gen_open_power_makeup_value(en_mode, context.st_bandMcsOpt.e_bandwidth);
 

@@ -86,5 +86,7 @@ uint8_t BB_set_skySweepVtfrq(ENUM_RF_BAND band, uint8_t ch);
 
 void RF8003s_GetFctFreqTable(ENUM_CH_BW e_bw);
 
+void RF_GetFctFreqTable(ENUM_CH_BW e_bw);
+
 
 #endif

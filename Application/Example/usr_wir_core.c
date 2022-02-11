@@ -9,7 +9,7 @@
 
 WIR_INFO wir_info;
 
-int get_buf_info(void)
+static int get_buf_info(void)
 {
     int ret;
     unsigned char *p;

@@ -2743,7 +2743,7 @@ void __attribute__ ((section(".h264")))rc_set_unlock_patten(uint8_t chg_bw)
 		context.st_bandMcsOpt.e_bandwidth = BW_10M;
 		context.rf_bw.bw=BW_10M;
 		reset_sweep_table(context.e_curBand);
-		RF8003s_GetFctFreqTable(context.st_bandMcsOpt.e_bandwidth);
+		RF_GetFctFreqTable(context.st_bandMcsOpt.e_bandwidth);
 		if(context.en_bbmode==BB_SKY_MODE)
 		{
 			BB_set_RF_bandwitdh(BB_SKY_MODE, BW_10M);

@@ -290,7 +290,6 @@ QAMUPDONW snr_static_for_qam_change(uint16_t threshod_left_section, uint16_t thr
         work_ch_snr.snr_cmpResult[ work_ch_snr.u16_cmpCnt ] = QAMDOWN;
 
         if (  ( context.qam_ldpc == 1 && work_ch_snr.u16_downCount >= MCS1_DOWN_CONT_SNR ) || 
-              /*( context.qam_ldpc == 1 && cnt >= MCS1_DOWN_SNR ) ||*/
               ( context.qam_ldpc == 2 && work_ch_snr.u16_downCount >= MCS2_DOWN_CONT_SNR ) ||
               ( context.qam_ldpc == 3 && work_ch_snr.u16_downCount >= MCS3_DOWN_CONT_SNR ) ||
               ( context.qam_ldpc == 4 && work_ch_snr.u16_downCount >= MCS4_DOWN_CONT_SNR ) ||
@@ -466,7 +465,7 @@ void grd_set_txmsg_mcs_change(ENUM_CH_BW bw, uint8_t index)
     }
     else // 20M
     {
-        if( index == 4 )
+        if( index >= 4 )
         {
             regdata = mcs_20m_registers[1];
         }    
@@ -483,7 +482,7 @@ void grd_set_txmsg_mcs_change(ENUM_CH_BW bw, uint8_t index)
         BB_WriteReg(PAGE1, (addr + cnt), regdata[cnt]);
     }
 
-    //DLOG_Warning("MCS2=> 0x%x\n", index);
+    DLOG_Warning("MCS2=> 0x%x\n", index);
 }
 
 
