@@ -466,12 +466,12 @@ static void __attribute__ ((section(".h264"))) H264_Encoder_BBModulationChangeCa
     if (0 == ch)
     {
         H264_Encoder_UpdateBitrate(0, br_idx);
-     //   DLOG_Warning("H264 bitidx ch1: %d \r\n", br_idx);
+        DLOG_Warning("H264 bitidx ch1: %d \r\n", br_idx);
     }
     else if (1 == ch)
     {
         H264_Encoder_UpdateBitrate(1, br_idx);
-     //   DLOG_Warning("H264 bitidx ch2: %d \r\n", br_idx);
+        DLOG_Warning("H264 bitidx ch2: %d \r\n", br_idx);
     }
     else
     {

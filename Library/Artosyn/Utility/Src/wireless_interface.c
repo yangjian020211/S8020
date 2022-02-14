@@ -3419,7 +3419,7 @@ static void Wireless_Task(void const *argument)
     {
         Wireless_MessageProcess();
 
-        HAL_Delay(7);
+        HAL_Delay(2);
     }
 }
 

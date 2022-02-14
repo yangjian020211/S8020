@@ -404,7 +404,7 @@ void sky_notify_encoder_brc(uint8_t u8_ch, uint8_t bridx)
     }
 	event.bw = context.st_bandMcsOpt.e_bandwidth;
     SYS_EVENT_NotifyInterCore(SYS_EVENT_ID_BB_SUPPORT_BR_CHANGE, (void*)&event);
-    //DLOG_Info("ch%d brc =%d \n", u8_ch, bridx);
+    DLOG_Info("ch%d brc =%d \n", u8_ch, bridx);
 }
 
 

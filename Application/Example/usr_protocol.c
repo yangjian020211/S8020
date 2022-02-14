@@ -168,7 +168,7 @@ uint8_t cmd_ack_handle(void *msg, uint8_t port_id)
     {
         case CMD_VIDEO_BUF_DEEP:
         
-            len = 9;
+            len = 10;
             
             len += 1;//data is ready len
         
@@ -183,12 +183,13 @@ uint8_t cmd_ack_handle(void *msg, uint8_t port_id)
                 buf[10] = DATA_RDY;
 
             buf[15] = get_mcs(); 
-
-            ret = data_check(&buf[10],10);
+			buf[20] = get_bw(); 
+            ret = data_check(&buf[10],11);
 
             buf[8] = (char)ret;
             buf[9] = (char)(ret >> 8);
-
+			
+			
             break;
 
         case CMD_GRD_MOD_STATUS:

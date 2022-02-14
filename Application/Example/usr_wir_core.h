@@ -26,6 +26,7 @@ extern "C"
     int Wir_Set_Pwr_Handler(char *param);
     int get_vedio_deep(int *len);
     char get_mcs(void);
+	char get_bw(void);
     int get_vedio_deep1(int *len);
 
 #ifdef __cplusplus

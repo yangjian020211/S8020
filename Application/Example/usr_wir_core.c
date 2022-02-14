@@ -57,17 +57,44 @@ int get_vedio_deep(int *len)
 }
 int get_vedio_deep1(int *len)
 {
-
-
     *len = *(int *)(wir_info.vedio_space1);
     DLOG_Info("len = %x",*len);
-
     return 0;
 }
 
 char get_mcs(void)
 {
-    return wir_info.encoder_brcidx;
+	switch(wir_info.encoder_brcidx)
+	{
+		
+	case 1:
+		return 0;
+	break;
+	case 2:
+		return 1;
+	break;
+	case 3:
+		return 2;
+	break;
+	case 8:
+		return 3;
+	break;
+	case 11:
+		return 4;
+	break;
+	case 13:
+		return 5;
+	break;
+
+	defaut:
+		return 1;
+
+	}
+
+}
+
+char get_bw(void){
+	return  wir_info.bandwidth;
 }
 
 void enc_brcidx_change(uint8_t enc_brcidx,uint8_t bw)

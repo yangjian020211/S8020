@@ -2198,7 +2198,7 @@ int BB_DtStopSend(ENUM_DT_NUM e_num)
 
 int BB_Session0SendMsg(uint8_t id, uint8_t* data_buf, uint16_t len)
 {
-    uint8_t  data[128];
+    uint8_t  data[256];
     uint8_t  i = 0;
 
     if (len + 3 > sizeof(data))

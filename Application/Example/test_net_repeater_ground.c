@@ -18,7 +18,7 @@
 #include "hal_sram_ground.h"
 #include "memory.h"
 
-#define MAX_BUFFER (50)
+#define MAX_BUFFER (128)
 
 typedef struct _ring_buf
 {
