@@ -16,7 +16,7 @@ extern "C"
         volatile uint8_t    freq_chanl;
         volatile uint8_t    vedio_space[4];
         volatile uint8_t    vedio_space1[4];
-
+		volatile uint8_t	taget_Power;
     }WIR_INFO;
 
     void enc_brcidx_change(uint8_t enc_brcidx,uint8_t bw);
@@ -25,8 +25,9 @@ extern "C"
     int Wir_Set_Freq_Handler(char *param,char *ret_data);
     int Wir_Set_Pwr_Handler(char *param);
     int get_vedio_deep(int *len);
-    char get_mcs(void);
-	char get_bw(void);
+    uint8_t get_mcs(void);
+	uint8_t get_bw(void);
+	uint8_t get_taget_pwr(void);
     int get_vedio_deep1(int *len);
 
 #ifdef __cplusplus

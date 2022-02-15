@@ -168,8 +168,7 @@ uint8_t cmd_ack_handle(void *msg, uint8_t port_id)
     {
         case CMD_VIDEO_BUF_DEEP:
         
-            len = 10;
-            
+            len = 11;
             len += 1;//data is ready len
         
             buf[6] = len;
@@ -184,7 +183,8 @@ uint8_t cmd_ack_handle(void *msg, uint8_t port_id)
 
             buf[15] = get_mcs(); 
 			buf[20] = get_bw(); 
-            ret = data_check(&buf[10],11);
+			buf[21] = get_taget_pwr();
+            ret = data_check(&buf[10],len+1);
 
             buf[8] = (char)ret;
             buf[9] = (char)(ret >> 8);

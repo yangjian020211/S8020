@@ -20,7 +20,7 @@
 
 
 
-#define OPENMSG 0
+#define OPENMSG 1
 
  uint32_t sweep_pwr_table1[SWEEP_FREQ_BLOCK_ROWS/2][42]={0};
  uint32_t sweep_pwr_table2[SWEEP_FREQ_BLOCK_ROWS/2][42]={0};

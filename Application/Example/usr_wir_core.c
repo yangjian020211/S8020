@@ -35,6 +35,7 @@ static int get_buf_info(void)
     {
         *(int *)(wir_info.vedio_space) = pst_bb_info->sdram_buf_size[1];
         *(int *)(wir_info.vedio_space1) = pst_bb_info->sdram_buf_size[0];
+		 wir_info.taget_Power = pst_bb_info->current_pwr;
         if((pst_bb_info->lock_status & 0x07) == 0x07)
             wir_info.match_state = 1;
         else
@@ -62,7 +63,7 @@ int get_vedio_deep1(int *len)
     return 0;
 }
 
-char get_mcs(void)
+uint8_t get_mcs(void)
 {
 	switch(wir_info.encoder_brcidx)
 	{
@@ -93,8 +94,12 @@ char get_mcs(void)
 
 }
 
-char get_bw(void){
+uint8_t get_bw(void){
 	return  wir_info.bandwidth;
+}
+
+uint8_t get_taget_pwr(void){
+	return  wir_info.taget_Power;
 }
 
 void enc_brcidx_change(uint8_t enc_brcidx,uint8_t bw)

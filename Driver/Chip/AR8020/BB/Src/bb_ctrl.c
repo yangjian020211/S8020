@@ -2770,7 +2770,7 @@ void __attribute__ ((section(".h264")))rc_update_working_patten(void)
 			if((id & context.rcChgPatten.patten[i]) == id)
 			{
 				context.rf_info.rc_ch_working_patten[k] = i*8+j;
-				DLOG_Warning("syncnt=%d,new_patten[%d]=%d,freq=%d,frq_size=%d",context.sync_cnt, k,context.rf_info.rc_ch_working_patten[k],BB_GetRcFrqByCh(context.rf_info.rc_ch_working_patten[k]),BB_GetRcFrqNum(context.e_curBand));
+				//DLOG_Warning("syncnt=%d,new_patten[%d]=%d,freq=%d,frq_size=%d",context.sync_cnt, k,context.rf_info.rc_ch_working_patten[k],BB_GetRcFrqByCh(context.rf_info.rc_ch_working_patten[k]),BB_GetRcFrqNum(context.e_curBand));
 				k++;
 			}
 			id = id <<1;

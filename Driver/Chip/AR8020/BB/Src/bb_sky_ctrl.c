@@ -2609,21 +2609,38 @@ static void sky_handle_all_rf_cmds(void)
 static uint32_t H264_SDRAM_GetBufferLevel(uint8_t e_channel)
 {
     uint32_t buf_level = 0;
+	uint32_t buf_level0 = 0;
+	uint32_t radd=0,wadd=0;
+	//SDRAM_ENC_DEEP_REG_ADDR:0xA0010000
 
     Reg_Write32_Mask(SDRAM_ENC_DEEP_REG_ADDR + 0xDC, (unsigned int)(0x21 << 24), 0xFF000000);
-
     //read buffer counter
-
     if (e_channel == 0)
     {
         Reg_Write32_Mask(SDRAM_ENC_DEEP_REG_ADDR + 0xD8, (unsigned int)(0x04 <<  8), 0x00000F00);       // Switch to vdb debug register
+		buf_level = Reg_Read32(SDRAM_ENC_DEEP_REG_ADDR + 0xF8);
+		/*
+		Reg_Write32_Mask(SDRAM_ENC_DEEP_REG_ADDR + 0xD8, (unsigned int)(0x07 <<  8), 0x00000F00); 
+		wadd = Reg_Read32(SDRAM_ENC_DEEP_REG_ADDR + 0xF8);
+		Reg_Write32_Mask(SDRAM_ENC_DEEP_REG_ADDR + 0xD8, (unsigned int)(0x0b <<  8), 0x00000F00);
+		radd = Reg_Read32(SDRAM_ENC_DEEP_REG_ADDR + 0xF8);
+
+		if(wadd > radd){
+			buf_level0 = 0x100000 + radd - wadd;
+		}
+		else buf_level0 = radd - wadd;
+
+		//using buffer
+		buf_level = 0x100000 - buf_level0;
+		*/
     }
     else
     {
         Reg_Write32_Mask(SDRAM_ENC_DEEP_REG_ADDR + 0xD8, (unsigned int)(0x05 <<  8), 0x00000F00);       // Switch to vdb debug register
+        buf_level = Reg_Read32(SDRAM_ENC_DEEP_REG_ADDR + 0xF8);
     }
 
-    buf_level = Reg_Read32(SDRAM_ENC_DEEP_REG_ADDR + 0xF8);
+    
     Reg_Write32_Mask(SDRAM_ENC_DEEP_REG_ADDR + 0xDC, (unsigned int)(0x00 << 24), 0xFF000000);
 
     return buf_level;
@@ -2709,7 +2726,7 @@ uint16_t sky_get_rc_snr( void )
     if( cnt++ > 1500 )
     {
         cnt = 0;
-        DLOG_Info("SNR1:%0.4x\n", snr);
+        //DLOG_Info("SNR1:%0.4x\n", snr);
     }
 
     return snr;
@@ -2757,7 +2774,7 @@ void sky_ChgRcRate(uint8_t rate)
         DLOG_Error("%d",rate);
     }
     context.uplink_qam_mode = rate;
-	DLOG_Critical("RC rate = %d !");
+	//DLOG_Critical("RC rate = %d !");
     //sky_soft_reset();
 }
 
