@@ -52,7 +52,7 @@ static STRU_SkyStatus g_stru_skyStatus;
 
 //uint8_t grd_rc_channel = 0;
 static uint8_t non_lbt_opt_ch = 0xff;
-static int print_grd=0;
+static int print_grd=1;
 
 
 STRU_CALC_DIST_DATA s_st_calcDistData = 
@@ -205,7 +205,7 @@ int j=0;
 		uint32_t str2[50]={0};
 		for(j=0;j<context.rf_info.rc_ch_working_patten_size;j++)str2[j]=BB_GetRcFrqByCh(context.rf_info.rc_ch_working_patten[j]);
 		gprtit(str2, 0);
-		print_grd++;
+		print_grd=0;
 		
  }
 	
@@ -438,7 +438,7 @@ static void BB_grd_uartDataHandler(void)
 					gptf(buff,0);
 				}
 				if(type==0x0d){
-					print_grd =0x00;
+					print_grd =0x01;
 				}
 				
 			}

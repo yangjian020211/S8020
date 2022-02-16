@@ -352,7 +352,7 @@ uint8_t WIRELESS_SendOSDInfo(uint8_t usbPortId)
     {
         if (HAL_OK != HAL_USB_DeviceSendCtrl(u8_sendBuff, u32_sendLength, usbPortId))
 		{
-			DLOG_Error("send osd info error");
+			DLOG_Info("send osd info error");
 
 			return 1;
 		}
