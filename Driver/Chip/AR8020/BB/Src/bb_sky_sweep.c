@@ -766,7 +766,7 @@ static void find_best_patten()
 	}
 	selectionSortBy(lastestpatten,context.rf_info.rc_ch_working_patten_len,list,0);
 	context.rf_info.rc_patten_nextchg_delay=0;
-	for(i=0;i<context.rf_info.rc_ch_working_patten_len;i++) {
+	for(i=0;i<10;i++) {
 		context.rcChgPatten.patten[i]=0;
 	}
 	for(i=0;i<context.rf_info.rc_ch_working_patten_len;i++){
