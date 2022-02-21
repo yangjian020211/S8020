@@ -1624,8 +1624,9 @@ void grd_auto_change_rf_bw(void){
 	if(k==200)
 	{
 		k=0;
-		  DLOG_Critical("en_auto=%d,working_pwr_avrg=%d,thd_10=%d,thd_20=%d",
+		  DLOG_Critical("en_auto=%d,bw=%d,working_pwr_avrg=%d,thd_10=%d,thd_20=%d",
 		  context.rf_info.rf_bw_cg_info.en_auto,
+		  context.st_bandMcsOpt.e_bandwidth,
 		  context.rf_info.working_pwr_avrg,
 		  context.rf_info.rf_bw_cg_info.thd_10,
 		  context.rf_info.rf_bw_cg_info.thd_20

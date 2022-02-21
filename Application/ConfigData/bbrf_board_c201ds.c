@@ -112,10 +112,15 @@ STRU_cfgNode rf_bw_chg_nodeInfo=
 
 STRU_BOARD_RF_BW_CHG stru_rf_bw_chg__boardCfg __attribute__ ((aligned (4)))= 
 {
-    .en_auto  = 1,    	   // enbale
-    .thd_10   = 84,        // > u8_agcThdL, select_10MHz
-    .thd_20   = 81,        // < u8_agcThdH, select_20MHz
+   .en_auto  = 1,    	   // enbale
+    .thd_10   = 82,        // > u8_agcThdL, select_10MHz
+    .thd_20   = 76,        // < u8_agcThdH, select_20MHz
     .en_it_hoping_quickly=1,
+    .max_rc_len = 6,
+	.sweep_noise_thd = 5,
+	.sweep_patten_size = 4,
+	.rc_fine_sweep_size=8,
+	.it_fine_sweep_size=4,
 };
 
 

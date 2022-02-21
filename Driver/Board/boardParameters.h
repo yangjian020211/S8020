@@ -101,7 +101,11 @@ typedef struct
     uint8_t  thd_10;
     uint8_t  thd_20;
 	uint8_t  en_it_hoping_quickly;
-
+	uint8_t	 max_rc_len;
+	uint8_t  sweep_noise_thd;
+	uint8_t  sweep_patten_size;
+	uint8_t  rc_fine_sweep_size;
+	uint8_t  it_fine_sweep_size;
 }STRU_BOARD_RF_BW_CHG;
 
 

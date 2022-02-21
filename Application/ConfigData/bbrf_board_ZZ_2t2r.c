@@ -177,6 +177,11 @@ STRU_BOARD_RF_BW_CHG stru_rf_bw_chg__boardCfg __attribute__ ((aligned (4)))=
     .thd_10   = 82,        // > u8_agcThdL, select_10MHz
     .thd_20   = 76,        // < u8_agcThdH, select_20MHz
     .en_it_hoping_quickly=1,
+    .max_rc_len = 5,
+	.sweep_noise_thd = 5,
+	.sweep_patten_size = 3,
+	.rc_fine_sweep_size=8,
+	.it_fine_sweep_size=4,
 };
 
 extern STRU_BB_AOC stru_EK_2t2r_bb_aoc_boardCfg;

@@ -201,7 +201,7 @@ int j=0;
  if(print_grd==0x01)
  {
 		DLOG_Critical("rc_error=%d,rc_agca=%d,rc_agcb=%d",(100-g_stru_skyStatus.u8_rcCrcLockCnt),g_stru_skyStatus.u8_skyagc1,g_stru_skyStatus.u8_skyagc2);
-		DLOG_Critical("rc work patten ");
+		DLOG_Critical("current rc work patten len=%d",context.rf_info.rc_ch_working_patten_size);
 		uint32_t str2[50]={0};
 		for(j=0;j<context.rf_info.rc_ch_working_patten_size;j++)str2[j]=BB_GetRcFrqByCh(context.rf_info.rc_ch_working_patten[j]);
 		gprtit(str2, 0);
@@ -438,9 +438,19 @@ static void BB_grd_uartDataHandler(void)
 					gptf(buff,0);
 				}
 				if(type==0x0d){
+					
 					print_grd =0x01;
 				}
-				
+
+				if(type==0x0b)
+				{
+					DLOG_Warning("new patten len= %d",len-2);
+					for(i=0;i<len-2;i++)buff[i+2]=BB_GetRcFrqByCh(data[i+3]);
+					buff[0]=len;
+					buff[1]=0x0e;
+					gptf(buff,0);
+					
+				}
 			}
 			else if(pid == DT_NUM_SKY_RC_PATTEN)
 			{

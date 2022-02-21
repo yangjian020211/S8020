@@ -18,7 +18,7 @@
 #define SWEEP_FREQ_BLOCK_ROWS           (10)
 
 #define SWEEP_FREQ_STATISTICS_ROWS           (100)
-#define SKY_PATTEN_MAX_Dynamic_SIZE_2G	(5)
+#define SKY_PATTEN_MAX_Dynamic_SIZE_2G	(6)
 
 
 #define MAX_RC_FRQ_SIZE             (40)
@@ -198,7 +198,8 @@ typedef struct
 	uint8_t   rc_ch_patten_need_id_size;///the size of the representative for patten 
 	uint8_t	  rc_ch_working_patten_len;///the len for working patten channel numbers
 	uint8_t   rc_ch_dynamic_working_patten_max_len; 
-	
+	uint8_t   sweep_noise_thd;
+	uint8_t   sweep_patten_size;
 	uint32_t   rc_patten_nextchg_delay;//
 	uint8_t	  rc_avr_sweep_result_size;
 

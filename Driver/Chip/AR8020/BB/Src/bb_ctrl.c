@@ -348,12 +348,24 @@ static void  __attribute__ ((section(".h264"))) BB_getCfgData(ENUM_BB_MODE en_mo
 		context.rf_info.rf_bw_cg_info.thd_10 = rf_bw_chg_info->thd_10;
 		context.rf_info.rf_bw_cg_info.thd_20 = rf_bw_chg_info->thd_20;
 		context.rf_info.rf_bw_cg_info.en_it_hoping_quickly = rf_bw_chg_info->en_it_hoping_quickly;
-
-		DLOG_Warning("en_auto=%d, thd_10=%d,thd_20=%d",
+		
+		context.rf_info.rc_ch_dynamic_working_patten_max_len= rf_bw_chg_info->max_rc_len;
+		context.rf_info.sweep_noise_thd = rf_bw_chg_info->sweep_noise_thd;
+		context.rf_info.sweep_patten_size=rf_bw_chg_info->sweep_patten_size;
+		context.rf_info.rc_ch_working_patten_len = rf_bw_chg_info->sweep_patten_size;
+		if (en_mode == BB_SKY_MODE)
+			context.rf_info.fine_sweep_size = rf_bw_chg_info->rc_fine_sweep_size;
+		else 
+			context.rf_info.fine_sweep_size = rf_bw_chg_info->it_fine_sweep_size;
+		DLOG_Warning("en_auto=%d, thd_10=%d,thd_20=%d,rc_patten_max_len=%d,sweep_noise_thd=%d,sweep_patten_size=%d,fine_sweep_size=%d",
 			context.rf_info.rf_bw_cg_info.en_auto,
 			context.rf_info.rf_bw_cg_info.thd_10,
-			context.rf_info.rf_bw_cg_info.thd_20
-			);
+			context.rf_info.rf_bw_cg_info.thd_20,
+			context.rf_info.rc_ch_dynamic_working_patten_max_len,
+			context.rf_info.sweep_noise_thd,
+			context.rf_info.sweep_patten_size,
+			context.rf_info.fine_sweep_size
+		);
 	}
 	
 }
@@ -2770,7 +2782,6 @@ void __attribute__ ((section(".h264")))rc_update_working_patten(void)
 			if((id & context.rcChgPatten.patten[i]) == id)
 			{
 				context.rf_info.rc_ch_working_patten[k] = i*8+j;
-				//DLOG_Warning("syncnt=%d,new_patten[%d]=%d,freq=%d,frq_size=%d",context.sync_cnt, k,context.rf_info.rc_ch_working_patten[k],BB_GetRcFrqByCh(context.rf_info.rc_ch_working_patten[k]),BB_GetRcFrqNum(context.e_curBand));
 				k++;
 			}
 			id = id <<1;
@@ -2864,7 +2875,6 @@ void  reset_sweep_table(ENUM_RF_BAND cur_band){
 		}
 	}
 	else if(context.en_bbmode==BB_GRD_MODE){
-		context.rf_info.fine_sweep_size=4;
 		if (cur_band == RF_2G_5G)
 	    {
 	        context.rf_info.u8_bb1ItFrqSize = BB_GetItFrqNum(RF_2G);
@@ -2911,14 +2921,11 @@ void  reset_sweep_table(ENUM_RF_BAND cur_band){
 	context.rf_info.currc_statistics_Row=0;
 	context.rf_info.sweep_finished=1;
 	context.rf_info.lock_sweep=0;
-	context.rf_info.fine_sweep_size=8;
 	context.rf_info.fine_sweep_id=0;
 	context.rf_info.fine_sweep_row=0;
 	context.rf_info.isFull = 0;
 	context.rf_info.u8_isFull =0;
 	context.rf_info.sweep_cycle=0;
-	context.rf_info.rc_ch_working_patten_len=SKY_PATTEN_SIZE_2G;
-	context.rf_info.rc_ch_dynamic_working_patten_max_len=SKY_PATTEN_MAX_Dynamic_SIZE_2G;
 	bb_update_rc_patten_size();
 
 }
