@@ -441,7 +441,6 @@ static void BB_grd_uartDataHandler(void)
 					
 					print_grd =0x01;
 				}
-
 				if(type==0x0b)
 				{
 					DLOG_Warning("new patten len= %d",len-2);

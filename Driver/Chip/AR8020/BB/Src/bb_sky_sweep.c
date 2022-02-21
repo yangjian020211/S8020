@@ -735,7 +735,7 @@ static void find_best_patten()
 
 	//step3 decide the len of the patten
 	context.rf_info.rc_ch_working_patten_len= context.rf_info.sweep_patten_size ;
-	if(context.rf_info.sort_result_list[context.rf_info.rc_ch_working_patten_len-1].value -context.rf_info.sort_result_list[0].value > SWEEP_NOISE_SELECT_DIFF_THD )
+	if(context.rf_info.sort_result_list[context.rf_info.rc_ch_working_patten_len-1].value -context.rf_info.sort_result_list[0].value > context.rf_info.sweep_noise_thd )
 	{
 		context.rf_info.rc_ch_working_patten_len=context.rf_info.rc_ch_working_patten_len-1;
 	}
