@@ -27,7 +27,6 @@
 #define DEFAULT_DIST_ZERO_20M           (4386)
 #define DEFAULT_DIST_JUDGE_THRELD       (20)
 #define DEFAULT_DIST_JUDGE_CNT          (30)
-#define UNLOCK_CNT						(36)
 
 STRU_GRD_STATUS stru_grdstatus;
 
@@ -368,8 +367,11 @@ static void BB_grd_uartDataHandler(void)
                 STRU_skyAgc *agc = (STRU_skyAgc *)(data+1);
                 g_stru_skyStatus.u8_skyagc1 = agc->u8_skyagc1;
                 g_stru_skyStatus.u8_skyagc2 = agc->u8_skyagc2;
+				context.rf_info.skyp0=agc->u8_skyagc1;
+				context.rf_info.skyp1=agc->u8_skyagc2;
                 g_stru_skyStatus.snr        = agc->snr;
 				g_stru_skyStatus.tx_pwr		= agc->u8_tx_pwr;
+				context.rf_info.skytxp		= agc->u8_tx_pwr;
             }
             else if(DT_NUM_RC_ID_SYNC == pid)
             {
@@ -423,7 +425,7 @@ static void BB_grd_uartDataHandler(void)
 				
 				if(len > 50) return;
 				if(len < 2) return;
-				if(type==0xaa || type==0x55 || type==0x01 || type==0x04 || type==0x06 || type==0x07 || type==0x0a || type==0x0c )
+				if(type==0xaa || type==0x55 || type==0x01 || type==0x04 || type==0x06 || type==0x07 || type==0x0a || type==0x0c || type==0x0e )
 				{
 					for(i=0;i<len-2;i++) buff[i+2]=0-data[i+3];
 					buff[0]=len;
@@ -566,6 +568,7 @@ void grd_fec_judge(void)
         {
             context.dev_state = FEC_LOCK;
             context.fec_unlock_cnt = 0;
+			context.it_fec_unlock_cnt=0;
 			#ifdef RFSUB_BAND
             if(context.freq_band_mode == SUB_BAND)
             {
@@ -583,12 +586,14 @@ void grd_fec_judge(void)
             }
            
             context.fec_unlock_cnt++;
-            if(context.fec_unlock_cnt > UNLOCK_CNT)
+			context.it_fec_unlock_cnt++;
+			if(context.it_fec_unlock_cnt > context.rf_info.rc_unlock_timeout_cnt){
+				rc_set_unlock_patten(1);
+			}
+            if(context.fec_unlock_cnt >= context.rf_info.it_unlock_timeout_cnt)
             {
                 context.dev_state = CHECK_FEC_LOCK;
-				//DLOG_Warning("rc_set_unlock_patten");
-				rc_set_unlock_patten(1);
-                DLOG_Info("CHECK_FEC_LOCK");
+                DLOG_Critical("fec_unlock_cnt > %d",context.rf_info.it_unlock_timeout_cnt);
 				#ifdef RFSUB_BAND
                 if(context.freq_band_mode == SUB_BAND)
                 {
@@ -628,7 +633,7 @@ void grd_fec_judge(void)
 						it_ch_ok = BB_selectBestCh(context.e_curBand, SELECT_MAIN_OPT, &mainch, &optch, NULL, 0);
 						//if VT is unlock, reset map
 						//DLOG_Info("unlock: reset RC map");
-						BB_ResetRcMap();
+						//BB_ResetRcMap();
 					}
                     #endif
                     
@@ -1484,9 +1489,10 @@ static void time_slice7(){
 	   grd_freq_skip_post_judge( );
    }
    if(context.inSearching) return;
-
-   if(context.rf_info.rf_bw_cg_info.en_it_hoping_quickly)
+   if(context.itHopMode==MANUAL) return;
+   if(context.rf_info.rf_bw_cg_info.en_it_hoping_quickly){
 		grd_gen_it_working_ch(1);
+   	}
 
 }
 
@@ -1656,7 +1662,7 @@ ENUM_BB_LDPC grd_get_IT_LDPC(void)
 static void grd_handle_IT_mode_cmd(ENUM_RUN_MODE mode)
 {
     context.itHopMode = mode;
-    DLOG_Info("Set IT:%d", context.itHopMode);
+    DLOG_Critical("Set IT:%d", context.itHopMode);
     
     if ( mode == AUTO )
     {
@@ -1981,6 +1987,7 @@ void grd_handle_one_cmd(STRU_WIRELESS_CONFIG_CHANGE* pcmd)
                 frq[0] = frq_v >> 8;
                 frq[1] = frq_v;*/
                 BB_grd_NotifyItFreqByValue( frq ); 
+				DLOG_Warning("IT_CHANNEL_FREQ %d ", frq);  
                 #endif
                 break;
             }
@@ -1999,7 +2006,7 @@ void grd_handle_one_cmd(STRU_WIRELESS_CONFIG_CHANGE* pcmd)
                     BB_grd_NotifyItFreqByCh(context.e_curBand, value);
                     context.dev_state = FIND_SAME_DEV;
                 }
-                DLOG_Info("IT_CHANNEL_FREQ 0x%0.8x ", value); 
+                //DLOG_Info("IT_CHANNEL_FREQ 0x%0.8x ", value); 
                 break;
             }
 
@@ -2407,7 +2414,8 @@ static void grd_do_rf_bw(void)
 			    context.rf_info.u8_prevSweepCh = main_ch;
 				BB_set_RF_bandwitdh(BB_GRD_MODE, bw);
 				context.qam_ldpc=context.rf_bw.ldpc;
-				BB_set_ItFrqByCh(context.e_curBand, context.stru_bandChange.u8_ItCh);
+				if( context.itHopMode == AUTO)
+					BB_set_ItFrqByCh(context.e_curBand, context.stru_bandChange.u8_ItCh);
 				grd_set_txmsg_mcs_change(context.st_bandMcsOpt.e_bandwidth, context.qam_ldpc);
 				BB_softRxReset(BB_GRD_MODE);
 				DLOG_Critical("set rf bandwidth=%d", context.st_bandMcsOpt.e_bandwidth);

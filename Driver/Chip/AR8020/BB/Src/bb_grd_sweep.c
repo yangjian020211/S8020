@@ -443,7 +443,7 @@ static int __attribute__ ((section(".h264"))) BB_SweepBeforeFull( void )
 #endif
 
 
-            if( context.rf_info.u8_isFull )
+            if( context.rf_info.u8_isFull &&  context.itHopMode == AUTO )
             {
                 uint8_t mainch = 0, opt = 0;
 
@@ -1601,8 +1601,9 @@ void   grd_gen_it_working_ch(uint8_t mode){
 	uint8_t ret=0;
 	ret = grd_check_sweep_noise(0);
 	int oldch=context.cur_IT_ch;
-	if(context.itHopMode==MANUAL) return;
-	if(mode==0 || ret){
+	
+	if(mode==0 || ret)
+	{
 	  context.cur_IT_ch=context.rf_info.sort_result_list[0].id;
 	  BB_grd_NotifyItFreqByCh(context.e_curBand, context.cur_IT_ch);
 	  context.dev_state = DELAY_14MS;
@@ -1624,12 +1625,15 @@ void grd_auto_change_rf_bw(void){
 	if(k==200)
 	{
 		k=0;
-		  DLOG_Critical("en_auto=%d,bw=%d,working_pwr_avrg=%d,thd_10=%d,thd_20=%d",
+		  DLOG_Critical("en_auto=%d,bw=%d,working_pwr_avrg=%d,thd_10=%d,thd_20=%d,skypA=%d,skypB=%d,skytx_pwr=%d",
 		  context.rf_info.rf_bw_cg_info.en_auto,
 		  context.st_bandMcsOpt.e_bandwidth,
 		  context.rf_info.working_pwr_avrg,
 		  context.rf_info.rf_bw_cg_info.thd_10,
-		  context.rf_info.rf_bw_cg_info.thd_20
+		  context.rf_info.rf_bw_cg_info.thd_20,
+		  context.rf_info.skyp0,
+		  context.rf_info.skyp1,
+		  context.rf_info.skytxp
 		  );
 	}
 	#endif

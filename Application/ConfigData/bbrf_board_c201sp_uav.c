@@ -176,6 +176,10 @@ STRU_BOARD_RF_BW_CHG stru_rf_bw_chg__boardCfg __attribute__ ((aligned (4)))=
 	.sweep_patten_size = 4,
 	.rc_fine_sweep_size=8,
 	.it_fine_sweep_size=4,
+	.rc_common_ch_size=5;
+	.rc_common_ch={0,4,15,30,35},
+	.it_unlock_timeout_cnt=64,
+	.rc_unlock_timeout_cnt=245,
 };
 
 extern STRU_BB_AOC stru_TEST8003_bb_aoc_boardCfg;

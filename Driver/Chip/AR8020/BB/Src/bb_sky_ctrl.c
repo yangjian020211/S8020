@@ -878,8 +878,6 @@ static void process_check_lock_state()
 	if (1 == stru_skystatus.flag_errorConnect || SKY_RC_ERR(stru_skystatus.u8_rcStatus))
 	{
 		sky_soft_reset();
-
-		//DLOG_Warning("reset_flag = 5");
 		stru_skystatus.flag_errorConnect = 0;	//clear the error flag, or else will reset again.
 	}
 	else if (SKY_CRC_OK(stru_skystatus.u8_rcStatus)&& (!SKY_ID_CRC_MATCH(stru_skystatus.u8_rcStatus)) && (!BB_sky_isSearching()))
@@ -898,8 +896,6 @@ static void process_check_lock_state()
 		sky_handle_it_ch_sync_cmd();
 		flag_rchop		  = 1;
 		context.dev_state = WAIT_VT_LOCK;
-		//rc_set_unlock_patten();
-		
 		DLOG_Warning("CHECK_LOCK->WAIT_VT_LOCK");
 		BB_SetTrxMode(BB_NORMAL_MODE);
 		if (stru_skystatus.check_lock_times > 0)
@@ -912,19 +908,17 @@ static void process_check_lock_state()
 	else
 	{
 		BB_SetTrxMode(BB_RECEIVE_ONLY_MODE);
-		//sky_notify_grd_goto_unlock_patten();
 		if (BB_sky_isSearching() && u32_contiousUnlock ++ >= 20)
 		{
 			u32_contiousUnlock = 0;
 			context.dev_state  = SEARCH_ID;
 			DLOG_Warning("rc_set_unlock_patten");
 			rc_set_unlock_patten(1);
-			//sky_notify_grd_goto_unlock_patten();
 			DLOG_Warning("CHECK_LOCK-> SEARCH_ID");
 		}
 		else if ( (context.st_bandMcsOpt.e_rfbandMode == AUTO && context.st_bandMcsOpt.e_bandsupport == RF_2G_5G))	 
 		{
-			sky_rcUnLockHopBand();				//switch band, toggle agc, change channel each 1s
+			sky_rcUnLockHopBand();//switch band, toggle agc, change channel each 1s
 		}
 		else
 		{
@@ -948,7 +942,7 @@ static void process_wait_it_lock_state()
 	    DLOG_Info("%d %d %d %d",stru_skystatus.u8_rcStatus,stru_skystatus.flag_errorConnect,stru_skystatus.flag_groundInSearching,context.inSearching);
 	}
 
-    if (u32_contiousUnlock >= u8_unlockCntFromLockToUnlock)           //ID_MATCH_LOCK -> CHECK_ID_MATCH
+    if (u32_contiousUnlock >=  context.rf_info.rc_unlock_timeout_cnt)           //ID_MATCH_LOCK -> CHECK_ID_MATCH
     {
         u32_contiousUnlock = 0;
         context.dev_state  = CHECK_LOCK;
@@ -969,7 +963,7 @@ static void process_wait_it_lock_state()
 
     flag_rchop = 1;
 	//handler in rc lock
-    if (u32_contiousUnlock ++ >= u8_unlockCntFromLockToUnlock)           //ID_MATCH_LOCK -> CHECK_ID_MATCH
+    if (u32_contiousUnlock ++ >= context.rf_info.rc_unlock_timeout_cnt)           //ID_MATCH_LOCK -> CHECK_ID_MATCH
     {
         u32_contiousUnlock = 0;
         context.dev_state  = CHECK_LOCK;
@@ -1044,18 +1038,16 @@ static void process_lock_state()
 	}
 	
 	//handler in rc lock
-	if (u32_contiousUnlock ++ >= u8_unlockCntFromLockToUnlock)			 //ID_MATCH_LOCK -> CHECK_ID_MATCH
+	if (u32_contiousUnlock ++ >= context.rf_info.rc_unlock_timeout_cnt)			 //ID_MATCH_LOCK -> CHECK_ID_MATCH
 	{
 		u32_contiousUnlock = 0;
 		context.dev_state  = CHECK_LOCK;
 		DLOG_Warning("rc_set_unlock_patten");
 		rc_set_unlock_patten(1);
-		//sky_notify_grd_goto_unlock_patten();
 		BB_SetTrxMode(BB_RECEIVE_ONLY_MODE);
 		sky_switchSetPower(context.e_curBand);
 		sky_soft_reset();
 		DLOG_Warning("LOCK->CHECK_LOCK reset");
-		//context.rc_skip_patten = 0xff;
 	}
 	else if (sky_checkRcLock(stru_skystatus.u8_rcStatus))
 	{
@@ -2131,13 +2123,13 @@ static void sky_handle_all_grd_cmds(uint8_t *arg, uint8_t len)
 		case DT_NUM_SKY_RC_PATTEN:
 		{
 			context.rcChgPatten.valid=0;
-			DLOG_Warning("sky get ack,cnt=%d",context.sync_cnt);
+			//DLOG_Warning("sky get ack,cnt=%d",context.sync_cnt);
 			break;
 
 		}
 		case DT_NUM_GRD_RC_CHPATTEN:
 		{
-			DLOG_Warning("sky get grd rc patten,cnt=%d",context.sync_cnt);
+			//DLOG_Warning("sky get grd rc patten,cnt=%d",context.sync_cnt);
 			sky_handle_rc_patten_cmd(&arg[1]);
 		}
         case DT_NUM_RF_BAND_MODE:
@@ -2194,7 +2186,7 @@ static void sky_handle_all_grd_cmds(uint8_t *arg, uint8_t len)
                         BB_sky_vtId((uint8_t *)context.vtid);
                         sky_setRcId((uint8_t *)context.hashRcid);
 
-                        DLOG_Warning("select vtid %02x,%02x",vtid[0],vtid[1]);
+                        //DLOG_Warning("select vtid %02x,%02x",vtid[0],vtid[1]);
                         context.select_obj_vt_ok = 1;
                     }
                 }
@@ -2320,13 +2312,14 @@ static void sky_handle_one_cmd(STRU_WIRELESS_CONFIG_CHANGE* pcmd)
             {
                 context.itHopMode = MANUAL;
                 BB_write_ItRegs(frq);
-                //DLOG_Info("IT_CHANNEL_FREQ %x\r\n", value);
+                DLOG_Critical("IT_CHANNEL_FREQ %d\r\n", frq);
                 break;
             }
             case IT_CHANNEL_SELECT:
             {
                 context.itHopMode = MANUAL;
                 BB_set_ItFrqByCh(context.e_curBand, value);
+				DLOG_Critical("it channel value %x\r\n", value);
                 break;
             }
 
@@ -3130,7 +3123,7 @@ static void sky_restore_rf_frq(void)
 
 void sky_set_unlockCnt(uint8_t count)
 {
-    u8_unlockCntFromLockToUnlock = count;
+     context.rf_info.rc_unlock_timeout_cnt = count;
 }
 
 static void sky_handle_sub_band_set_cmd(uint8_t *arg)

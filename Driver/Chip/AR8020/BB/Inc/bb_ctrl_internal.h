@@ -230,6 +230,11 @@ typedef struct
 
 	STRU_BOARD_RF_BW_CHG rf_bw_cg_info;
 
+	uint16_t it_unlock_timeout_cnt;
+	uint16_t rc_unlock_timeout_cnt;
+	uint8_t	 skyp0;
+	uint8_t	 skyp1;
+	uint8_t  skytxp;
 	//vt
 	ENUM_RF_BAND e_bandsupport;
 	uint8_t    u8_mainCh; 		 //current VT channel
@@ -243,8 +248,8 @@ typedef struct
 	uint8_t	   u8_bestBb2ChCnt[MAX_IT_FRQ_SIZE];
     uint32_t   working_pwr[MAX_IT_PWR_STATICS];
 	uint32_t   working_pwr_avrg;
-	uint8_t      u8_spareSweepCh;       //channel number
-    uint8_t      u8_optBandSweepCh;     //use to sweep another band channel.
+	uint8_t    u8_spareSweepCh;       //channel number
+    uint8_t    u8_optBandSweepCh;     //use to sweep another band channel.
 
     uint8_t      u8_curBb1Row;
     uint8_t      u8_curBb2Row;
@@ -275,8 +280,9 @@ typedef struct
     uint8_t             next_IT_ch;
     uint8_t             it_manual_ch;
     ENUM_RUN_MODE       e_rfbandMode;
-    uint8_t             fec_unlock_cnt;
+    uint16_t             fec_unlock_cnt;
     uint16_t            rc_unlock_cnt;
+	uint16_t 			it_fec_unlock_cnt;
 
     ENUM_RUN_MODE       itHopMode;
     ENUM_RUN_MODE       rcHopMode;

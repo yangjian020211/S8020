@@ -78,7 +78,7 @@ int main(void)
     HAL_BB_RegisterFemFuntion(fem_normal_trx,fem_only_rx);
 	//normal_rf();
     HAL_BB_InitSky(NULL);
-    HAL_BB_SetUnlockCnt(64);
+    //HAL_BB_SetUnlockCnt(64);
 
     for( ;; )
     {

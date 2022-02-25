@@ -724,13 +724,36 @@ static void find_best_patten()
 		list[i].id=context.rf_info.pre_selection_list[i].id;
 		
 	}
-
+	for(i=0;i<context.rf_info.rc_avr_sweep_result_size;i++)
+	{
+		#if 0
+		sweep_noise = context.rf_info.sweep_pwr_avrg_value[i].value * SWEEP_NOISE_ORDER;
+		sweep_noise_fluct = context.rf_info.sweep_pwr_fluct_value[i].value *(100-SWEEP_NOISE_ORDER);
+		v1 = (sweep_noise + sweep_noise_fluct)/100;
+		v2 =0;
+		if(v1<0){
+		 	v2 =  (abs(sweep_noise + sweep_noise_fluct)%100)>50 ? -1 : 0;
+		}else{
+			v2 =  (abs(sweep_noise + sweep_noise_fluct)%100)>50 ? 1 : 0;
+		}
+		list[i].value=v1+v2;
+		#else 
+		sweep_noise = context.rf_info.sweep_pwr_avrg_value[i].value;
+		sweep_noise_fluct = context.rf_info.sweep_pwr_fluct_value[i].value ;
+		list[i].value=sweep_noise+sweep_noise_fluct;	
+		#endif
+		list[i].id=context.rf_info.sweep_pwr_avrg_value[i].id;
+		working_sort_value_sweep_pwr_avrg[i+2] = list[i].value;
+	}
+	working_sort_value_sweep_pwr_avrg[1] = 0x0e;
+	working_sort_value_sweep_pwr_avrg[0] = context.rf_info.rc_avr_sweep_result_size+2;
 	//step2 sort the list by value and record the sort results
 	selectionSortBy(listr,context.rf_info.fine_sweep_size,list,1);	
 	for(i=0;i<context.rf_info.fine_sweep_size;i++)
 	{
 		context.rf_info.sort_result_list[i].id=listr[i].id;
 		context.rf_info.sort_result_list[i].value=listr[i].value;
+		
 	}
 
 	//step3 decide the len of the patten
@@ -878,6 +901,8 @@ void sky_gen_rc_working_patten(void)
 		   }
 		   else if(k==5)
 		   {
+		   		if(plotlog_en==2)
+					sptf (working_sort_value_sweep_pwr_avrg);
 		   		//0x01 0x07
 				sptf(sweep_pwr_avrg);
 				//0x02 0x08
@@ -904,6 +929,8 @@ void sky_gen_rc_working_patten(void)
 				//0x06
 				sptf (working_sort_value_sweep_pwr_avrg);
 		   		}
+				
+				
 		   }
 		   else if(k==6)
 		   {	

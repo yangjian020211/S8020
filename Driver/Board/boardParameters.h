@@ -106,6 +106,10 @@ typedef struct
 	uint8_t  sweep_patten_size;
 	uint8_t  rc_fine_sweep_size;
 	uint8_t  it_fine_sweep_size;
+	uint8_t  rc_common_ch_size;
+	uint8_t  rc_common_ch[50];
+	uint16_t it_unlock_timeout_cnt;
+	uint16_t rc_unlock_timeout_cnt;
 }STRU_BOARD_RF_BW_CHG;
 
 

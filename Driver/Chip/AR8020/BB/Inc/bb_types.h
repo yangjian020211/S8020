@@ -409,9 +409,11 @@ typedef struct
 typedef struct
 {
 	 uint8_t patten[10];
+	 uint8_t common_patten[10];
 	 uint8_t valid;
      uint8_t en_flag; 
      uint8_t timeout_cnt;
+	 uint8_t wait_reconnect_time_cnt;
 	 
 	 uint8_t patten_grd[10];
 	 uint8_t en_flag_grd; 
