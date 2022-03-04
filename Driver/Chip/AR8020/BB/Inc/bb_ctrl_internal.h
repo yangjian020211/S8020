@@ -232,6 +232,7 @@ typedef struct
 
 	uint16_t it_unlock_timeout_cnt;
 	uint16_t rc_unlock_timeout_cnt;
+	uint8_t rc_sweep_log_open;
 	uint8_t	 skyp0;
 	uint8_t	 skyp1;
 	uint8_t  skytxp;

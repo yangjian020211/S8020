@@ -18,10 +18,6 @@
 #define CHG_PATTEN_TIME_GAP 64
 #define SWEEP_NOISE_SELECT_DIFF_THD 5
 
-
-
-#define OPENMSG 1
-
  uint32_t sweep_pwr_table1[SWEEP_FREQ_BLOCK_ROWS/2][42]={0};
  uint32_t sweep_pwr_table2[SWEEP_FREQ_BLOCK_ROWS/2][42]={0};
  uint32_t sweep_pwr_avrg[42]={0};
@@ -335,7 +331,7 @@ void GetSweepCh_finesweep(uint8_t u8_bandidx, uint8_t u8_ch,signed char data)
 		   context.rf_info.sweep_finished=1;
 		   context.rf_info.fine_sweep_id=0;
 		   context.rf_info.fine_sweep_row=0;
-		   DLOG_Critical("swwep finished");
+		   //DLOG_Critical("swwep finished");
 		}
    }
 }
@@ -559,6 +555,16 @@ static void reset_error_list_record()
 		context.rf_info.error_ch_record[i]=0xff;
 	}	
 }
+static uint8_t is_error_working_patten()
+{
+	uint8_t i=0;
+	uint8_t ch=0;
+	for(i=0;i<context.rf_info.rc_ch_working_patten_size;i++){
+		ch = context.rf_info.rc_ch_working_patten[i];
+		if(context.rf_info.work_rc_error_value[ch].value) return 1;
+	}
+	return 0;	
+}
 
 static uint8_t corse_check_sweep_noise(uint8_t mustchg){
 	STRU_RF_DATA list[MAX_RC_FRQ_SIZE]={0};
@@ -608,6 +614,7 @@ static uint8_t corse_check_sweep_noise(uint8_t mustchg){
 		}
 		return 1;
 	}
+	if(0==is_error_working_patten()) return 0;
 	//sort the current working patten
 	for(i=0;i<context.rf_info.rc_ch_working_patten_len;i++)
 	{
@@ -645,46 +652,43 @@ static uint8_t corse_check_sweep_noise(uint8_t mustchg){
 			{
 				context.rf_info.pre_selection_list[j].id=context.rf_info.sort_result_list[j].id;
 				context.rf_info.pre_selection_list[j].value=context.rf_info.sort_result_list[i].value;
-				#if OPENMSG
-				fine_sweep_id[j+2]=context.rf_info.sort_result_list[j].id;
-				#endif
+				if(context.rf_info.rc_sweep_log_open){
+					fine_sweep_id[j+2]=context.rf_info.sort_result_list[j].id;
+				}
 			}
-			#if OPENMSG
-			fine_sweep_id[0]=context.rf_info.fine_sweep_size+2;
-			fine_sweep_id[1]=0xbb;
-			for(j=0;j<context.rf_info.rc_ch_working_patten_len;j++)
+			if(context.rf_info.rc_sweep_log_open)
 			{
-				working_avrg_id[j+2]=listcomp[j].id;
-				working_sort_value_sweep_pwr_avrg[j+2]=listcomp[j].value;
+				fine_sweep_id[0]=context.rf_info.fine_sweep_size+2;
+				fine_sweep_id[1]=0xbb;
+				for(j=0;j<context.rf_info.rc_ch_working_patten_len;j++){
+					working_avrg_id[j+2]=listcomp[j].id;
+					working_sort_value_sweep_pwr_avrg[j+2]=listcomp[j].value;
+					
+					sweep_pwr_avrg_sortid[j+2]=context.rf_info.sort_result_list[j].id;
+					sweep_pwr_avrg_sort[j+2]=context.rf_info.sort_result_list[j].value;
+				}
 				
-				sweep_pwr_avrg_sortid[j+2]=context.rf_info.sort_result_list[j].id;
-				sweep_pwr_avrg_sort[j+2]=context.rf_info.sort_result_list[j].value;
-			}
-			
-			sky_print_sweep_pwr_table(0x55);
-			
-			for(j=0;j<context.rf_info.sweep_freqsize;j++)
-			{
-				sweep_pwr_avrg[j+2]=context.rf_info.sweep_pwr_avrg_value[j].value;
-				sweep_pwr_avrg_fluct[j+2]= context.rf_info.sweep_pwr_fluct_value[j].value ;
+				sky_print_sweep_pwr_table(0x55);
 				
+				for(j=0;j<context.rf_info.sweep_freqsize;j++){
+					sweep_pwr_avrg[j+2]=context.rf_info.sweep_pwr_avrg_value[j].value;
+					sweep_pwr_avrg_fluct[j+2]= context.rf_info.sweep_pwr_fluct_value[j].value ;
+				}
+				sweep_pwr_avrg[0]=context.rf_info.sweep_freqsize+2;
+				sweep_pwr_avrg[1]=0x01;
+
+				sweep_pwr_avrg_fluct[0]=context.rf_info.sweep_freqsize+2;
+				sweep_pwr_avrg_fluct[1]=0x02;
+
+				sweep_pwr_avrg_sortid[0]=context.rf_info.rc_ch_working_patten_len+2;
+				sweep_pwr_avrg_sortid[1]=0x03;
+				sweep_pwr_avrg_sort[0]=context.rf_info.rc_ch_working_patten_len+2;
+				sweep_pwr_avrg_sort[1]=0x04;
+				working_avrg_id[0]=context.rf_info.rc_ch_working_patten_len+2;
+				working_avrg_id[1]=0x05;
+				working_sort_value_sweep_pwr_avrg[0]=context.rf_info.rc_ch_working_patten_len+2;
+				working_sort_value_sweep_pwr_avrg[1]=0x06;
 			}
-			sweep_pwr_avrg[0]=context.rf_info.sweep_freqsize+2;
-			sweep_pwr_avrg[1]=0x01;
-
-			sweep_pwr_avrg_fluct[0]=context.rf_info.sweep_freqsize+2;
-			sweep_pwr_avrg_fluct[1]=0x02;
-
-			sweep_pwr_avrg_sortid[0]=context.rf_info.rc_ch_working_patten_len+2;
-			sweep_pwr_avrg_sortid[1]=0x03;
-			sweep_pwr_avrg_sort[0]=context.rf_info.rc_ch_working_patten_len+2;
-			sweep_pwr_avrg_sort[1]=0x04;
-			working_avrg_id[0]=context.rf_info.rc_ch_working_patten_len+2;
-			working_avrg_id[1]=0x05;
-			working_sort_value_sweep_pwr_avrg[0]=context.rf_info.rc_ch_working_patten_len+2;
-			working_sort_value_sweep_pwr_avrg[1]=0x06;
-			
-			#endif
 			
 			return 1;
 		}
@@ -697,6 +701,7 @@ static uint8_t check_working_channel_snr(){
 	return 0;
 }
 
+
 static void find_best_patten()
 {
 	int i=0;
@@ -708,22 +713,7 @@ static void find_best_patten()
 	int sweep_noise=0;
 	int sweep_noise_fluct=0;
 	uint8_t j;
-	
-	//step1 remove  the error channel if the errors in the working patten meets the state to change patten,and to  caculate the condition for selection 
-	for(i=0;i<context.rf_info.fine_sweep_size;i++)
-	{
-		#if 0
-		sweep_noise = context.rf_info.sweep_pwr_avrg_value[context.rf_info.pre_selection_list[i].id].value * SWEEP_NOISE_ORDER;
-		sweep_noise_fluct = context.rf_info.sweep_pwr_fluct_value[context.rf_info.pre_selection_list[i].id].value *(100-SWEEP_NOISE_ORDER);
-		list[i].value=( sweep_noise + sweep_noise_fluct)/100;
-		#else
-		sweep_noise = context.rf_info.sweep_pwr_avrg_value[context.rf_info.pre_selection_list[i].id].value;
-		sweep_noise_fluct = context.rf_info.sweep_pwr_fluct_value[context.rf_info.pre_selection_list[i].id].value;
-		list[i].value=(sweep_noise + sweep_noise_fluct);
-		#endif
-		list[i].id=context.rf_info.pre_selection_list[i].id;
-		
-	}
+
 	for(i=0;i<context.rf_info.rc_avr_sweep_result_size;i++)
 	{
 		#if 0
@@ -747,6 +737,22 @@ static void find_best_patten()
 	}
 	working_sort_value_sweep_pwr_avrg[1] = 0x0e;
 	working_sort_value_sweep_pwr_avrg[0] = context.rf_info.rc_avr_sweep_result_size+2;
+	
+	//step1 remove  the error channel if the errors in the working patten meets the state to change patten,and to  caculate the condition for selection 
+	for(i=0;i<context.rf_info.fine_sweep_size;i++)
+	{
+		#if 0
+		sweep_noise = context.rf_info.sweep_pwr_avrg_value[context.rf_info.pre_selection_list[i].id].value * SWEEP_NOISE_ORDER;
+		sweep_noise_fluct = context.rf_info.sweep_pwr_fluct_value[context.rf_info.pre_selection_list[i].id].value *(100-SWEEP_NOISE_ORDER);
+		list[i].value=( sweep_noise + sweep_noise_fluct)/100;
+		#else
+		sweep_noise = context.rf_info.sweep_pwr_avrg_value[context.rf_info.pre_selection_list[i].id].value;
+		sweep_noise_fluct = context.rf_info.sweep_pwr_fluct_value[context.rf_info.pre_selection_list[i].id].value;
+		list[i].value=(sweep_noise + sweep_noise_fluct);
+		#endif
+		list[i].id=context.rf_info.pre_selection_list[i].id;
+		
+	}
 	//step2 sort the list by value and record the sort results
 	selectionSortBy(listr,context.rf_info.fine_sweep_size,list,1);	
 	for(i=0;i<context.rf_info.fine_sweep_size;i++)
@@ -785,18 +791,19 @@ static void find_best_patten()
 	{
 		context.rf_info.prelist[i].id =context.rf_info.sort_result_list[i].id;
 		context.rf_info.prelist[i].value = context.rf_info.sort_result_list[i].value;
-		#if OPENMSG
+		if(context.rf_info.rc_sweep_log_open){
 		select_fine_sweep_id[i+2]=context.rf_info.sort_result_list[i].id;
 		sweep_pwr_avrg_fine[i+2]=context.rf_info.sort_result_list[i].value;
 		//DLOG_Critical("prelist[%d] = %d,value=%d",i,context.rf_info.prelist[i].id,context.rf_info.prelist[i].value);
-		#endif
+		}
 	}
-	#if OPENMSG
-	select_fine_sweep_id[0]=context.rf_info.rc_ch_working_patten_len+2;
-	sweep_pwr_avrg_fine[0]=context.rf_info.rc_ch_working_patten_len+2;
-	select_fine_sweep_id[1]=0x09;
-	sweep_pwr_avrg_fine[1]=0x0a;
-	#endif
+	if(context.rf_info.rc_sweep_log_open)
+	{
+		select_fine_sweep_id[0]=context.rf_info.rc_ch_working_patten_len+2;
+		sweep_pwr_avrg_fine[0]=context.rf_info.rc_ch_working_patten_len+2;
+		select_fine_sweep_id[1]=0x09;
+		sweep_pwr_avrg_fine[1]=0x0a;
+	}
 	//step5 sort by id,find the low to high list for generate the patten codes
 	for(i=0;i<context.rf_info.rc_ch_working_patten_len;i++)
 	{
@@ -804,7 +811,7 @@ static void find_best_patten()
 			list[i].id=context.rf_info.sort_result_list[i].id;
 	}
 	selectionSortBy(lastestpatten,context.rf_info.rc_ch_working_patten_len,list,0);
-	context.rf_info.rc_patten_nextchg_delay=0;
+	//context.rf_info.rc_patten_nextchg_delay=0;
 	for(i=0;i<10;i++) 
 	{
 		context.rcChgPatten.patten[i]=0;
@@ -819,32 +826,33 @@ static void find_best_patten()
 	context.rcChgPatten.en_flag=1;
 	context.rcChgPatten.valid=1;
 	context.rcChgPatten.timeout_cnt=context.sync_cnt+STATUS_CHG_DELAY;
+	DLOG_Critical("begin to change the new patten !");
 	reset_error_list_record();
 
-	#if OPENMSG
-			
-	sky_print_sweep_pwr_table(0xaa);
-	for(j=0;j<context.rf_info.fine_sweep_size;j++)
-	{
-		sweep_pwr_avrg[j+2]=context.rf_info.sweep_pwr_avrg_value[context.rf_info.pre_selection_list[j].id].value;
-		sweep_pwr_avrg_fluct[j+2]= context.rf_info.sweep_pwr_fluct_value[context.rf_info.pre_selection_list[j].id].value;
+	if(context.rf_info.rc_sweep_log_open)
+	{		
+		sky_print_sweep_pwr_table(0xaa);
+		for(j=0;j<context.rf_info.fine_sweep_size;j++)
+		{
+			sweep_pwr_avrg[j+2]=context.rf_info.sweep_pwr_avrg_value[context.rf_info.pre_selection_list[j].id].value;
+			sweep_pwr_avrg_fluct[j+2]= context.rf_info.sweep_pwr_fluct_value[context.rf_info.pre_selection_list[j].id].value;
+		}
+		sweep_pwr_avrg[0]=context.rf_info.fine_sweep_size+2;
+		sweep_pwr_avrg[1]=0x07;
+		sweep_pwr_avrg_fluct[0]=context.rf_info.fine_sweep_size+2;
+		sweep_pwr_avrg_fluct[1]=0x08;
+		
+		for(j=0;j<context.rf_info.rc_ch_working_patten_len;j++)
+		{
+			sweep_pwr_avrg_sortid[j+2]=lastestpatten[j].id;
+			sweep_pwr_avrg_sort[j+2]=lastestpatten[j].value;
+		}
+		
+		sweep_pwr_avrg_sortid[0]=context.rf_info.rc_ch_working_patten_len+2;
+		sweep_pwr_avrg_sortid[1]=0x0b;
+		sweep_pwr_avrg_sort[0]=context.rf_info.rc_ch_working_patten_len+2;
+		sweep_pwr_avrg_sort[1]=0x0c;
 	}
-	sweep_pwr_avrg[0]=context.rf_info.fine_sweep_size+2;
-	sweep_pwr_avrg[1]=0x07;
-	sweep_pwr_avrg_fluct[0]=context.rf_info.fine_sweep_size+2;
-	sweep_pwr_avrg_fluct[1]=0x08;
-	
-	for(j=0;j<context.rf_info.rc_ch_working_patten_len;j++)
-	{
-		sweep_pwr_avrg_sortid[j+2]=lastestpatten[j].id;
-		sweep_pwr_avrg_sort[j+2]=lastestpatten[j].value;
-	}
-	
-	sweep_pwr_avrg_sortid[0]=context.rf_info.rc_ch_working_patten_len+2;
-	sweep_pwr_avrg_sortid[1]=0x0b;
-	sweep_pwr_avrg_sort[0]=context.rf_info.rc_ch_working_patten_len+2;
-	sweep_pwr_avrg_sort[1]=0x0c;
-	#endif
 }
 
 void begin_lock_sweep_noise_for_selection(){
@@ -882,7 +890,7 @@ void sky_gen_rc_working_patten(void)
 	int working_snr_meet=0;
 	static int k=0,plotlog_en=0;
 	
-	 #if OPENMSG
+	 if(context.rf_info.rc_sweep_log_open){
 	 uint32_t str[50]={0};
 	 int i=0,j=0; 
 	 int len=0;
@@ -943,8 +951,9 @@ void sky_gen_rc_working_patten(void)
 			    k=0;
 				release_table(); 
 		   }
-	 }
-	#endif
+	   }
+
+	}
 	
 	if(context.rf_info.rc_patten_set_by_usr==1) return;
 	if(context.rcChgPatten.en_flag==1) return;
@@ -952,7 +961,9 @@ void sky_gen_rc_working_patten(void)
 	if(context.dev_state == CHECK_FEC_LOCK) return;
 	if(context.dev_state == CHECK_LOCK) return;
 	if(context.dev_state == WAIT_VT_LOCK) return;
+	if(context.dev_state == SEARCH_ID) return;
 	if(context.rf_info.isFull==0) return;
+	if( context.rcChgPatten.valid==1)return;
 	//if((SysTicks_GetDiff(context.rf_info.rc_patten_nextchg_delay, SysTicks_GetTickCount())) < CHG_PATTEN_TIME_GAP)return;
 	
 	if(context.rf_info.lock_sweep==0)

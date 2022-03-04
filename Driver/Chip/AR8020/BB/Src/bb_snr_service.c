@@ -482,7 +482,7 @@ void grd_set_txmsg_mcs_change(ENUM_CH_BW bw, uint8_t index)
         BB_WriteReg(PAGE1, (addr + cnt), regdata[cnt]);
     }
 
-    DLOG_Info("MCS2=> 0x%x\n", index);
+    //DLOG_Info("MCS2=> 0x%x\n", index);
 }
 
 
@@ -625,7 +625,7 @@ void grd_judge_qam_band_switch(void)
         static int loop = 0;
         if ( loop ++ > 1000)
         {
-            DLOG_Info("-BRC MANUAL-");
+            //DLOG_Info("-BRC MANUAL-");
             loop = 0;
         }
 

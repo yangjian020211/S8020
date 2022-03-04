@@ -760,10 +760,10 @@ static void sky_do_rc_patten(void)
     {
         if (context.sync_cnt == context.rcChgPatten.timeout_cnt)
         {
-        	rc_update_working_patten();
-            context.rcChgPatten.en_flag = 0;
-            context.rcChgPatten.timeout_cnt = 0;
-			context.rf_info.rc_patten_nextchg_delay=SysTicks_GetTickCount();
+	        rc_update_working_patten();
+			context.rcChgPatten.valid=0;
+			context.rcChgPatten.en_flag = 0;
+	        context.rcChgPatten.timeout_cnt = 0;
         }
     }
 }
@@ -789,7 +789,7 @@ static void sky_do_rf_bw(void)
 				sky_handle_mcs_mode_cmd((uint8_t*)&mode);
 			}
 			BB_softTxReset(BB_SKY_MODE);
-			DLOG_Critical("set rf bandwidth=%d",context.st_bandMcsOpt.e_bandwidth);	
+			DLOG_Critical("bandwidth=%d",context.st_bandMcsOpt.e_bandwidth);	
         }
     }
 }
@@ -833,14 +833,14 @@ static void process_searchid_state()
 			{
 				context.dev_state = CHECK_LOCK;
 				DLOG_Warning("SEARCH_ID->CHECK_LOCK");
-				DLOG_Warning("rc_set_unlock_patten");
+				//DLOG_Warning("rc_set_unlock_patten");
 				rc_set_unlock_patten(1);
 			}
 		}
 		else
 		{
 			context.dev_state = CHECK_LOCK;
-			DLOG_Warning("rc_set_unlock_patten");
+			//DLOG_Warning("rc_set_unlock_patten");
 			DLOG_Warning("SEARCH_ID->CHECK_LOCK");
 			rc_set_unlock_patten(1);
 		}
@@ -869,6 +869,7 @@ static void process_searchid_state()
 
 static void process_check_lock_state()
 {
+	
 	#ifdef RFSUB_BAND
 	if(context.freq_band_mode == SUB_BAND)
 	{
@@ -896,29 +897,33 @@ static void process_check_lock_state()
 		sky_handle_it_ch_sync_cmd();
 		flag_rchop		  = 1;
 		context.dev_state = WAIT_VT_LOCK;
-		DLOG_Warning("CHECK_LOCK->WAIT_VT_LOCK");
+		//DLOG_Warning("CHECK_LOCK->WAIT_VT_LOCK");
 		BB_SetTrxMode(BB_NORMAL_MODE);
 		if (stru_skystatus.check_lock_times > 0)
 		{
 		  uint32_t time = HAL_GetSysMsTick();
-		  DLOG_Warning("Lock %d: %d ms", stru_skystatus.check_lock_times, time - stru_skystatus.rst_start_time);
+		  //DLOG_Warning("Lock %d: %d ms", stru_skystatus.check_lock_times, time - stru_skystatus.rst_start_time);
 		  stru_skystatus.check_lock_times --;
 		}
 	}
 	else
 	{
+		u32_contiousUnlock ++;
 		BB_SetTrxMode(BB_RECEIVE_ONLY_MODE);
-		if (BB_sky_isSearching() && u32_contiousUnlock ++ >= 20)
+		if (BB_sky_isSearching() && u32_contiousUnlock >= 20)
 		{
 			u32_contiousUnlock = 0;
 			context.dev_state  = SEARCH_ID;
-			DLOG_Warning("rc_set_unlock_patten");
+			//DLOG_Warning("rc_set_unlock_patten");
 			rc_set_unlock_patten(1);
-			DLOG_Warning("CHECK_LOCK-> SEARCH_ID");
+			//DLOG_Warning("CHECK_LOCK-> SEARCH_ID");
 		}
-		else if ( (context.st_bandMcsOpt.e_rfbandMode == AUTO && context.st_bandMcsOpt.e_bandsupport == RF_2G_5G))	 
+		else if ( (context.st_bandMcsOpt.e_rfbandMode == AUTO && 
+			context.st_bandMcsOpt.e_bandsupport == RF_2G_5G) &&
+			u32_contiousUnlock > context.rf_info.rc_unlock_timeout_cnt)	 
 		{
 			sky_rcUnLockHopBand();//switch band, toggle agc, change channel each 1s
+			u32_contiousUnlock = 0;
 		}
 		else
 		{
@@ -934,23 +939,44 @@ static void process_wait_it_lock_state()
 	if (sky_checkRcLock(stru_skystatus.u8_rcStatus))
 	{
 	    u32_contiousUnlock = 0;
-	    DLOG_Warning("WAIT_VT_LOCK->Lock");
+	   // DLOG_Warning("WAIT_VT_LOCK->Lock");
 	    context.dev_state = LOCK;  //go to Lock status
 	}
 	else
 	{
-	    DLOG_Info("%d %d %d %d",stru_skystatus.u8_rcStatus,stru_skystatus.flag_errorConnect,stru_skystatus.flag_groundInSearching,context.inSearching);
+	    //DLOG_Info("%d %d %d %d",stru_skystatus.u8_rcStatus,stru_skystatus.flag_errorConnect,stru_skystatus.flag_groundInSearching,context.inSearching);
+	}
+	u32_contiousUnlock ++;
+	if (sky_checkRcLock(stru_skystatus.u8_rcStatus))
+	{
+		u32_contiousUnlock = 0;
+		sky_handle_all_spi_cmds();
+		sky_getAgcStatus();
+		sky_auto_adjust_agc_gain();
+		if(context.enable_non_lbt)
+		{
+			if(context.sky_sel_vt_ch_flag)
+			{
+				BB_set_skySweepVtfrq(context.e_curBand,context.sky_sel_vt_ch);
+			}
+			else
+			{
+				BB_set_skySweepVtfrq(context.e_curBand,context.cur_IT_ch);
+			}
+
+		}
 	}
 
-    if (u32_contiousUnlock >=  context.rf_info.rc_unlock_timeout_cnt)           //ID_MATCH_LOCK -> CHECK_ID_MATCH
+    else if (u32_contiousUnlock >=  context.rf_info.rc_unlock_timeout_cnt)           //ID_MATCH_LOCK -> CHECK_ID_MATCH
     {
         u32_contiousUnlock = 0;
         context.dev_state  = CHECK_LOCK;
+		//DLOG_Warning("rc_set_unlock_patten");
 		rc_set_unlock_patten(1);
         BB_SetTrxMode(BB_RECEIVE_ONLY_MODE);
-        sky_soft_reset();
         DLOG_Warning("WAIT_VT_LOCK -> CHECK_LOCK");
-        //context.rc_skip_patten = 0xff;
+        sky_switchSetPower(context.e_curBand);
+        sky_soft_reset();
     }
 
 	if (stru_skystatus.check_lock_times > 0)
@@ -961,39 +987,7 @@ static void process_wait_it_lock_state()
         //DLOG_Warning("rst time: %d", stru_skystatus.rst_start_time);
 	}
 
-    flag_rchop = 1;
-	//handler in rc lock
-    if (u32_contiousUnlock ++ >= context.rf_info.rc_unlock_timeout_cnt)           //ID_MATCH_LOCK -> CHECK_ID_MATCH
-    {
-        u32_contiousUnlock = 0;
-        context.dev_state  = CHECK_LOCK;
-		DLOG_Warning("rc_set_unlock_patten");
-		rc_set_unlock_patten(1);
-        BB_SetTrxMode(BB_RECEIVE_ONLY_MODE);
-        sky_switchSetPower(context.e_curBand);
-        sky_soft_reset();
-        //DLOG_Warning("LOCK->CHECK_LOCK reset");
-        //context.rc_skip_patten = 0xff;
-    }
-    else if (sky_checkRcLock(stru_skystatus.u8_rcStatus))
-    {
-        u32_contiousUnlock = 0;
-        sky_handle_all_spi_cmds();
-        sky_getAgcStatus();
-        sky_auto_adjust_agc_gain();
-        if(context.enable_non_lbt)
-        {
-            if(context.sky_sel_vt_ch_flag)
-            {
-                BB_set_skySweepVtfrq(context.e_curBand,context.sky_sel_vt_ch);
-            }
-            else
-            {
-                BB_set_skySweepVtfrq(context.e_curBand,context.cur_IT_ch);
-            }
-
-        }
-    }
+    flag_rchop = 1;   
 }
 
 static void process_lock_state()
@@ -1030,7 +1024,7 @@ static void process_lock_state()
 	if (1==stru_skystatus.flag_errorConnect)
 	{
 		context.dev_state = CHECK_LOCK;
-		DLOG_Warning("rc_set_unlock_patten");
+		DLOG_Warning("rc_set_unlock_patten£¬flag_errorConnect=1");
 		rc_set_unlock_patten(1);
 		//sky_notify_grd_goto_unlock_patten();
 		sky_soft_reset();
@@ -1104,21 +1098,24 @@ static void sky_notify_rc_patten()
 {
 	uint8_t buf[10];
 	int i=0;
-	static int gap =0;
-	#define delay (4)
-	gap++;
-	if(context.rcChgPatten.en_flag==1 && context.rcChgPatten.valid==1 && gap < delay)
-	{
-		for(i=0;i<context.rf_info.rc_ch_patten_need_id_size;i++)
-		{
+	static uint8_t pre_sync_cnt =0;
+	if(context.rcChgPatten.en_flag==1 && context.rcChgPatten.valid==1 ){
+		if(pre_sync_cnt <  context.sync_cnt){
+			if( context.sync_cnt-pre_sync_cnt <3) return;
+			else pre_sync_cnt = context.sync_cnt;
+		}
+		else{
+			if( pre_sync_cnt+255-context.sync_cnt <3) return;
+			else pre_sync_cnt = context.sync_cnt;
+		}
+		for(i=0;i<context.rf_info.rc_ch_patten_need_id_size;i++){
 			buf[i+2]=context.rcChgPatten.patten[i];
 		}
 		buf[0]= context.rcChgPatten.timeout_cnt;
 		buf[1]= context.rf_info.rc_patten_set_by_usr;
 		BB_Session0SendMsg(DT_NUM_SKY_RC_PATTEN, buf, context.rf_info.rc_ch_patten_need_id_size+2);
-		//DLOG_Warning("sky notify grd :cnt=%d,aim_cnt=%d", context.sync_cnt, context.rcChgPatten.timeout_cnt);
+		DLOG_Warning("sky notify grd :cnt=%d,aim_cnt=%d", context.sync_cnt, context.rcChgPatten.timeout_cnt);
 	}
-	if(gap > 10) gap = 0;
 }
 
 static void sky_gen_rc_patten(void)
@@ -1129,8 +1126,7 @@ static void sky_gen_rc_patten(void)
 	if(context.dev_state == WAIT_VT_LOCK) return;
 	if(!context.rcChgPatten.en_flag)
 	{
-		if(i==100)
-		{
+		if(i==100){
 			context.rcChgPatten.patten[0]=0x01;
 			context.rcChgPatten.patten[1]=0x02;
 			context.rcChgPatten.patten[2]=0x04;
@@ -1140,8 +1136,7 @@ static void sky_gen_rc_patten(void)
 			context.rcChgPatten.valid=1;
 			context.rcChgPatten.timeout_cnt=context.sync_cnt+STATUS_CHG_DELAY;
 		}
-		else if(i==200)
-		{
+		else if(i==200){
 			
 			context.rcChgPatten.patten[0]=0x10;
 			context.rcChgPatten.patten[1]=0x20;
@@ -1152,8 +1147,7 @@ static void sky_gen_rc_patten(void)
 			context.rcChgPatten.valid=1;
 			context.rcChgPatten.timeout_cnt=context.sync_cnt+STATUS_CHG_DELAY;
 		}
-		else if(i==300)
-		{
+		else if(i==300){
 			
 			context.rcChgPatten.patten[0]=0x01;
 			context.rcChgPatten.patten[1]=0x04;
@@ -1288,8 +1282,6 @@ static void Sky_TIM2_6_IRQHandler(uint32_t u32_vectorNum)
 	
     sky_handle_all_cmds();
     sky_doRfBandChange(stru_skystatus.u8_rcStatus);
-    //sky_do_rcRate();
-	//sky_do_rc_patten();
 	BB_skyPlot();
     BB_GetDevInfo();
     BB_ComCycleMsgProcess();
@@ -2123,7 +2115,7 @@ static void sky_handle_all_grd_cmds(uint8_t *arg, uint8_t len)
 		case DT_NUM_SKY_RC_PATTEN:
 		{
 			context.rcChgPatten.valid=0;
-			//DLOG_Warning("sky get ack,cnt=%d",context.sync_cnt);
+			DLOG_Warning("sky get rc_patten_ack,cnt=%d",context.sync_cnt);
 			break;
 
 		}

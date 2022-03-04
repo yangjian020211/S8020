@@ -173,19 +173,20 @@ STRU_cfgNode rf_bw_chg_nodeInfo=
 
 STRU_BOARD_RF_BW_CHG stru_rf_bw_chg__boardCfg __attribute__ ((aligned (4)))= 
 {
-    .en_auto  = 1,    	   // enbale
+   .en_auto  = 1,    	   // enbale
     .thd_10   = 78,        // > u8_agcThdL, select_10MHz
     .thd_20   = 73,        // < u8_agcThdH, select_20MHz
     .en_it_hoping_quickly=1,
-    .max_rc_len = 5,
+    .max_rc_len = 6,
 	.sweep_noise_thd = 5,
-	.sweep_patten_size = 3,
+	.sweep_patten_size = 4,
 	.rc_fine_sweep_size=8,
 	.it_fine_sweep_size=4,
-	.rc_common_ch_size=5,
-	.rc_common_ch={0,4,15,30,35},
+	.rc_common_ch_size=4,
+	.rc_common_ch={0,4,30,37},
 	.it_unlock_timeout_cnt=64,
-	.rc_unlock_timeout_cnt=512,
+	.rc_unlock_timeout_cnt=335,
+	.rc_sweep_log_open=1,
 };
 
 extern STRU_BB_AOC stru_EK_2t2r_bb_aoc_boardCfg;
@@ -205,8 +206,8 @@ STRU_BB_AOC stru_EK_2t2r_bb_aoc_boardCfg __attribute__ ((aligned (4)))=
 	//21->0x1f79,22dbm->0x279F
     .u16_snrThdL     = 0x7e7,    // 
     .u16_snrThdH     = 0xc87,    //
-    .u8_agcThdL      = 60,        //
-    .u8_agcThdH      = 70,        //
+    .u8_agcThdL      = 60,       //
+    .u8_agcThdH      = 70,       //
     .u8_PwrThdMin    = 15,      //min adjust power 15dbm
     .u8_snrAvgCnt    = 16,//snr average num, MAX Average Count value is 64
     .u8_agcAvgCnt    = 64,//rssi average num,MAX Average Count value is 128

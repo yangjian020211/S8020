@@ -220,7 +220,7 @@ void RF8003s_GetFctFreqTable(ENUM_CH_BW e_bw)
     STRU_RF_CHANNEL *p_frq_vt;
 	STRU_RF_CHANNEL *p_frq_2g,*p_frq_5g,*p_frq_vt_2g_10M,*p_frq_vt_5g_10M,*p_frq_vt_2g_20M,*p_frq_vt_5g_20M;
 
-	DLOG_Warning("e_bw=%d",e_bw);
+	//DLOG_Warning("e_bw=%d",e_bw);
 
     if (e_bw == BW_10M)
     {

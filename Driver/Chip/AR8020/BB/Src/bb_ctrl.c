@@ -353,6 +353,7 @@ static void  __attribute__ ((section(".h264"))) BB_get_rf_sweep_init(ENUM_BB_MOD
 		context.rf_info.rc_ch_working_patten_len = rf_bw_chg_info->sweep_patten_size;
 		context.rf_info.rc_unlock_timeout_cnt = rf_bw_chg_info->rc_unlock_timeout_cnt;
 		context.rf_info.it_unlock_timeout_cnt = rf_bw_chg_info->it_unlock_timeout_cnt;	
+		context.rf_info.rc_sweep_log_open = rf_bw_chg_info->rc_sweep_log_open;
 		for(i=0;i<rf_bw_chg_info->rc_common_ch_size;i++){
 			context.rcChgPatten.common_patten[rf_bw_chg_info->rc_common_ch[i]/8] |=dec2bit_index(rf_bw_chg_info->rc_common_ch[i]%8);
 		}
@@ -363,7 +364,7 @@ static void  __attribute__ ((section(".h264"))) BB_get_rf_sweep_init(ENUM_BB_MOD
 			context.rf_info.fine_sweep_size = rf_bw_chg_info->rc_fine_sweep_size;
 		else 
 			context.rf_info.fine_sweep_size = rf_bw_chg_info->it_fine_sweep_size;
-		DLOG_Warning("en_auto=%d, thd_10=%d,thd_20=%d,rc_patten_max_len=%d,sweep_noise_thd=%d,sweep_patten_size=%d,fine_sweep_size=%d,it_tout_cnt=%d,rc_tout_cnt=%d",
+		DLOG_Warning("en_auto=%d, thd_10=%d,thd_20=%d,rc_patten_max_len=%d,sweep_noise_thd=%d,sweep_patten_size=%d,fine_sweep_size=%d,it_tout_cnt=%d,rc_tout_cnt=%d,rc_sweep_log_open=%d",
 			context.rf_info.rf_bw_cg_info.en_auto,
 			context.rf_info.rf_bw_cg_info.thd_10,
 			context.rf_info.rf_bw_cg_info.thd_20,
@@ -372,7 +373,8 @@ static void  __attribute__ ((section(".h264"))) BB_get_rf_sweep_init(ENUM_BB_MOD
 			context.rf_info.sweep_patten_size,
 			context.rf_info.fine_sweep_size,
 			context.rf_info.it_unlock_timeout_cnt,
-			context.rf_info.rc_unlock_timeout_cnt
+			context.rf_info.rc_unlock_timeout_cnt,
+			context.rf_info.rc_sweep_log_open
 		);
 		
 	}
@@ -955,7 +957,7 @@ void  __attribute__ ((section(".h264"))) BB_init(ENUM_BB_MODE en_mode, STRU_CUST
     context.vt_start = 0;
     context.vt_end = BB_GetItFrqNumPerFilter();
     BB_WriteReg(PAGE2, SPI_DT_END_ADDR, 0);
-	context.rf_info.rc_patten_nextchg_delay = SysTicks_GetTickCount();
+	//context.rf_info.rc_patten_nextchg_delay = SysTicks_GetTickCount();
 	bb_update_rc_patten_size();
 	context.rf_info.rc_patten_set_by_usr=0;
 	BB_get_rf_sweep_init(en_mode, (STRU_cfgBin *)SRAM_CONFIGURE_MEMORY_ST_ADDR);
@@ -2556,7 +2558,7 @@ void BB_Lna_AddAgc(uint8_t agca, uint8_t agcb)
     {
         stru_agc2lna.mindex = 0;
         stru_agc2lna.isFull = 1;
-        DLOG_Warning("a=%d,b=%d",stru_agc2lna.sum_a/pstru_lna_auto->u16_avgCnt,stru_agc2lna.sum_b/pstru_lna_auto->u16_avgCnt);
+        //DLOG_Warning("a=%d,b=%d",stru_agc2lna.sum_a/pstru_lna_auto->u16_avgCnt,stru_agc2lna.sum_b/pstru_lna_auto->u16_avgCnt);
     }
 
 }
@@ -2564,7 +2566,7 @@ void BB_Lna_AddAgc(uint8_t agca, uint8_t agcb)
 void BB_Lna_reset(void)
 {
     memset(&stru_agc2lna,0,sizeof(stru_agc2lna));
-    DLOG_Warning("");
+    //DLOG_Warning("");
 }
 
 ENUM_LNA_STATUS BB_Lna_isNeedSwitch(ENUM_RF_BAND band)
@@ -2771,6 +2773,7 @@ void __attribute__ ((section(".h264")))rc_set_unlock_patten(uint8_t chg_bw)
 		DLOG_Warning("e_bandwidth=%d",context.st_bandMcsOpt.e_bandwidth);
 	}
 	rc_update_working_patten();
+	context.rcChgPatten.valid=0;
 }
 void __attribute__ ((section(".h264")))rc_update_working_patten(void)
 {
@@ -2850,7 +2853,7 @@ void __attribute__ ((section(".h264")))CalcAverageSweepPower(uint8_t ch){
 }
 void  reset_sweep_table(ENUM_RF_BAND cur_band){
 	int i=0,j=0;
-    DLOG_Warning("cur_band=%d,en_bbmode=%d",cur_band,context.en_bbmode);
+    //DLOG_Warning("cur_band=%d,en_bbmode=%d",cur_band,context.en_bbmode);
 	if(context.en_bbmode==BB_SKY_MODE){
 		if(cur_band==RF_2G){
 			context.rf_info.sweepBand[0] = RF_2G;
@@ -2908,8 +2911,7 @@ void  reset_sweep_table(ENUM_RF_BAND cur_band){
 		//context.rf_info.work_snr_avrg_value[i].id=i;context.rf_info.work_snr_avrg_value[i].value=0;
 		//context.rf_info.work_snr_fluct_value[i].id=i;context.rf_info.work_snr_fluct_value[i].value=0;
 		context.rf_info.error_ch_record[i]=0xff;
-		for(j=0;j<SWEEP_FREQ_BLOCK_ROWS;j++)
-		{
+		for(j=0;j<SWEEP_FREQ_BLOCK_ROWS;j++){
 			context.rf_info.sweep_pwr_table[j][i].id=i;context.rf_info.sweep_pwr_table[j][i].value=0;
 			context.rf_info.work_rc_unlock_table[j][i].id=i;context.rf_info.work_rc_unlock_table[j][i].value=0;
 			//context.rf_info.work_snr_table[j][i].id=i;context.rf_info.work_snr_table[j][i].value=0;

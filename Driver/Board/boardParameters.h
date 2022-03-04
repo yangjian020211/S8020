@@ -110,6 +110,7 @@ typedef struct
 	uint8_t  rc_common_ch[50];
 	uint16_t it_unlock_timeout_cnt;
 	uint16_t rc_unlock_timeout_cnt;
+	uint8_t  rc_sweep_log_open;
 }STRU_BOARD_RF_BW_CHG;
 
 

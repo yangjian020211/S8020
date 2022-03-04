@@ -589,9 +589,11 @@ void grd_fec_judge(void)
 			context.it_fec_unlock_cnt++;
 			if(context.it_fec_unlock_cnt > context.rf_info.rc_unlock_timeout_cnt){
 				rc_set_unlock_patten(1);
+				context.it_fec_unlock_cnt=0;
 			}
             if(context.fec_unlock_cnt >= context.rf_info.it_unlock_timeout_cnt)
             {
+            	context.fec_unlock_cnt = 0;
                 context.dev_state = CHECK_FEC_LOCK;
                 DLOG_Critical("fec_unlock_cnt > %d",context.rf_info.it_unlock_timeout_cnt);
 				#ifdef RFSUB_BAND
@@ -655,7 +657,7 @@ void grd_fec_judge(void)
 
                 }
 
-                context.fec_unlock_cnt = 0;
+                
 
                 if(context.qam_skip_mode == AUTO && context.qam_ldpc > context.u8_bbStartMcs)
                 {
@@ -1484,7 +1486,7 @@ static void time_slice7(){
    NVIC_DisableIRQ(TIMER_INTR27_VECTOR_NUM);
    TIM_StopTimer(grd_timer2_7);
    
-   if( flag_snrPostCheck )
+   if(flag_snrPostCheck)
    {
 	   grd_freq_skip_post_judge( );
    }
@@ -2374,8 +2376,7 @@ static void grd_do_rc_patten(void)
 	{
 		if (context.sync_cnt == context.rcChgPatten.timeout_cnt)
 		{
-
-			context.rf_info.rc_patten_nextchg_delay = SysTicks_GetTickCount();
+			//context.rf_info.rc_patten_nextchg_delay = SysTicks_GetTickCount();
 			rc_update_working_patten();
 			context.rcChgPatten.en_flag=0;
 			context.rcChgPatten.timeout_cnt=0;
@@ -2388,7 +2389,7 @@ static void grd_do_rf_bw(void)
 	uint8_t bw=0;
 	if (1 == context.rf_bw.en_flag)
 	{
-		if (context.sync_cnt == context.rf_bw.timeout_cnt)
+		if (context.sync_cnt == context.rf_bw.timeout_cnt )
 		{
 			context.rf_bw.en_flag=0;
 			context.rf_bw.timeout_cnt=0;
@@ -2424,13 +2425,15 @@ static void grd_do_rf_bw(void)
 	}
 }
 
-static void grd_notify_rf_bw(){
+static void grd_notify_rf_bw()
+{
 	uint8_t buf[10];
 	int i=0;
 	static int gap =0;
 	#define delay (2)
 	gap++;
-	if(context.rf_bw.en_flag==1 && context.rf_bw.valid==1 && gap < delay){
+	if(context.rf_bw.en_flag==1 && context.rf_bw.valid==1 && gap < delay)
+	{
 		buf[0]= context.rf_bw.bw;
 		buf[1]= context.rf_bw.timeout_cnt;
 		buf[2]= context.rf_bw.ldpc;

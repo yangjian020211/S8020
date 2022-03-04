@@ -82,7 +82,7 @@ int rc_score600m(uint8_t * map, uint8_t * use, uint8_t start, uint8_t end)
     //some error happen, reset the map
     if (changech > context.st_chSelectionParam.u8_rcChReplaceMaxCnt)
     {
-        DLOG_Error("Error: ch %d %d", changech, context.st_chSelectionParam.u8_rcChReplaceMaxCnt);
+        //DLOG_Error("Error: ch %d %d", changech, context.st_chSelectionParam.u8_rcChReplaceMaxCnt);
         tmpCh = sky_get_lock_worst_ch(start, end);
         if(-1 != tmpCh)
         {
@@ -125,7 +125,7 @@ int rc_score600m(uint8_t * map, uint8_t * use, uint8_t start, uint8_t end)
         }
     }
 
-    DLOG_Info("replace:%d-%d", g_max, g_min);
+   // DLOG_Info("replace:%d-%d", g_max, g_min);
 #if 0
     if (rc_checktimes >= context.st_chSelectionParam.u16_rcChReplaceCycles)
     {
@@ -164,7 +164,7 @@ int rc_score600m(uint8_t * map, uint8_t * use, uint8_t start, uint8_t end)
         //compare the noise power, the channel_noise(score_min) > channel_noise(sweep_min_ch) + 5
         if (power1 - power2 > 5)
         {
-            DLOG_Info("RST: %d %d %d", g_min, sweep_min_ch, power1 - power2);
+            //DLOG_Info("RST: %d %d %d", g_min, sweep_min_ch, power1 - power2);
 
             //reset the chnanel
             g_min = sweep_min_ch;
@@ -346,7 +346,7 @@ void sky_rcHopFreq(void)
         {
             if(context.e_curBand == RF_2G)
             {
-                DLOG_Info("2g it=%d",sub_band_2g);
+                //DLOG_Info("2g it=%d",sub_band_2g);
                 if(sub_band_2g == 0)
                 {
                     if(sub_band_2g_agc_gain)
@@ -370,7 +370,7 @@ void sky_rcHopFreq(void)
             }
             else if(context.e_curBand == RF_5G)
             {
-                DLOG_Info("5g it=%d",sub_band_5g);
+               // DLOG_Info("5g it=%d",sub_band_5g);
                 if(sub_band_5g == 0)
                 {
                     if(sub_band_5g_agc_gain)
@@ -395,7 +395,7 @@ void sky_rcHopFreq(void)
             }
             else
             {
-                DLOG_Error("band error");
+               // DLOG_Error("band error");
             }
             
             context.sky_rc_channel = context.sub_rc_start + (SysTicks_GetTickCount() % (context.sub_rc_end - context.sub_rc_start));
