@@ -135,6 +135,8 @@ STRU_CMD_ENTRY_T g_cmdArray[] =
     {0, (f_cmdline)command_get_chipId, "command_get_chipId", ""},
     {2, (f_cmdline)command_TestHalAdRead, "TestHalAdRead", "<ch> <nch>"},
     {1, (f_cmdline)command_set_usb_video_priority, "set_usb_video_priority", "<0/1>"},
+    {0, (f_cmdline)command_TestNetRepeaterGnd, "TestRepeaterGnd", ""},
+    {0, (f_cmdline)command_TestNetRepeaterSky, "TestRepeaterSky", ""},
     END_OF_CMD_ENTRY
 };
 
