@@ -1148,7 +1148,7 @@ static void HCD_HC_OUT_IRQHandler  (HCD_HandleTypeDef *hhcd, uint8_t chnum)
 
     if(tmphost && tmphost->recvCallback[chnum])
     {
-        (tmphost->recvCallback[chnum])(tmphost);
+//      (tmphost->recvCallback[chnum])(tmphost);
     }
 
     __HAL_HCD_CLEAR_HC_INT(chnum, USB_OTG_HCINT_CHH);

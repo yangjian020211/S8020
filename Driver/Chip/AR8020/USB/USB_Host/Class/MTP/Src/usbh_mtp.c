@@ -143,6 +143,8 @@ extern uint8_t g_u8CurrentHost;
 
 static int exec_time = 0;
 
+uint32_t CheckFeq = 0;
+
 #define USB_OTG1_HPRT_REG_ADDR      ((uint32_t)0x43100440)
 #define TO4TIMES(value) ((((value) + 3) / 4)*4)
 
@@ -1181,6 +1183,7 @@ void USBH_MTP_RecvData(USBH_HandleTypeDef *phost)
         if(0 == u32_recvSize)
         {
             receive_mtp = 0;
+            CheckFeq = 0;
             return;
         }
 
@@ -1212,6 +1215,7 @@ void USBH_MTP_RecvData(USBH_HandleTypeDef *phost)
 
         WIRELESS_ParseParamConfig((void *)buffer_mtp_recv, phost->id);
         receive_mtp = 0;
+        CheckFeq = 0;
     }
     /*else if(USBH_URB_IDLE != USBH_LL_GetURBState(phost, MTP_Handle->DataInPipe))
     {
@@ -1301,7 +1305,7 @@ static USBH_StatusTypeDef USBH_MTP_SOFProcess (USBH_HandleTypeDef *phost)
     MTP_Handle =  (MTP_HandleTypeDef *)phost->pActiveClass->pData;
 
     g_mtp_recv_enable = 1;
-    if(0 == receive_mtp)//CheckFeq > 50 ||
+    if(0 == receive_mtp && CheckFeq > 0)//CheckFeq > 50 ||
     {
         if(MTP_Handle->DataOutPipe != 0)
         {
@@ -1317,7 +1321,7 @@ static USBH_StatusTypeDef USBH_MTP_SOFProcess (USBH_HandleTypeDef *phost)
         USBH_MTP_SendProcess(phost);
     }
 
-    //++CheckFeq;
+    ++CheckFeq;
 
     return USBH_OK;
 }
@@ -1945,6 +1949,7 @@ uint8_t USBH_MTP_Send(uint8_t *buffer, uint32_t size)
     while(size > MAX_PACKET_SIZE)
     {
         memcpy(g_mtpSendBuffer[g_mtpSendWrIndex], buffer, MAX_PACKET_SIZE);
+        buffer += MAX_PACKET_SIZE;
         g_mtpSendSize[g_mtpSendWrIndex] = MAX_PACKET_SIZE;
         g_mtpSendWrIndex = (++g_mtpSendWrIndex) % DATA_BUF_DEPTH;
         size -= MAX_PACKET_SIZE;

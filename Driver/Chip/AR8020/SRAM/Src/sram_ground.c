@@ -94,7 +94,7 @@ void SRAM_Ready0_USB_HOST_Video_Config(uint8_t *buff, uint32_t dataLen)
 	sramReady0 = 1;
 }
 
-void SRAM_Ready0_USB_DEVICE_Video_Config(uint8_t *buff, uint32_t dataLen)
+void SRAM_Ready0_USB_DEVICE_Video_Config(uint8_t *buff, uint32_t dataLen, uint8_t usb_port_id)
 {
 	uint8_t u8_usbPortId;
     USBD_HandleTypeDef *pdev;
@@ -114,6 +114,9 @@ void SRAM_Ready0_USB_DEVICE_Video_Config(uint8_t *buff, uint32_t dataLen)
 #else
 	for (u8_usbPortId = 0; u8_usbPortId < USBD_PORT_NUM; ++u8_usbPortId)
 	{
+        if (usb_port_id >= HAL_USB_PORT_0 && usb_port_id < HAL_USB_PORT_NUM)
+            u8_usbPortId = usb_port_id;
+
 		pdev = &USBD_Device[u8_usbPortId];
 		if (pdev->dev_state == USBD_STATE_CONFIGURED)
 		{
@@ -219,20 +222,20 @@ void SRAM_Ready0IRQHandler(uint32_t u32_vectorNum)
 			if (usb0_mode == HAL_USB_DR_MODE_HOST)
 				SRAM_Ready0_USB_HOST_Video_Config(buff, dataLen);
 			else
-				SRAM_Ready0_USB_DEVICE_Video_Config(buff, dataLen);
+				SRAM_Ready0_USB_DEVICE_Video_Config(buff, dataLen, HAL_USB_PORT_0);
 			break;
 		case HAL_USB_PORT_1:
 			if (usb1_mode == HAL_USB_DR_MODE_HOST)
 				SRAM_Ready0_USB_HOST_Video_Config(buff, dataLen);
 			else
-				SRAM_Ready0_USB_DEVICE_Video_Config(buff, dataLen);
+				SRAM_Ready0_USB_DEVICE_Video_Config(buff, dataLen, HAL_USB_PORT_1);
 			break;
 		case HAL_USB_PORT_NUM:
 		default:
 			if (g_mtp_enable == 1)
 				SRAM_Ready0_USB_HOST_Video_Config(buff, dataLen);
 			else
-				SRAM_Ready0_USB_DEVICE_Video_Config(buff, dataLen);
+				SRAM_Ready0_USB_DEVICE_Video_Config(buff, dataLen, HAL_USB_PORT_NUM);
 			break;
 	}
 }
