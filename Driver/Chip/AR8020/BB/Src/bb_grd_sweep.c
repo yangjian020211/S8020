@@ -1599,6 +1599,7 @@ static uint8_t  grd_check_sweep_noise(uint8_t mustchg){
 
 void   grd_gen_it_working_ch(uint8_t mode){
 	uint8_t ret=0;
+	if(context.ldpc_error_cnt==0) return;
 	ret = grd_check_sweep_noise(0);
 	int oldch=context.cur_IT_ch;
 	
@@ -1619,7 +1620,7 @@ void   grd_gen_it_working_ch(uint8_t mode){
 void grd_auto_change_rf_bw(void){
 	static uint32_t timegap=0;
 
-	#if 1
+	#if 0
 	static int k=0;
 	k++;
 	if(k==200)

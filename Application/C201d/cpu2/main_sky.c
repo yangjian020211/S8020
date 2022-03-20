@@ -13,6 +13,7 @@
 #include "cmd_line.h"
 #include "board_watchdog.h"
 #include "test_bb_led_ctrl_2.h"
+#include "usr_uart3_task.h"
 
 void console_init(uint32_t uart_num, uint32_t baut_rate)
 {
@@ -57,7 +58,7 @@ int main(void)
     console_init(2, 115200);   
     dlog_set_output_level(LOG_LEVEL_WARNING);
     DLOG_Critical("cpu2 start!!! \n");
-	#if 1
+	#ifndef NET_REPEATER
     STRU_HAL_H264_CONFIG st_h264Cfg;
     st_h264Cfg.u8_view0En = 1;
     st_h264Cfg.u8_view0Gop = 10;
@@ -73,7 +74,7 @@ int main(void)
     HAL_H264_UsrCfg(1, &st_enc_usr_cfg);
 	#endif
     HAL_BB_RegisterLnaFuntion(lna_open,lna_bypass);
-    HAL_BB_Enable_RcRandomSkipFreq();
+    //HAL_BB_Enable_RcRandomSkipFreq();
     HAL_BB_RegisterFemFuntion(fem_normal_trx,fem_only_rx);
 
     HAL_BB_InitSky(NULL);

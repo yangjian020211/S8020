@@ -635,7 +635,7 @@ void CDC_Transfer(USBH_HandleTypeDef *phost)
     uint32_t                data_size   = 0;
     USBH_URBStateTypeDef    URB_Status = USBH_URB_IDLE;
     uint8_t                 flag = 1;
-
+	static uint32_t txidex=0;
     while(flag)
     {
         switch(CDC_Handle->data_state)
@@ -651,7 +651,7 @@ void CDC_Transfer(USBH_HandleTypeDef *phost)
                         CDC_Handle->TxDataLength    = data_size;
                         CDC_Handle->pTxData         = data_buffer;
                         CDC_Handle->data_state      = CDC_SEND_DATA;
-                        DLOG_Info("TX len:%d", data_size);
+                        //DLOG_Error("TX len:%d", data_size);
                     }
                     else
                     {
@@ -681,6 +681,8 @@ void CDC_Transfer(USBH_HandleTypeDef *phost)
                                           CDC_Handle->DataItf.OutEpSize,
                                           CDC_Handle->DataItf.OutPipe,
                                           1);
+						//DLOG_Error("1 sent %d",CDC_Handle->DataItf.OutEpSize);
+						txidex += CDC_Handle->DataItf.OutEpSize;
                     }
                     else
                     {
@@ -689,6 +691,9 @@ void CDC_Transfer(USBH_HandleTypeDef *phost)
                                           CDC_Handle->TxDataLength,
                                           CDC_Handle->DataItf.OutPipe,
                                           1);
+						//DLOG_Error("2 sent %d",CDC_Handle->TxDataLength);
+						
+				
                     }
                     CDC_Handle->data_state = CDC_SEND_DATA_WAIT;
                     flag = 0;
@@ -699,9 +704,24 @@ void CDC_Transfer(USBH_HandleTypeDef *phost)
 
                 ++wait_time;
                 if(wait_time % 5 == 0)
-                {
-                    CDC_Handle->data_state = CDC_SEND_DATA;
-                    DLOG_Info("Resend");
+                {	
+                	if(CDC_Handle->TxDataLength > CDC_Handle->DataItf.OutEpSize){
+						CDC_Handle->TxDataLength -= CDC_Handle->DataItf.OutEpSize;
+          				CDC_Handle->pTxData += CDC_Handle->DataItf.OutEpSize;
+				 	}
+					else{
+						CDC_Handle->TxDataLength =0;
+					}
+					if(CDC_Handle->TxDataLength>0){
+						CDC_Handle->data_state = CDC_SEND_DATA;
+                    	//DLOG_Critical("Resend wait time %d",wait_time);
+					}
+					else{
+						 CDC_Handle->TxDataLength = 0;
+                    	 CDC_Handle->pTxData = 0;
+                    	 CDC_Handle->data_state = CDC_IDLE;
+					}
+                    
                 }
                 else if(wait_time > 50)
                 {
@@ -774,7 +794,7 @@ USBH_StatusTypeDef USBH_CDC_DeviceUp(USBH_HandleTypeDef *phost, uint8_t netcard_
 {
     CDC_HandleTypeDef *CDC_Handle =  (CDC_HandleTypeDef*)phost->pActiveClass->pData;
 
-    DLOG_Critical("ethernet device is ready1111111");
+    DLOG_Critical("ethernet device is ready ");
 
     if ((CDC_IDLE_STATE == CDC_Handle->state)||
         (CDC_DEVICE_PROBE == CDC_Handle->state)||

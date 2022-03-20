@@ -17,7 +17,7 @@
 #include "test_net_repeater_sky.h"
 #include "hal_sram_sky.h"
 
-
+#define NET_COM BB_COM_SESSION_3
 static void rcvDataHandler(void *p)
 {
     /* receive from repeater ground SPI send to IP Camera */
@@ -26,7 +26,7 @@ static void rcvDataHandler(void *p)
     uint32_t  u32_rcvLen = 0;
     //STRU_SysEvent_BB_NET_DATA_RECV * msg = (STRU_SysEvent_BB_NET_DATA_RECV * )p;
 
-    ret = HAL_BB_ComReceiveMsg(BB_COM_SESSION_3, data_buf_proc, 1520, &u32_rcvLen);
+    ret = HAL_BB_ComReceiveMsg(NET_COM, data_buf_proc, 1520, &u32_rcvLen);
     if (ret == HAL_OK && u32_rcvLen > 0)
     {
         HAL_RET_T send_ret;
@@ -38,6 +38,7 @@ static void rcvDataHandler(void *p)
             DLOG_Error("NetDeviceSend fail");
             return;
         }
+		 //DLOG_Critical("sky rec  %d", u32_rcvLen);
     }
     else
     {
@@ -64,10 +65,11 @@ void command_TestNetRepeaterSky( void )
 
     HAL_SRAM_EnableSkyBypassVideo(HAL_SRAM_VIDEO_CHANNEL_1);
 
-    if (HAL_OK != HAL_BB_ComRegisterSession(BB_COM_SESSION_3, BB_COM_SESSION_PRIORITY_LOW, BB_COM_SESSION_DATA_NORMAL, rcvDataHandler))
+    if (HAL_OK != HAL_BB_ComRegisterSession(NET_COM, BB_COM_SESSION_PRIORITY_LOW, BB_COM_SESSION_DATA_NORMAL, rcvDataHandler))
     {
-        DLOG_Error("Fail register session %d", BB_COM_SESSION_3);
+        DLOG_Error("Fail register session %d", NET_COM);
     }
+	  DLOG_Critical("Ok register session %d", NET_COM);
 }
 
 

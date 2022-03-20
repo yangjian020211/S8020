@@ -35,11 +35,12 @@
 #include "hal_norflash.h"
 #include "usr_protocol.h"
 #include "test_nv_grd_slave.h"
+#include "test_net_repeater_ground.h"
+
 
 //#define ENABLE_NV_GRD_SLAVE
 
 #define USB_CTL_GPIO_NUM    HAL_GPIO_NUM80
-
 void console_init(uint32_t uart_num, uint32_t baut_rate)
 {
     HAL_UART_Init(DEBUG_LOG_UART_PORT, HAL_UART_BAUDR_115200, NULL);
@@ -130,6 +131,13 @@ static void USB1_init(void)
     }
 
 }
+#ifdef NET_REPEATER
+static void net_repeaterTask(){
+	HAL_Delay(4000);
+	DLOG_Critical("begin run net repeater\n");
+	command_TestNetRepeaterGnd();
+}
+#endif
 
 /**
   * @brief  Main program
@@ -203,14 +211,10 @@ int main(void)
     //osThreadCreate(osThread(ModPinSleepTask), NULL);
 
     osThreadDef(ModGndPinSearchIdTask, Mod_Grd_Pin_SearchIdTask, osPriorityIdle, 0, 4 * 128);
-    osThreadCreate(osThread(ModGndPinSearchIdTask),NULL);
-
+    osThreadCreate(osThread(ModGndPinSearchIdTask),NULL);	
     usr_usb0_interface();
-
     c201d_pt(testmode);
-
     usr_bypass_uart_task(pst_cfg->u8_workMode,HAL_UART_COMPONENT_5);
-
     //usr_bypass_sbus_uart_task(pst_cfg->u8_workMode);
 
     usr_cmd_uart_task(pst_cfg->u8_workMode);
@@ -225,7 +229,14 @@ int main(void)
 
     portENABLE_INTERRUPTS();
 
+	#ifdef NET_REPEATER
+		osTimerDef(Net_repeatertask, net_repeaterTask);
+    	osTimerId npTimer = osTimerCreate(osTimer(Net_repeatertask), osTimerOnce, NULL);
+    	osTimerStart(npTimer, 2000);
+#endif
+
     osKernelStart();
+
 
     /* We should never get here as control is now taken by the scheduler */
     for( ;; )

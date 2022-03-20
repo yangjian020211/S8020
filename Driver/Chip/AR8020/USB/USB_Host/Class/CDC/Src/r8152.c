@@ -1021,7 +1021,7 @@ static void r8152b_get_version(USBH_HandleTypeDef *phost)
     {
         DLOG_Error("r8152 Unknown tcr version 0x%04x\n", tcr);
     }
-
+	DLOG_Critical("r8152  version 0x%04x\n", tcr);
     rtl8152_set_speed(phost, AUTONEG_ENABLE, SPEED_100, DUPLEX_FULL);
 }
 
@@ -1102,7 +1102,7 @@ static void r8152_init_common(USBH_HandleTypeDef *phost)
         {
             if (timeout == 0)
             {
-                DLOG_Info("waiting for ethernet connection ...");
+                DLOG_Error("waiting for ethernet connection ...");
             }
 
             ar_osDelay(TIMEOUT_RESOLUTION);
@@ -1140,7 +1140,7 @@ static void r8152_write_hwaddr(USBH_HandleTypeDef *phost)
 
     ocp_write_byte(phost, MCU_TYPE_PLA, PLA_CRWECR, &g_write_hwaddr);
 
-    DLOG_Info("MAC %pM\n", g_enetaddr);
+    DLOG_Error("MAC %pM\n", g_enetaddr);
 }
 
 

@@ -109,6 +109,7 @@ static void Sensor_Task_Loop(void const *argument)
     XC7027_SENSOR_LoopCallBack();
 }
 
+
 //sky or grd reverse, but usb1 host or device attribute not change
 static void USB1_init(void)
 {

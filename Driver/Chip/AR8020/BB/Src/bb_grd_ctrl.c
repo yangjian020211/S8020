@@ -2827,6 +2827,7 @@ static void grd_getSignalStatus(void)
     stru_grdstatus.u16_grd_snr = grd_get_it_snr();
     stru_grdstatus.agc_value1 = BB_ReadReg(PAGE2, AAGC_2_RD);
     stru_grdstatus.agc_value2 = BB_ReadReg(PAGE2, AAGC_3_RD);
+	context.ldpc_error_cnt = (((uint16_t)BB_ReadReg(PAGE2, LDPC_ERR_HIGH_8)) << 8) | BB_ReadReg(PAGE2, LDPC_ERR_LOW_8);
 }
 
 

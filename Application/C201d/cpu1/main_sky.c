@@ -69,8 +69,10 @@ int main(void)
         //DLOG_Process(NULL);
     }
 #else
-    usr_bypass_sbus_uart_task(0);
-
+	#ifndef NET_REPEATER
+    	usr_bypass_sbus_uart_task(0);
+	#endif
+	
     for( ;; )
     {
         SYS_EVENT_Process();

@@ -75,7 +75,7 @@ uint8_t get_session_eventid(uint8_t id, uint32_t *pu32_rcv_event)
         u32_rcv_event = SYS_EVENT_ID_UART_DATA_RCV_SESSION4;
         ret = 1;        
     }
-
+ 	
     if (ret && pu32_rcv_event )
     {
         *pu32_rcv_event = u32_rcv_event;
@@ -328,6 +328,7 @@ void BB_ComSessionInit(ENUM_BB_COM_SESSION_ID session_id,
                                 (STRU_BBComSessionRxBuffer *)SRAM_BB_UART_COM_SESSION_2_SHARE_MEMORY_ST_ADDR,
                                 (STRU_BBComSessionRxBuffer *)SRAM_BB_UART_COM_SESSION_3_SHARE_MEMORY_ST_ADDR,
                                 (STRU_BBComSessionRxBuffer *)SRAM_BB_UART_COM_SESSION_4_SHARE_MEMORY_ST_ADDR
+                               
                                 };
     static uint32_t session_buff_size[BB_COM_SESSION_MAX] = {
                                 sizeof(g_BBUARTComSession0RxBuffer),
@@ -335,6 +336,7 @@ void BB_ComSessionInit(ENUM_BB_COM_SESSION_ID session_id,
                                 SRAM_BB_UART_COM_SESSION_2_SHARE_MEMORY_SIZE,
                                 SRAM_BB_UART_COM_SESSION_3_SHARE_MEMORY_SIZE,
                                 SRAM_BB_UART_COM_SESSION_4_SHARE_MEMORY_SIZE
+                              
                                 };
 
     g_BBComSessionArray[session_id].rx_buf = ptr_BBSessionRxBuffer[session_id];
@@ -360,6 +362,7 @@ void BB_ComClearResource(void)
     memset((void *)SRAM_BB_UART_COM_SESSION_2_SHARE_MEMORY_ST_ADDR, 0, sizeof(STRU_BBComSessionRxBuffer));
     memset((void *)SRAM_BB_UART_COM_SESSION_3_SHARE_MEMORY_ST_ADDR, 0, sizeof(STRU_BBComSessionRxBuffer));
     memset((void *)SRAM_BB_UART_COM_SESSION_4_SHARE_MEMORY_ST_ADDR, 0, sizeof(STRU_BBComSessionRxBuffer));
+
 }
 
 

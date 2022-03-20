@@ -19,6 +19,7 @@
 #include "memory.h"
 
 #define MAX_BUFFER (128)
+#define NET_COM BB_COM_SESSION_3
 
 typedef struct _ring_buf
 {
@@ -84,7 +85,7 @@ static void sessionSend_task(void const *argument)
 
         if (rd_idx != wr_idx) //not empty
         {
-            HAL_RET_T ret = HAL_BB_ComSendMsg(BB_COM_SESSION_3, session_ring.buffer[rd_idx], session_ring.buffer_size[rd_idx]);
+            HAL_RET_T ret = HAL_BB_ComSendMsg(NET_COM, session_ring.buffer[rd_idx], session_ring.buffer_size[rd_idx]);
             if (HAL_OK == ret)
             {
                 //free(session_ring.buffer[rd_idx]);
@@ -152,7 +153,7 @@ static void repeater_ground_input(void *data, uint32_t size)
     if (cur_tick - pre_log_tick > 5000 || cnt > 40)
     {
         pre_log_tick = cur_tick;
-        DLOG_Error("send=%d tick=%d cnt=%d %d %d", total_size, (cur_tick-start_send_tick), cnt, rd_idx, wr_idx);
+        //DLOG_Error("send=%d tick=%d cnt=%d %d %d", total_size, (cur_tick-start_send_tick), cnt, rd_idx, wr_idx);
     }
 
     if (rd_idx >= MAX_BUFFER || wr_idx >=MAX_BUFFER )
@@ -202,9 +203,10 @@ static void repeater_ground_input(void *data, uint32_t size)
 
 void command_TestNetRepeaterGnd( void )
 {
-    if (HAL_OK != HAL_BB_ComRegisterSession(BB_COM_SESSION_3, BB_COM_SESSION_PRIORITY_LOW, BB_COM_SESSION_DATA_NORMAL, rcvDataHandler))
+    if (HAL_OK != HAL_BB_ComRegisterSession(NET_COM, BB_COM_SESSION_PRIORITY_LOW, BB_COM_SESSION_DATA_NORMAL, rcvDataHandler))
     {
-        DLOG_Error("Fail register session %d", BB_COM_SESSION_3);
+        DLOG_Error("Fail register session %d", NET_COM);
+		return;
     }
 
     ipcamera_mac_address_valid = 0;
@@ -215,6 +217,7 @@ void command_TestNetRepeaterGnd( void )
 
     HAL_SRAM_ChannelConfig(ENUM_HAL_SRAM_CHANNEL_TYPE_RTSP_BYPASS,
                            1);
+	DLOG_Error("ok register session %d", NET_COM);
 }
 
 /**

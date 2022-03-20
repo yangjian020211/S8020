@@ -448,7 +448,7 @@ void usr_bypass_uart_task(int dev_type)
 #include "ringbuf.h"
 
 ENUM_HAL_UART_COMPONENT uart_bypass_num;
-#define BYPASS_BB_COM BB_COM_SESSION_3
+#define BYPASS_BB_COM BB_COM_SESSION_4
 static ringbuf_t ring_hal_uart_rx = NULL;
 static ringbuf_t ring_bb_uart_rx = NULL;
 static int hal_uart_rx_cnt,bb_uart_rx_cnt;

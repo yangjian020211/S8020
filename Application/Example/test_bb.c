@@ -15,10 +15,10 @@ static void rcvDataHandler(void *p)
     uint8_t data_buf_proc[1024];
     uint32_t u32_rcvLen = 0;
     
-    HAL_BB_ComReceiveMsg(BB_COM_SESSION_2, data_buf_proc, sizeof(data_buf_proc), &u32_rcvLen);
+    //HAL_BB_ComReceiveMsg(BB_COM_SESSION_2, data_buf_proc, sizeof(data_buf_proc), &u32_rcvLen);
 
-    DLOG_Info("rcv: %d", u32_rcvLen);
-    DLOG_Info("%d %d", data_buf_proc[0], data_buf_proc[1]);
+    //DLOG_Critical("rcv: %d", u32_rcvLen);
+    //DLOG_Critical("%d %d", data_buf_proc[0], data_buf_proc[1]);
 }
 
 

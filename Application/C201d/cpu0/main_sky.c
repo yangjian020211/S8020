@@ -41,6 +41,7 @@
 #include "hal_norflash.h"
 #include "usr_protocol.h"
 #include "XC7027/xc7027.h"
+#include "test_net_repeater_sky.h"
 
 //#define USE_HDMI_CH7038
 //#define SENSOR_XC7027
@@ -161,6 +162,13 @@ static void USB1_init(void)
 
 }
 
+#ifdef NET_REPEATER
+static void net_repeaterTask(){
+	HAL_Delay(4000);
+	DLOG_Critical("begin run net repeater\n");
+	command_TestNetRepeaterSky();
+}
+#endif
 
 /**
   * @brief  Main program
@@ -220,11 +228,14 @@ int main(void)
 #endif
 
     HAL_USB_Init(HAL_USB_PORT_0, HAL_USB_DR_MODE_DEVICE);
-
+	#ifdef NET_REPEATER
+		HAL_USB_Init(HAL_USB_PORT_1, HAL_USB_DR_MODE_HOST);
+	#else
     if(testmode)
         HAL_USB_Init(HAL_USB_PORT_1, HAL_USB_DR_MODE_HOST);
     else
         USB1_init();
+	#endif
 
     UPGRADE_SKYInit();
     fem_init();
@@ -261,9 +272,9 @@ int main(void)
 
     if(!testmode)
     {
-        usr_bypass_uart_task(pst_cfg->u8_workMode,HAL_UART_COMPONENT_5);
 
-        //usr_bypass_sbus_uart_task(pst_cfg->u8_workMode);
+        usr_bypass_uart_task(pst_cfg->u8_workMode,HAL_UART_COMPONENT_5);
+		//usr_bypass_sbus_uart_task(pst_cfg->u8_workMode);
 
         usr_cmd_uart_task(pst_cfg->u8_workMode);
     }
@@ -273,6 +284,8 @@ int main(void)
 #endif
 
     Wireless_TaskInit(WIRELESS_USE_RTOS);
+
+
 
     portENABLE_INTERRUPTS();
 
@@ -285,8 +298,17 @@ int main(void)
     osTimerId SensorLoopTimer = osTimerCreate(osTimer(SensorLoopTask), osTimerPeriodic, NULL);
     osTimerStart(SensorLoopTimer, 300);
 #endif
+	
+#ifdef NET_REPEATER
+		osTimerDef(Net_repeatertask, net_repeaterTask);
+    	osTimerId npTimer = osTimerCreate(osTimer(Net_repeatertask), osTimerOnce, NULL);
+    	osTimerStart(npTimer, 2000);
+#endif
+
 
     osKernelStart();
+
+
 
     /* We should never get here as control is now taken by the scheduler */
     for( ;; )

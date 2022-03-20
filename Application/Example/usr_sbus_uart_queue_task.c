@@ -42,7 +42,7 @@
 /* define rt uart Hal uart num */
 #define BYPASS_UART_SPI_NUM HAL_UART_COMPONENT_4
 /* define rt uart BaseBand session num */
-#define BYPASS_BB_COM BB_COM_SESSION_SPI
+#define BYPASS_BB_SESSION BB_COM_SESSION_SPI
 /* define rt uart max vaild data len */
 #define MAX_RT_BUF_LEN 25
 /* define rt uart gpio pin to notice extern device */
@@ -211,7 +211,7 @@ static void bypass_bb_spi_irq_handler(void *p)
     //STRU_SPI_DATA_SAVE_FORMAT *pst_spiDSave = (STRU_SPI_DATA_SAVE_FORMAT *)(SRAM_SPI_DATA_TRANS_ST_ADDR);
 
     cnt = 0;
-    ret = HAL_BB_ComReceiveMsg(BYPASS_BB_COM, buffer,BB_READ_MAX_LEN,&cnt);
+    ret = HAL_BB_ComReceiveMsg(BYPASS_BB_SESSION, buffer,BB_READ_MAX_LEN,&cnt);
     if(ret != HAL_OK && cnt != 0)
     {
         DLOG_Error("failed read bbcom %02x,%d",ret,cnt);
@@ -273,7 +273,7 @@ static void hal_uart_tx2bb_spi(void)
     }
 
     len = rt_uart_buf_len[rt_uart_buf_index_r] > spi_num ? spi_num : rt_uart_buf_len[rt_uart_buf_index_r];
-    ret = HAL_BB_ComSendMsg(BYPASS_BB_COM,rt_uart_buf[rt_uart_buf_index_r],len);
+    ret = HAL_BB_ComSendMsg(BYPASS_BB_SESSION,rt_uart_buf[rt_uart_buf_index_r],len);
     if(ret != HAL_OK)
     {
         DLOG_Error("failed ret %x",ret);
@@ -474,7 +474,7 @@ void usr_bypass_sbus_uart_task(uint8_t dev_type)
     if(dev_type == 0)
     {
         //register BaseBand rt-uart session, will malloc a special session to rt-uart function 
-        ret = HAL_BB_ComRegisterSession(BYPASS_BB_COM,
+        ret = HAL_BB_ComRegisterSession(BYPASS_BB_SESSION,
                                        BB_COM_SESSION_PRIORITY_HIGH,
                                        BB_COM_SESSION_DATA_NORMAL,
                                        NULL);

@@ -323,6 +323,7 @@ typedef struct
 
     uint8_t             u8_rcValue[5];
     uint32_t            qam_switch_time;
+	uint16_t			ldpc_error_cnt; 
 
     uint8_t             ldpc_error_move_cnt;
     DEVICE_STATE        dev_state;
