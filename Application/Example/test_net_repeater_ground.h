@@ -8,6 +8,7 @@ extern "C"
 
 
 void command_TestNetRepeaterGnd( void );
+void set_ip_filter(uint8_t *data,uint8_t index);
 
 
 #ifdef __cplusplus

@@ -20,7 +20,7 @@
 
 #define MAX_BUFFER (128)
 #define NET_COM BB_COM_SESSION_3
-
+#define MAX_IP_NUMBER 20
 typedef struct _ring_buf
 {
     void  *buffer[MAX_BUFFER];
@@ -28,6 +28,8 @@ typedef struct _ring_buf
     uint16_t  rd_ptr;
     uint16_t  wr_ptr;
 }ring_buf_t;
+
+uint8_t filter_ip_collection[MAX_IP_NUMBER][4];
 
 
 volatile ring_buf_t session_ring;
@@ -37,6 +39,8 @@ uint32_t pre_log_tick = 0;
 uint32_t total_size = 0;
 uint8_t  ipcamera_mac_address[6];
 uint8_t  ipcamera_mac_address_valid = 0;
+
+
 
 static void repeater_ground_input(void *data, uint32_t size);
 
@@ -121,6 +125,37 @@ static void create_send_thread(void)
     osThreadCreate(osThread(sessionSend_Task), NULL);
 }
 
+static void plot_msg(uint8_t *gdata,int size)
+{
+	//type len
+	int len = gdata[16]<<8 | gdata[17];
+	DLOG_Critical("size=%d,len=%d type :%x",size,len,gdata[23]);
+	//src ip
+	//DLOG_Critical("src ip:%d.%d.%d.%d",gdata[26],gdata[27],gdata[28],gdata[29]);
+	//dest ip
+	//DLOG_Critical("dest ip:%d.%d.%d.%d",gdata[30],gdata[31],gdata[32],gdata[33]);
+	//src port
+	//int port = gdata[34]<<8 | gdata[35];
+	//DLOG_Critical("src port:%d",port);
+	//dest port
+	//port = gdata[36]<<8 | gdata[37];
+	//DLOG_Critical("dest port:%d",port);
+	
+	//DLOG_Critical("dest mac addr:%2x %2x %2x %2x %2x %2x",gdata[0],gdata[1],gdata[2],gdata[3],gdata[4],gdata[5]);
+	//DLOG_Critical("src mac addr:%2x %2x %2x %2x %2x %2x",gdata[6],gdata[7],gdata[8],gdata[9],gdata[10],gdata[11]);
+}
+static uint8_t filter_ip(uint8_t *data){
+
+	int i=0;
+	//DLOG_Critical("dest ip:%d.%d.%d.%d",data[0],data[1],data[2],data[3]);
+	//DLOG_Critical("filter ip:%d.%d.%d.%d",filter_ip_collection[0][0],filter_ip_collection[0][1],filter_ip_collection[0][2],filter_ip_collection[0][3]);
+	for(i=0;i<MAX_IP_NUMBER;i++)
+	{
+		if(memcmp(filter_ip_collection[i], data, 4)== 0)  return 1;
+	}
+
+	return 0;
+}
 
 static void repeater_ground_input(void *data, uint32_t size)
 {
@@ -128,7 +163,9 @@ static void repeater_ground_input(void *data, uint32_t size)
     uint8_t wr_idx = session_ring.wr_ptr;
     uint8_t cnt;
     uint8_t broadcast_mac_addr[6] = {0xff,0xff,0xff,0xff,0xff,0xff};
-
+	static int getsum=0;
+	uint8_t *gdata = (uint8_t *)data;
+	uint8_t type = gdata[23];
     total_size += size;
     if (start_send_tick == 0)
     {
@@ -143,12 +180,22 @@ static void repeater_ground_input(void *data, uint32_t size)
     {
         cnt = MAX_BUFFER - (rd_idx - wr_idx);
     }
-
+	
     if (memcmp(ipcamera_mac_address, data, 6) != 0 && memcmp(broadcast_mac_addr, data, 6) != 0)
     {
         return;
     }
-
+	//plot_msg(gdata,size);
+	
+	if(type==0x8c){
+		if(filter_ip(&gdata[28])==0)  return;
+		
+	}
+	else{
+		if(filter_ip(&gdata[26])==0)  return;
+	}
+	
+	
     uint32_t cur_tick = HAL_GetSysMsTick();
     if (cur_tick - pre_log_tick > 5000 || cnt > 40)
     {
@@ -201,6 +248,13 @@ static void repeater_ground_input(void *data, uint32_t size)
     return;
 }
 
+void set_ip_filter(uint8_t *data,uint8_t index){
+	if(index>MAX_IP_NUMBER) return;
+	filter_ip_collection[index][0]=data[0];
+	filter_ip_collection[index][1]=data[1];
+	filter_ip_collection[index][2]=data[2];
+	filter_ip_collection[index][3]=data[3];
+}
 void command_TestNetRepeaterGnd( void )
 {
     if (HAL_OK != HAL_BB_ComRegisterSession(NET_COM, BB_COM_SESSION_PRIORITY_LOW, BB_COM_SESSION_DATA_NORMAL, rcvDataHandler))
