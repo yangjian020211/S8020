@@ -781,7 +781,8 @@ static void sky_do_rf_bw(void)
 			RF_GetFctFreqTable(context.st_bandMcsOpt.e_bandwidth);
 			reset_sweep_table(context.e_curBand);
 			BB_set_RF_bandwitdh(BB_SKY_MODE, (ENUM_CH_BW)context.rf_bw.bw);
-			BB_set_ItFrqByCh(context.e_curBand, context.stru_bandChange.u8_ItCh);
+			if( context.itHopMode == AUTO)
+				BB_set_ItFrqByCh(context.e_curBand, context.stru_bandChange.u8_ItCh);
 			if(context.qam_ldpc!=context.rf_bw.ldpc)
 			{
 	    		ENUM_RUN_MODE mode = AUTO;

@@ -1508,7 +1508,8 @@ void __attribute__ ((section(".h264"))) grd_SetSweepMode(uint8_t mode)
 void rf_pwr_statistics(){
 	static int pwr_id=0;
 	static int isfull=0;
-	
+	STRU_RF_DATA list[MAX_IT_PWR_STATICS]={0};
+	STRU_RF_DATA listr[MAX_IT_PWR_STATICS]={0};
 	int i=0;
 	int temp=0;
 
@@ -1522,11 +1523,20 @@ void rf_pwr_statistics(){
 	if(isfull){
 		for(i=0;i<MAX_IT_PWR_STATICS-1;i++){
 			context.rf_info.working_pwr[i] = context.rf_info.working_pwr[i+1];
-			temp +=context.rf_info.working_pwr[i];
+			//temp +=context.rf_info.working_pwr[i];
+			list[i].value=context.rf_info.working_pwr[i];
+			list[i].id=i;
 		}  
 		context.rf_info.working_pwr[MAX_IT_PWR_STATICS-1]=value;
-		temp +=value;
-		context.rf_info.working_pwr_avrg=temp/MAX_IT_PWR_STATICS;
+		list[MAX_IT_PWR_STATICS-1].value=value;
+		list[MAX_IT_PWR_STATICS-1].id=MAX_IT_PWR_STATICS-1;
+		//temp +=value;
+		selectionSortBy(listr,MAX_IT_PWR_STATICS,list,1);
+		
+		for(i=1;i<MAX_IT_PWR_STATICS-1;i++){
+			temp +=listr[i].value;
+		}
+		context.rf_info.working_pwr_avrg=temp/(MAX_IT_PWR_STATICS-2);
 	}
 	else{
 		context.rf_info.working_pwr[pwr_id] = value;
@@ -1620,7 +1630,7 @@ void   grd_gen_it_working_ch(uint8_t mode){
 void grd_auto_change_rf_bw(void){
 	static uint32_t timegap=0;
 
-	#if 0
+	#if 1
 	static int k=0;
 	k++;
 	if(k==200)
