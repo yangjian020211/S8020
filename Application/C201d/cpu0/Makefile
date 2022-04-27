@@ -8,7 +8,6 @@ BUILD_DIR ?= $(TOP_DIR)/Build
 OUTPUT_DIR ?= $(TOP_DIR)/Output
 OUTPUT_HEADER_STAGING_DIR ?= $(OUTPUT_DIR)/Staging/Inc
 OUTPUT_LIB_STAGING_DIR ?= $(OUTPUT_DIR)/Staging/Lib
-
 # utility file director
 UTILITY_DIR ?= $(TOP_DIR)/Utility
 
@@ -38,8 +37,8 @@ endif
 ifeq ($(APPLICATION_SCENARIO), ground)
 TARGET = ar8020_gndcpu0.bin
 SRC_C   := main_ground.c \
-           ../../Example/grd_test_search_id_2.c \
-           ../../Example/grd_app_sys_event_process.c
+			../../Example/grd_test_search_id_2.c \
+			../../Example/grd_app_sys_event_process.c
 SRC_CXX :=
 endif
 SRC_C   += command.c \
@@ -93,7 +92,7 @@ SRC_C   += command.c \
 		   ../../Example/XC7027/xc7027.c \
 		   ../../Example/test_net_repeater_sky.c \
            ../../Example/test_net_repeater_ground.c \
-           $(NORFLASH_WPT_SRC_C)
+		   $(NORFLASH_WPT_SRC_C)
 
 # compile flags
 CFLAGS   += -I$(OUTPUT_HEADER_STAGING_DIR) -I$(TOP_DIR)/Configure/Include -I../share -I../../Example \
@@ -107,7 +106,7 @@ CXXFLAGS += -I$(OUTPUT_HEADER_STAGING_DIR) -I$(TOP_DIR)/Configure/Include -I../s
 
 # libs
 LD_LIBS := --start-group
-LD_LIBS += -llwip -lfreertos -lutility -lfatfs -lhal -lboard -lAR8020drv -lm -lcommon -lc_nano -lgcc
+LD_LIBS += -llwip -lfreertos -lutility -lfatfs -lhal -lboard -lAR8020drv -lm -lcommon -lc_nano -lgcc -lAR8020drv_cpu2
 ifeq ($(SRC_CXX), )
 LD_LIBS += --end-group
 else
@@ -116,7 +115,7 @@ endif
 
 # link flags
 LDFLAGS += -Bstatic
-LDFLAGS += -L$(OUTPUT_LIB_STAGING_DIR) -L$(OUTPUT_LIB_STAGING_DIR)/$(CPU_NUMBER) $(LD_LIBS)
+LDFLAGS += -L$(OUTPUT_LIB_STAGING_DIR) -L$(OUTPUT_LIB_STAGING_DIR)/$(CPU_NUMBER) $(LD_LIBS) -L$(OUTPUT_LIB_STAGING_DIR)/cpu2
 
 ###############################################################################
 

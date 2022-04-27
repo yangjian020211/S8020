@@ -8,6 +8,7 @@ BUILD_DIR ?= $(TOP_DIR)/Build
 OUTPUT_DIR ?= $(TOP_DIR)/Output
 OUTPUT_HEADER_STAGING_DIR ?= $(OUTPUT_DIR)/Staging/Inc
 OUTPUT_LIB_STAGING_DIR ?= $(OUTPUT_DIR)/Staging/Lib
+OUTPUT_LIB_STAGING_DIR2?= $(OUTPUT_DIR)/Lib
 SRC_C_DIR ?= $(TOP_DIR)/Driver/Chip/AR8020
 INC_LIBRARY_H_DIR ?= $(TOP_DIR)/Library/Artosyn/Utility/Inc
 SRC_LIBRARY_C_DIR ?= $(TOP_DIR)/Library/Artosyn/Utility/Src
@@ -27,11 +28,11 @@ CPU_NUMBER := cpu0
 CFLAGS += $(CPU0_COMPILE_FLAGS)
 
 LD_LIBS := --start-group
-LD_LIBS += -lfatfs -lutility -lhal -lboard -lAR8020drv -lcommon -lsimplec -lgcc -lcmbacktrace
+LD_LIBS += -lfatfs -lutility -lhal -lboard -lAR8020drv -lcommon -lsimplec -lgcc -lcmbacktrace -lAR8020drv_cpu2
 LD_LIBS += --end-group
 
 LDFLAGS += -Bstatic --gc-section
-LDFLAGS += -L$(OUTPUT_LIB_STAGING_DIR)/$(CPU_NUMBER) $(LD_LIBS)
+LDFLAGS += -L$(OUTPUT_LIB_STAGING_DIR)/$(CPU_NUMBER) $(LD_LIBS) -L$(OUTPUT_LIB_STAGING_DIR)/cpu2 -L$(OUTPUT_LIB_STAGING_DIR2)/cpu2
                  
 # source file(s), including c file(s)
 SRC_S   :=  Src/upgrade_start.s 

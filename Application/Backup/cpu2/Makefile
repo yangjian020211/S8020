@@ -8,7 +8,7 @@ BUILD_DIR ?= $(TOP_DIR)/Build
 OUTPUT_DIR ?= $(TOP_DIR)/Output
 OUTPUT_HEADER_STAGING_DIR ?= $(OUTPUT_DIR)/Staging/Inc
 OUTPUT_LIB_STAGING_DIR ?= $(OUTPUT_DIR)/Staging/Lib
-
+OUTPUT_LIB_STAGING_DIR2 ?= $(OUTPUT_DIR)/Lib
 # utility file director
 UTILITY_DIR ?= $(TOP_DIR)/Utility
 
@@ -40,7 +40,7 @@ CXXFLAGS += -I$(OUTPUT_HEADER_STAGING_DIR) -I$(TOP_DIR)/Configure/Include -I../s
 
 # libs
 LD_LIBS := --start-group
-LD_LIBS += -lutility -lhal -lboard -lAR8020drv -lm -lcommon -lsimplec -lgcc
+LD_LIBS += -lutility -lhal -lboard -lAR8020drv_cpu2 -lm -lcommon -lsimplec -lgcc
 ifeq ($(SRC_CXX), )
 LD_LIBS += --end-group
 else
@@ -50,7 +50,7 @@ endif
 # link flags
 LDFLAGS += -Bstatic
 LDFLAGS += --gc-sections
-LDFLAGS += -L$(OUTPUT_LIB_STAGING_DIR) -L$(OUTPUT_LIB_STAGING_DIR)/$(CPU_NUMBER) $(LD_LIBS)
+LDFLAGS += -L$(OUTPUT_LIB_STAGING_DIR) -L$(OUTPUT_LIB_STAGING_DIR)/$(CPU_NUMBER) $(LD_LIBS) -L$(OUTPUT_LIB_STAGING_DIR2)/cpu2
 
 ###############################################################################
 

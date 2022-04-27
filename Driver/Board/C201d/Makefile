@@ -42,8 +42,7 @@ SRC_C := ../Common/NORFlash/Src/nor_flash.c \
          ../Common/IT66021/Src/it_66021.c \
          ../Common/IT66021/Src/it6602.c \
 		 ../Common/WatchDog/Src/board_watchdog.c \
-		 ../Common/WatchDog/Src/board_watchdog_cpu2.c \
-         ../../Chip/AR8020/BB/Src/bb_sky_sweep.c
+		 ../Common/WatchDog/Src/board_watchdog_cpu2.c 
 
 INCDIRS := -I../ \
            -I../Common/IT66021/Inc \

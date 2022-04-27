@@ -14,21 +14,6 @@ SRC_C := SysCtl/Src/reg_rw.c \
          I2C/Src/i2c_ll.c \
          I2C/Src/i2c.c \
          SPI/Src/spi.c \
-         BB/Src/bb_spi.c \
-         BB/Src/bb_init_sky_regs.c \
-         BB/Src/bb_init_grd_regs.c \
-         BB/Src/bb_uart_com.c \
-         BB/Src/bb_sky_ctrl.c \
-         BB/Src/bb_grd_ctrl.c \
-         BB/Src/bb_grd_sweep.c \
-         BB/Src/bb_snr_service.c \
-         BB/Src/bb_sys_param.c \
-         BB/Src/bb_ctrl.c \
-         BB/Src/pwr_ctrl.c \
-         BB/Src/filter.c \
-         BB/Src/bb_uart_com.c \
-         BB/Src/bb_grd_search.c \
-         BB/Src/bb_sky_search.c \
          DMA/Src/dma.c \
          SRAM/Src/sram_sky.c \
          USB/USB_Host/Class/UVC/Src/usbh_uvc.c \

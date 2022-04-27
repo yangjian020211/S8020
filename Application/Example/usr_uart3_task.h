@@ -8,7 +8,7 @@ extern "C"
 
 #include "hal_uart.h"
 
-//#define NET_REPEATER 
+#define NET_REPEATER 
 void usr_bypass_uart_task(int dev_type,ENUM_HAL_UART_COMPONENT uart_num);
 uint32_t bypass_write_usb2uart(uint8_t *pu8_rxBuf, uint16_t u8_len);
 uint32_t bypass_read_uart2usb(uint8_t *pu8_rxBuf,uint32_t max_len);

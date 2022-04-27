@@ -19,7 +19,18 @@ include $(BUILD_DIR)/config.mk
 
 ###############################################################################
 # static library name
+
+ifeq ($(CPU_NUMBER), cpu0)
 LIB = lib$(CHIP)drv.a
+endif
+
+ifeq ($(CPU_NUMBER), cpu1)
+LIB = lib$(CHIP)drv.a
+endif
+
+ifeq ($(CPU_NUMBER), cpu2)
+LIB = lib$(CHIP)drv_cpu2.a
+endif
 
 CFG_BIN = $(BB_REG_CFG_BIN_FILE_NAME)
 

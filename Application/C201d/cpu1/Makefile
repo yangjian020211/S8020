@@ -56,7 +56,7 @@ CXXFLAGS += -I$(OUTPUT_HEADER_STAGING_DIR) -I$(TOP_DIR)/Configure/Include -I../s
 
 # libs
 LD_LIBS := --start-group
-LD_LIBS += -lutility -lhal -lboard -lAR8020drv -lm -lcommon -lc_nano -lgcc -lcmbacktrace
+LD_LIBS += -lutility -lhal -lboard -lAR8020drv -lm -lcommon -lc_nano -lgcc -lcmbacktrace -lAR8020drv_cpu2
 ifeq ($(SRC_CXX), )
 LD_LIBS += --end-group
 else
@@ -65,7 +65,7 @@ endif
 
 # link flags
 LDFLAGS += -Bstatic
-LDFLAGS += -L$(OUTPUT_LIB_STAGING_DIR) -L$(OUTPUT_LIB_STAGING_DIR)/$(CPU_NUMBER) $(LD_LIBS)
+LDFLAGS += -L$(OUTPUT_LIB_STAGING_DIR) -L$(OUTPUT_LIB_STAGING_DIR)/$(CPU_NUMBER) $(LD_LIBS) -L$(OUTPUT_LIB_STAGING_DIR)/cpu2 
 
 ###############################################################################
 

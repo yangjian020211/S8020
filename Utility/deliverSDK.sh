@@ -38,7 +38,23 @@ else
 	mkdir -p $AR8020SW/Output/$SDK_VERSION
 	cp $AR8020SW/Application/Example $AR8020SW/Output/$SDK_VERSION -R
 	mkdir -p $AR8020SW/Output/AR8020SDK/Example
+	
 	cp $AR8020SW/Application/Example $AR8020SW/Output/AR8020SDK -R
+	cp $AR8020SW/Driver $AR8020SW/Output/AR8020SDK -R
+	cp $AR8020SW/Build $AR8020SW/Output/AR8020SDK -R
+	cp $AR8020SW/Configure $AR8020SW/Output/AR8020SDK -R
+	cp $AR8020SW/Bootload $AR8020SW/Output/AR8020SDK -R
+	
+	
+	mv $AR8020SW/Output/AR8020SDK//Build/Project/AR8020/Makefile_cpu01 $AR8020SW/Output/AR8020SDK//Build/Project/AR8020/Makefile
+	rm $AR8020SW/Output/AR8020SDK//Build/Project/AR8020/Makefile_cpu2
+	rm $AR8020SW/Output/AR8020SDK//Build/Project/AR8020/Makefile_cpu012
+    #generate application
+	cp $AR8020SW/Library $AR8020SW/Output/AR8020SDK -R
+	cp $AR8020SW/Kernel $AR8020SW/Output/AR8020SDK -R
+	rm -rf $AR8020SW/Output/AR8020SDK/Driver/Chip/AR8020/BB/Src/*
+	rm -rf $AR8020SW/Output/AR8020SDK/Driver/Chip/AR8020/H264Encoder/Src/*
+
 fi
 
 
@@ -58,8 +74,15 @@ BUILD_DIR=$AR8020SW/Build/ConfigureFiles
          mkdir -p $AR8020SW/Output/$SDK_VERSION/$tmp
          cd ../Project/AR8020
          make configure PROJS=$tmp
+		 #make cpu2 first
+		 cp Makefile_cpu2 Makefile
          make 
-         #generate application
+		 #make cpu0 and cpu1
+		 cp Makefile_cpu01 Makefile
+         make 
+		 
+		 cp $AR8020SW/Output/Staging/ $AR8020SW/Output/AR8020SDK/Output/ -R
+		 
          make sdk
          cp $OUTPUT_DIR/$SDK_VERSION_TAR $AR8020SW/Output/$SDK_VERSION/$tmp
          md5sum $AR8020SW/Output/$SDK_VERSION/$tmp/$SDK_VERSION_TAR > $AR8020SW/Output/$SDK_VERSION/$tmp/$SDK_VERSION_TAR".md5"
