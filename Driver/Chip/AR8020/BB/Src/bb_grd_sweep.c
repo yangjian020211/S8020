@@ -1618,7 +1618,7 @@ void   grd_gen_it_working_ch(uint8_t mode){
 	  context.cur_IT_ch=context.rf_info.sort_result_list[0].id;
 	  BB_grd_NotifyItFreqByCh(context.e_curBand, context.cur_IT_ch);
 	  context.dev_state = DELAY_14MS;
-	  DLOG_Critical("mode=%d,it_work_sweep[%d]=%d,it_newsweep[%d]=%d",
+	  DLOG_Info("mode=%d,it_work_sweep[%d]=%d,it_newsweep[%d]=%d",
 	  mode,
 	  oldch, 
 	  context.rf_info.sweep_pwr_avrg_value[oldch].value,

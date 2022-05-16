@@ -646,7 +646,7 @@ static uint8_t corse_check_sweep_noise(uint8_t mustchg){
 		{
 			for(j=0;j<context.rf_info.rc_ch_working_patten_len;j++)
 			{
-				DLOG_Warning("%d working[%d]=%d, sweep[%d]=%d",j,listcomp[j].id,listcomp[j].value,listr[j].id,listr[j].value);
+				DLOG_Info("%d working[%d]=%d, sweep[%d]=%d",j,listcomp[j].id,listcomp[j].value,listr[j].id,listr[j].value);
 			}
 			for(j=0;j<context.rf_info.fine_sweep_size;j++)
 			{
@@ -826,7 +826,7 @@ static void find_best_patten()
 	context.rcChgPatten.en_flag=1;
 	context.rcChgPatten.valid=1;
 	context.rcChgPatten.timeout_cnt=context.sync_cnt+STATUS_CHG_DELAY;
-	DLOG_Critical("begin to change the new patten !");
+	DLOG_Info("begin to change the new patten !");
 	reset_error_list_record();
 
 	if(context.rf_info.rc_sweep_log_open)
@@ -973,7 +973,7 @@ void sky_gen_rc_working_patten(void)
 		{
 			sweep_noise_meet = corse_check_sweep_noise(1);
 			begin_lock_sweep_noise_for_selection();
-			DLOG_Critical("change patten because of the working error meet");
+			DLOG_Info("change patten because of the working error meet");
 		}
 		else
 		{
@@ -982,7 +982,7 @@ void sky_gen_rc_working_patten(void)
 			{
 				plotlog_en=1;
 				begin_lock_sweep_noise_for_selection();
-				DLOG_Critical("change patten because of the sweep noise meet");
+				DLOG_Info("change patten because of the sweep noise meet");
 			}
 		
 		}
@@ -991,7 +991,7 @@ void sky_gen_rc_working_patten(void)
 	{
 		if(context.rf_info.sweep_finished)
 		{
-			DLOG_Critical("begin select good patten");
+			DLOG_Info("begin select good patten");
 			find_best_patten();
 			end_lock_sweep_noise_for_selection();
 			plotlog_en=2;

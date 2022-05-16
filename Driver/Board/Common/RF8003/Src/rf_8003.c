@@ -171,9 +171,9 @@ void RF8003_GetFctFreqTable(ENUM_CH_BW e_bw)
 		itp_frq = FCT_GetNodeAndData(nodeid_band0, &itnode);
 		pItFreqlist = itp_frq->u16_rfChFrqList;
 		
-		DLOG_Critical("cnt = %d", itp_frq->u32_rfChCount);
+		DLOG_Info("cnt = %d", itp_frq->u32_rfChCount);
 		for(i=0;i<itp_frq->u32_rfChCount;i++)
-			DLOG_Critical("it[%d]=%d",i,pItFreqlist[i]);
+			DLOG_Info("it[%d]=%d",i,pItFreqlist[i]);
     }
     else
     {
@@ -193,7 +193,7 @@ void RF8003_GetFctFreqTable(ENUM_CH_BW e_bw)
 	#ifdef RFSUB_BAND
     if(p_frq->u32_rfChCount > 0 && p_frq->u16_rfChFrqList[0] < 100)//real freq value must > 100, e.g 2400,5800
     {
-        DLOG_Warning("2g auto generate rc freq");
+        DLOG_Info("2g auto generate rc freq");
         p_frq_vt = (STRU_RF_CHANNEL *)FCT_GetNodeAndData(nodeid_band0, &node_vt);
         if (NULL == p_frq_vt)
         {
@@ -207,7 +207,7 @@ void RF8003_GetFctFreqTable(ENUM_CH_BW e_bw)
         if(p_frq->u32_rfChCount * p_frq_vt->u32_rfChCount > 240)
         {
             freq_cnt = 240 / p_frq_vt->u32_rfChCount;
-            DLOG_Warning("2g force sub rc %d->%d",p_frq->u32_rfChCount,freq_cnt);
+            DLOG_Info("2g force sub rc %d->%d",p_frq->u32_rfChCount,freq_cnt);
         }
 
         for(i=0;i<p_frq_vt->u32_rfChCount;i++)
@@ -220,7 +220,7 @@ void RF8003_GetFctFreqTable(ENUM_CH_BW e_bw)
         }
         u8_rcFreqCnt_2g = freq_cnt * p_frq_vt->u32_rfChCount;
         u8_subBand10MrcFreqNum = freq_cnt;
-        DLOG_Warning("2g rc frq %d %d",u8_subBand10MrcFreqNum,u8_rcFreqCnt_2g);
+        DLOG_Info("2g rc frq %d %d",u8_subBand10MrcFreqNum,u8_rcFreqCnt_2g);
     }
     else
 	#endif
@@ -230,7 +230,7 @@ void RF8003_GetFctFreqTable(ENUM_CH_BW e_bw)
 		pRcFreqlist = rcp_frq->u16_rfChFrqList;
     }
 
-    DLOG_Warning("e_bw = %d,rc_cnt = %d", e_bw,u8_rcFreqCnt_2g);
+    DLOG_Info("e_bw = %d,rc_cnt = %d", e_bw,u8_rcFreqCnt_2g);
 }
 
 void RF_GetFctFreqTable(ENUM_CH_BW e_bw){

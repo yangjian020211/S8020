@@ -158,7 +158,7 @@ uint8_t __attribute__ ((section(".h264"))) sky_rcUnLockHopBand(void)
             sky_soft_reset();
 
             BB_set_ItFrqByCh(context.e_curBand, context.cur_IT_ch);
-            DLOG_Warning("to:%d %d %d %d", context.e_curBand, context.rf_info.rc_ch_working_patten_size,context.sky_rc_channel, SysTicks_GetTickCount());
+            DLOG_Info("to:%d %d %d %d", context.e_curBand, context.rf_info.rc_ch_working_patten_size,context.sky_rc_channel, SysTicks_GetTickCount());
 
             sky_bandSwitchLnaSwitch();
             
@@ -197,7 +197,7 @@ void __attribute__ ((section(".h264"))) sky_handle_RF_band_cmd(uint8_t *arg)
 				context.stru_bandChange.e_toBand		= p->e_toBand;
             }
 
-            DLOG_Critical("Band:%d %d :%d", context.e_curBand, (p->e_toBand), context.stru_bandChange.u8_eqCntChg);
+            DLOG_Info("Band:%d %d :%d", context.e_curBand, (p->e_toBand), context.stru_bandChange.u8_eqCntChg);
         }
     }
 }
@@ -207,7 +207,7 @@ void __attribute__ ((section(".h264"))) sky_switchSetPower(ENUM_RF_BAND band)
 {
     context.pwr = BB_get_band_power(context.e_curBand);
 
-    DLOG_Critical("band: %d %d %d %d,pwr %d",  context.sky_rc_channel, context.stru_bandChange.u8_eqCntChg,
+    DLOG_Info("band: %d %d %d %d,pwr %d",  context.sky_rc_channel, context.stru_bandChange.u8_eqCntChg,
                                         context.stru_bandChange.u8_ItCh, context.e_curBand,context.pwr);
     if (context.e_powerMode == RF_POWER_CLOSE)
     {

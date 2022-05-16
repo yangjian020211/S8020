@@ -90,8 +90,8 @@ SRC_C   += command.c \
 		   ../../Example/test_hdmi_ch7038.c \
 		   ../../Example/test_nv_grd_slave.c \
 		   ../../Example/XC7027/xc7027.c \
-		   ../../Example/test_net_repeater_sky.c \
-           ../../Example/test_net_repeater_ground.c \
+           ../../Example/tranceiver.c \
+		   ../../Example/jqy_codec.c \
 		   $(NORFLASH_WPT_SRC_C)
 
 # compile flags

@@ -35,7 +35,8 @@
 #include "hal_norflash.h"
 #include "usr_protocol.h"
 #include "test_nv_grd_slave.h"
-#include "test_net_repeater_ground.h"
+#include "tranceiver.h"
+
 
 
 //#define ENABLE_NV_GRD_SLAVE
@@ -134,21 +135,11 @@ static void USB1_init(void)
 #ifdef NET_REPEATER
 static void net_repeaterTask()
 {
-	uint8_t ip[4];
-	uint8_t index=0;
-	uint8_t max_ip=20;
+	
 	//HAL_Delay(4000);
 	DLOG_Critical("begin run net repeater\n");
-	command_TestNetRepeaterGnd();
+	app_net(0);
 	
-	ip[0]=192;
-	ip[1]=168;
-	ip[2]=1;
-	ip[3]=130;
-	for(index=0;index<max_ip;index++){
-		ip[3]=130+index;
-		set_ip_filter(ip,index);
-	}
 	
 }
 #endif

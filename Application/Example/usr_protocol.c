@@ -13,6 +13,7 @@
 #include "c201d_pt.h"
 #include "usr_uart3_task.h"
 #include "hal_sram_ground.h"
+#include "tranceiver.h"
 
 #define DATA_RDY    0
 #define DATA_NORDY  1
@@ -151,7 +152,7 @@ uint8_t cmd_ack_handle(void *msg, uint8_t port_id)
 {
     int ret,len;
     int i;
-    char buf[32];
+    char buf[2000];
     uint8_t sky_v,grd_v;
     uint8_t *pmsg = (uint8_t *)msg;
     uint8_t msg_id;
@@ -271,6 +272,16 @@ uint8_t cmd_ack_handle(void *msg, uint8_t port_id)
 			buf[9] = (char)(ret >> 8);
           
 			break;
+
+			case CMD_MANUL_START_LOG:
+			app_log_ctrl(1,port_id);
+		   	printf("open the log record buf[10]=%d,port_id=%d \n",1,port_id);
+			break;
+			case CMD_MANUL_STOP_LOG:
+			app_log_ctrl(0,port_id);
+		   	printf("close the log record buf[10]=%d,port_id=%d \n",0,port_id);
+			break;
+			
         default:
             DLOG_Warning("undef cmd %d",msg_id);
             return 0;
@@ -603,25 +614,6 @@ uint8_t cmd_usb_bypass_write_uart5_handle(void *msg, uint8_t port_id)
     return msg_len;
 
 }
-/*
-static uint8_t dec2bit_index(uint8_t d)
-{
-	uint8_t r;
-	switch(d){
-		case 0: r=0x01;break;
-		case 1: r=0x02;break;
-		case 2: r=0x04;break;
-		case 3: r=0x08;break;
-		case 4: r=0x10;break;
-		case 5: r=0x20;break;
-		case 6: r=0x40;break;
-		case 7: r=0x80;break;
-		default: r=0x00;break;
-		
-	}
-	return (r);
-}
-*/
 
 uint8_t set_rc_patten_by_manul(void *msg, uint8_t port_id){
 

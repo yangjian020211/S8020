@@ -358,13 +358,13 @@ static void  __attribute__ ((section(".h264"))) BB_get_rf_sweep_init(ENUM_BB_MOD
 			context.rcChgPatten.common_patten[rf_bw_chg_info->rc_common_ch[i]/8] |=dec2bit_index(rf_bw_chg_info->rc_common_ch[i]%8);
 		}
 		for(i=0;i<context.rf_info.rc_ch_patten_need_id_size;i++){
-			DLOG_Warning("rc_common_patten[%d]=%2x",i,context.rcChgPatten.common_patten[i]);
+			DLOG_Info("rc_common_patten[%d]=%2x",i,context.rcChgPatten.common_patten[i]);
 		}
 		if (en_mode == BB_SKY_MODE)
 			context.rf_info.fine_sweep_size = rf_bw_chg_info->rc_fine_sweep_size;
 		else 
 			context.rf_info.fine_sweep_size = rf_bw_chg_info->it_fine_sweep_size;
-		DLOG_Warning("en_auto=%d, thd_10=%d,thd_20=%d,rc_patten_max_len=%d,sweep_noise_thd=%d,sweep_patten_size=%d,fine_sweep_size=%d,it_tout_cnt=%d,rc_tout_cnt=%d,rc_sweep_log_open=%d",
+		DLOG_Info("en_auto=%d, thd_10=%d,thd_20=%d,rc_patten_max_len=%d,sweep_noise_thd=%d,sweep_patten_size=%d,fine_sweep_size=%d,it_tout_cnt=%d,rc_tout_cnt=%d,rc_sweep_log_open=%d",
 			context.rf_info.rf_bw_cg_info.en_auto,
 			context.rf_info.rf_bw_cg_info.thd_10,
 			context.rf_info.rf_bw_cg_info.thd_20,
@@ -2753,9 +2753,9 @@ void __attribute__ ((section(".h264")))rc_set_unlock_patten(uint8_t chg_bw)
 	int i=0;	
 	for(i=0;i<context.rf_info.rc_ch_patten_need_id_size;i++){
 		context.rcChgPatten.patten[i]=context.rcChgPatten.common_patten[i];
-		DLOG_Warning("patten[%d]=%2x",i,context.rcChgPatten.patten[i]);
+		DLOG_Info("patten[%d]=%2x",i,context.rcChgPatten.patten[i]);
 	}
-	DLOG_Warning("go to common patten,cnt=%d",context.sync_cnt);
+	DLOG_Info("go to common patten,cnt=%d",context.sync_cnt);
 	if(chg_bw && context.st_bandMcsOpt.e_bandwidth ==BW_20M)
 	{
 		context.st_bandMcsOpt.e_bandwidth = BW_10M;
@@ -2770,7 +2770,7 @@ void __attribute__ ((section(".h264")))rc_set_unlock_patten(uint8_t chg_bw)
 		{
 			BB_set_RF_bandwitdh(BB_GRD_MODE, BW_10M);
 		}
-		DLOG_Warning("e_bandwidth=%d",context.st_bandMcsOpt.e_bandwidth);
+		DLOG_Info("e_bandwidth=%d",context.st_bandMcsOpt.e_bandwidth);
 	}
 	rc_update_working_patten();
 	context.rcChgPatten.valid=0;
@@ -2826,7 +2826,7 @@ void __attribute__ ((section(".h264")))bb_update_rc_patten_size()
 {
 	int mod = BB_GetRcFrqNum(context.e_curBand)%8;
 	context.rf_info.rc_ch_patten_need_id_size= BB_GetRcFrqNum(context.e_curBand)/8+(mod >0);
-	DLOG_Critical("rc_ch_patten_need_id_size=%d",context.rf_info.rc_ch_patten_need_id_size);
+	DLOG_Info("rc_ch_patten_need_id_size=%d",context.rf_info.rc_ch_patten_need_id_size);
 	
 }
 

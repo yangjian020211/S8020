@@ -179,7 +179,7 @@ STRU_BOARD_RF_BW_CHG stru_rf_bw_chg__boardCfg __attribute__ ((aligned (4)))=
 	.rc_common_ch_size=4,
 	.rc_common_ch={0,4,30,37},
 	.it_unlock_timeout_cnt=64,
-	.rc_unlock_timeout_cnt=335,
+	.rc_unlock_timeout_cnt=64,
 	.rc_sweep_log_open=0,
 
 };

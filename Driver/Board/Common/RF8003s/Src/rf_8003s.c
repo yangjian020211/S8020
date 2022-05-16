@@ -151,14 +151,14 @@ uint16_t RF8003xCalcRegister2Frq(uint32_t u32_frq_reg)
     {
         tmp = u32_frq_reg >> 8;
         tmp = ((tmp & 0xff ) << 16) | ((tmp >> 16) & 0xff) | (tmp & 0x00ff00);
-        DLOG_Warning("%x.",tmp);
+        DLOG_Info("%x.",tmp);
        return (((double)(tmp )) / (1 << 24) +((double) ((u32_frq_reg) & 0x000000ff))) * 60 + 0.5;
     }
     else // 2g
     {
         tmp = u32_frq_reg >> 8;
         tmp = ((tmp & 0xff ) << 16) | ((tmp >> 16) & 0xff) | (tmp & 0x00ff00);
-        DLOG_Warning("%x",tmp);
+        DLOG_Info("%x",tmp);
         return (((double)(tmp )) / (1 << 24) +((double) ((u32_frq_reg) & 0x000000ff))) * 30 + 0.5;
     }
 }

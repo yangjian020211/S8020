@@ -595,7 +595,7 @@ void grd_fec_judge(void)
             {
             	context.fec_unlock_cnt = 0;
                 context.dev_state = CHECK_FEC_LOCK;
-                DLOG_Critical("fec_unlock_cnt > %d",context.rf_info.it_unlock_timeout_cnt);
+                DLOG_Info("fec_unlock_cnt > %d",context.rf_info.it_unlock_timeout_cnt);
 				#ifdef RFSUB_BAND
                 if(context.freq_band_mode == SUB_BAND)
                 {
@@ -940,7 +940,7 @@ uint8_t grd_is_bb_fec_lock(void)
         };
 
         SYS_EVENT_NotifyInterCore(SYS_EVENT_ID_BB_EVENT, (void *)&lockEvent);
-        DLOG_Warning("Lock=0x%x,it=%d", vt_lock,context.cur_IT_ch);
+        DLOG_Info("Lock=0x%x,it=%d", vt_lock,context.cur_IT_ch);
     }
 
     return vt_lock;
@@ -2419,7 +2419,7 @@ static void grd_do_rf_bw(void)
 					BB_set_ItFrqByCh(context.e_curBand, context.stru_bandChange.u8_ItCh);
 				grd_set_txmsg_mcs_change(context.st_bandMcsOpt.e_bandwidth, context.qam_ldpc);
 				BB_softRxReset(BB_GRD_MODE);
-				DLOG_Critical("set rf bandwidth=%d", context.st_bandMcsOpt.e_bandwidth);
+				DLOG_Info("set rf bandwidth=%d", context.st_bandMcsOpt.e_bandwidth);
 			}
 		}
 	}
@@ -2459,7 +2459,7 @@ static void grd_notify_rc_patten()
 		buf[0]= context.rcChgPatten.timeout_cnt_grd;
 		buf[1]=context.rf_info.rc_patten_set_by_usr;
 		BB_Session0SendMsg(DT_NUM_GRD_RC_CHPATTEN, buf, context.rf_info.rc_ch_patten_need_id_size+2);
-		DLOG_Critical("grd notify sky :cnt=%d,aim_cnt=%d", context.sync_cnt, context.rcChgPatten.timeout_cnt_grd);
+		DLOG_Info("grd notify sky :cnt=%d,aim_cnt=%d", context.sync_cnt, context.rcChgPatten.timeout_cnt_grd);
 	}
 	if(gap > 5) gap = 0;
 }

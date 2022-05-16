@@ -39,8 +39,8 @@ static unsigned char tx_id=0;
 
 #define MAX_FRAME 10
 #define MAX_TX_BUF_DEEP 10
-#define MAX_NET_LEN 1600
-#define MAX_REF_FRAME_LEN 1600
+#define MAX_NET_LEN 2000
+#define MAX_REF_FRAME_LEN 2000
 
 static unsigned char dec_net_packets[MAX_FRAME][MAX_NET_LEN]={0};
 static unsigned char net_ref_packets[MAX_TX_BUF_DEEP][MAX_REF_FRAME_LEN];
@@ -63,10 +63,7 @@ static void encode_find_non_zero_plus(unsigned char *si,int in_len ,unsigned cha
 	int j=-1;
 	int i=0;
 	int n=0;
-	unsigned char *s = malloc(in_len+100);
-	memset(s, 0, in_len+100);
 	int begin=0;
-	s[0]=0x00;
 	int addr=0;
 	int zero_cnt=0;
 	int state=0;
@@ -80,7 +77,7 @@ static void encode_find_non_zero_plus(unsigned char *si,int in_len ,unsigned cha
 				{
 					addr=0;
 					j=0;
-					s[j]=0;
+					so[j]=0;
 					n=0;
 				}
 				else 
@@ -90,17 +87,17 @@ static void encode_find_non_zero_plus(unsigned char *si,int in_len ,unsigned cha
 					{
 						j++;
 						addr=j;
-						s[addr]= 0xf0 | (zero_cnt%15);	
+						so[addr]= 0xf0 | (zero_cnt%15);	
 						j++;
 						addr=j;
-						s[addr]= 0x00;
+						so[addr]= 0x00;
 						
 					}
 					else if(zero_cnt>0)
 					{
 						j++;
 						addr=j;
-						s[addr] = (zero_cnt)<<4;
+						so[addr] = (zero_cnt)<<4;
 					}
 					
 				}
@@ -113,13 +110,13 @@ static void encode_find_non_zero_plus(unsigned char *si,int in_len ,unsigned cha
 				state =4;
 			}
 		#if debug1
-					printf("0 n=%d i=%d si[%d]=%x,j=%d,sj[%d]=%2x addr=%d sj[%d]=%2x zero_cnt=%d\n",n,i,i,si[i],j,j,s[j],addr,addr,s[addr],zero_cnt);
+					printf("0 n=%d i=%d si[%d]=%x,j=%d,sj[%d]=%2x addr=%d sj[%d]=%2x zero_cnt=%d\n",n,i,i,si[i],j,j,so[j],addr,addr,so[addr],zero_cnt);
 		#endif
 		}
 		else if(state==1)
 		{
 			n++;
-			s[j]=si[i];
+			so[j]=si[i];
 			if(n==15)
 			{
 				n=0;
@@ -139,19 +136,18 @@ static void encode_find_non_zero_plus(unsigned char *si,int in_len ,unsigned cha
 				}
 			}
 		#if debug1
-				 printf("1 n=%d i=%d si[%d]=%x,j=%d,sj[%d]=%2x addr=%d sj[%d]=%2x zero_cnt=%d\n",n,i,i,si[i],j,j,s[j],addr,addr,s[addr],zero_cnt);
+				 printf("1 n=%d i=%d si[%d]=%x,j=%d,sj[%d]=%2x addr=%d sj[%d]=%2x zero_cnt=%d\n",n,i,i,si[i],j,j,so[j],addr,addr,so[addr],zero_cnt);
 		#endif
 		}
 		else if(state==2)
 		{
 			//addr=j;
-			s[addr] |= 0x0f;
+			so[addr] |= 0x0f;
 		#if debug1
-				printf("2.1 n=%d i=%d si[%d]=%x,j=%d,sj[%d]=%2x addr=%d sj[%d]=%2x zero_cnt=%d\n",n,i,i,si[i],j,j,s[j],addr,addr,s[addr],zero_cnt);
+				printf("2.1 n=%d i=%d si[%d]=%x,j=%d,sj[%d]=%2x addr=%d sj[%d]=%2x zero_cnt=%d\n",n,i,i,si[i],j,j,so[j],addr,addr,so[addr],zero_cnt);
 		#endif
-			//j++;
 			addr =j;
-			s[addr] = 0x00;
+			so[addr] = 0x00;
 			i++;
 			if(i>=in_len){
 				state=6;
@@ -160,7 +156,7 @@ static void encode_find_non_zero_plus(unsigned char *si,int in_len ,unsigned cha
 				state=0;
 			}
 		#if debug1
-				printf("2 n=%d i=%d si[%d]=%x,j=%d,sj[%d]=%2x addr=%d sj[%d]=%2x zero_cnt=%d\n",n,i,i,si[i],j,j,s[j],addr,addr,s[addr],zero_cnt);
+				printf("2 n=%d i=%d si[%d]=%x,j=%d,sj[%d]=%2x addr=%d sj[%d]=%2x zero_cnt=%d\n",n,i,i,si[i],j,j,so[j],addr,addr,so[addr],zero_cnt);
 		#endif
 		}
 		else if(state==4)
@@ -178,7 +174,7 @@ static void encode_find_non_zero_plus(unsigned char *si,int in_len ,unsigned cha
 			{
 				if(n>0)
 				{
-					s[addr] +=n;
+					so[addr] +=n;
 				}
 				i++;
 				if(i>=in_len){
@@ -191,13 +187,13 @@ static void encode_find_non_zero_plus(unsigned char *si,int in_len ,unsigned cha
 				n=0;
 			}
 		#if debug1
-				printf("4 n=%d i=%d si[%d]=%x,j=%d,sj[%d]=%2x addr=%d sj[%d]=%2x zero_cnt=%d\n",n,i,i,si[i],j,j,s[j],addr,addr,s[addr],zero_cnt);
+				printf("4 n=%d i=%d si[%d]=%x,j=%d,sj[%d]=%2x addr=%d sj[%d]=%2x zero_cnt=%d\n",n,i,i,si[i],j,j,so[j],addr,addr,so[addr],zero_cnt);
 		#endif
 		}
 		else if(state==5)
 		{
 			addr=j; 
-			s[addr]=0xFF;	
+			so[addr]=0xFF;	
 			i++;
 			if(i>=in_len){
 				state=6;
@@ -207,39 +203,29 @@ static void encode_find_non_zero_plus(unsigned char *si,int in_len ,unsigned cha
 				state=0;
 			}
 		#if debug1
-				printf("5 n=%d i=%d si[%d]=%x,j=%d,sj[%d]=%2x addr=%d sj[%d]=%2x zero_cnt=%d\n",n,i,i,si[i],j,j,s[j],addr,addr,s[addr],zero_cnt);
+				printf("5 n=%d i=%d si[%d]=%x,j=%d,sj[%d]=%2x addr=%d sj[%d]=%2x zero_cnt=%d\n",n,i,i,si[i],j,j,so[j],addr,addr,so[addr],zero_cnt);
 		#endif
 		}
 		else if(state==6)
 		{
 			j++;
 			
-			if(n>0)s[addr]+=n;	
+			if(n>0)so[addr]+=n;	
 			else if(zero_cnt>0){
 				addr=j;
-				s[addr]=zero_cnt<<4;
+				so[addr]=zero_cnt<<4;
 				j++;
 			}				
 		#if debug1
-			printf("6 n=%d i=%d si[%d]=%x,j=%d,sj[%d]=%2x addr=%d sj[%d]=%2x zero_cnt=%d\n",n,i,i,si[i],j,j,s[j],addr,addr,s[addr],zero_cnt);
+			printf("6 n=%d i=%d si[%d]=%x,j=%d,sj[%d]=%2x addr=%d sj[%d]=%2x zero_cnt=%d\n",n,i,i,si[i],j,j,so[j],addr,addr,so[addr],zero_cnt);
 		#endif
 			break;	
 		}
 	}
-	//if(zero_cnt>0)j++;
-	//s[j-1] |= 0xf0|(zero_cnt-1);
 	*len_out = j;
-	so[0]=j;
-	for(i=0;i<j;i++) {
-		so[i] = s[i];
-	}
-	
-	if(s)
-	free(s);
-
 }
 
-static int decode_find_non_zero_plus(unsigned char *si,int in_len,unsigned char *so,int *len_out){
+static int decode_find_non_zero_plus(unsigned char *si,int in_len,unsigned char *so,int *len_out,int max_lout){
 	#define debug 0
 	int i=0;
 	unsigned char key;
@@ -264,6 +250,7 @@ static int decode_find_non_zero_plus(unsigned char *si,int in_len,unsigned char 
 			memset(&so[j],0,zero_len);
 			//j++;
 			j+=zero_len;
+			if(j>=max_lout) return 0;
 	#if debug
 			 printf("1 n=%2x i=%2d j=%2d,m=%2d	zero_len=%2d l=%2d\n",n,i,j,m,zero_len,l);
 	#endif 
@@ -273,11 +260,6 @@ static int decode_find_non_zero_plus(unsigned char *si,int in_len,unsigned char 
 	#if debug
 			printf("2 n=%2x i=%2d j=%2d,m=%2d  zero_len=%2d l=%2d\n",n,i,j,m,zero_len,l);
 	#endif 
-			//if(n==0x0f) continue;
-		
-			//printf("2.1 n=%2x i=%2d j=%2d,m=%2d  zero_len=%2d l=%2d\n",n,i,j,m,zero_len,l);
-			//memset(&so[j],0,n);
-			//j+=n;
 			
 			i++;
 	#if debug
@@ -286,6 +268,7 @@ static int decode_find_non_zero_plus(unsigned char *si,int in_len,unsigned char 
 			for(m=0;m<l;m++) so[j+m] = si[i+m];
 			j+=l;
 			i+=l;
+			if(j>=max_lout) return 0;
 	#if debug
 			printf("4 i=%2d j=%2d,m=%2d l=%2d\n",i,j,m,l);
 	#endif
@@ -302,17 +285,16 @@ static int decode_find_non_zero_plus(unsigned char *si,int in_len,unsigned char 
 			//if(l==0)n++;
 			memset(&so[j],0,n);
 			j+=n;
+			if(j>=max_lout) return 0;
 	#if debug
 			 printf("6 n=%2x i=%2d j=%2d,m=%2d l=%2d\n",n,i,j,m,l);
 	#endif
-			//if(n==0)j++;
-			//if(n==0)
-			//	for(m=0;m<l;m++) so[j+m] = si[i+m+1];
-			//else 
+
 			i++;
 			for(m=0;m<l;m++) so[j+m] = si[i+m];
 			j+=l;
 			i+=l;
+			if(j>=max_lout) return 0;
 	#if debug
 			 printf("7 i=%2d j=%2d,m=%2d l=%2d\n",i,j,m,l);
 	#endif
@@ -320,6 +302,8 @@ static int decode_find_non_zero_plus(unsigned char *si,int in_len,unsigned char 
 	
 	}
 	*len_out = j;
+
+	return 1;
 
 }
 
@@ -413,9 +397,6 @@ static void decode_frame( uint8_t *si,uint32_t len,uint8_t is_plus,uint8_t refid
 	int n=0;
 	int size =0;
 	int size2 =0;
-	// DLOG_Error("1 ");
-	//plot_msg(si,len);
-
 	//1 split frame
 	for(i=0;i<MAX_FRAME;)
 	{
@@ -426,6 +407,7 @@ static void decode_frame( uint8_t *si,uint32_t len,uint8_t is_plus,uint8_t refid
 			{
 				dec_net_packets[i][n]=si[k+n];
 				n++;
+				if(n>=len)break;
 			}
 			else
 			{
@@ -451,15 +433,14 @@ decode:
 			//DLOG_Error("2 ");
 			if(lin==0) continue;
 			//plot_msg(dec_net_packets[n],lin);
-			decode_find_non_zero_plus(dec_net_packets[n],lin,so,&size);
-			//size = net_ref_packets[refid][1]<<8 | net_ref_packets[refid][0];
 			
+			int ok=decode_find_non_zero_plus(dec_net_packets[n],lin,so,&size,MAX_NET_LEN);
+			if(!ok) continue;
 			if(n==0){
 				serial_xor(&net_ref_packets[refid][5],so,protocol_xor[n],size);
 			}else{
 				serial_xor(protocol_xor[n-1],so,protocol_xor[n],size);
 			}
-			//DLOG_Error("3 ");
 			//plot_msg(protocol_xor[n],size);
 			if(size<60) {
 				 DLOG_Error("--0 i=%d rxid=%d",i,is_plus);
@@ -476,11 +457,10 @@ decode:
 				 HAL_Delay(10);
 				 DLOG_Error("--4 n=%d",n);
 				 plot_msg(protocol_xor[n],size);
-				// continue;
+				 continue;
 			}
 			HAL_RET_T ret = HAL_USB_NetDeviceSend(size,protocol_xor[n]);
-			if(HAL_OK != ret)
-			{
+			if(HAL_OK != ret){
 				 DLOG_Error("NetDeviceSend fail");
 			}
 		}
@@ -491,24 +471,14 @@ static void rcvDataHandler(void *p)
     /* receive from repeater ground SPI send to IP Camera */
     uint8_t   data_buf_proc[MAX_NET_LEN];// 1500 + 6 + 6 + 2 + 4 = 1518
     uint32_t  u32_rcvLen = 0;
-	HAL_RET_T ret = HAL_BB_ComReceiveMsg(NET_COM, data_buf_proc, MAX_NET_LEN, &u32_rcvLen);
-	if(ret == HAL_OK && u32_rcvLen >0)
+	//memset(data_buf_proc, 0, MAX_NET_LEN);
+	HAL_RET_T ret = HAL_BB_ComReceiveMsg(NET_COM, data_buf_proc, 1523, &u32_rcvLen);
+	
+	if(ret == HAL_OK && u32_rcvLen-3 >0)
 	{
 		uint8_t cmd = data_buf_proc[0];
 		rx_id = data_buf_proc[1];
 		uint8_t net_ref_id = data_buf_proc[2];
-		
-		//if(rx_id>MAX_IP_NUMBER) return;
-		//if(ip_protocol[rx_id][4]==1) return;
-		 //osSemaphoreWait(net_semaphore_id,0);
-		//ip_protocol[rx_id][0]=u32_rcvLen ;
-		//ip_protocol[rx_id][1]=u32_rcvLen>>8 ;
-		//memcpy(&ip_protocol[rx_id][2], data_buf_proc, u32_rcvLen);
-		//ip_protocol[rx_id][4]=1;
-		//osSemaphoreRelease(net_semaphore_id);
-		//HAL_BB_ComSendMsg(NET_COM,data_buf_proc,2);
-		//DLOG_Critical("sky get rxid=%d txid=%d",rx_id,tx_id);
-		//DLOG_Critical("sky get rxid=%d cmd=%2x size=%d,net_ref_id=%d",rx_id,cmd,u32_rcvLen-3,net_ref_id);
 		if(ORG_FRAME==cmd)
 		{
 			ret = HAL_USB_NetDeviceSend(u32_rcvLen-3,&data_buf_proc[3]);
@@ -531,9 +501,14 @@ static void rcvDataHandler(void *p)
 		}
 		else if(REF_ENCODE_NORMAL==cmd)
 		{
+			uint8_t   tempdata[MAX_NET_LEN];// 1500 + 6 + 6 + 2 + 4 = 1518
+			memset(tempdata, 0, MAX_NET_LEN);
 			int check=check_ref_frame_exist(net_ref_id);
 			if(check)
-				decode_frame(&data_buf_proc[3],u32_rcvLen-3,rx_id,net_ref_id);
+			{
+				memcpy(tempdata, &data_buf_proc[3], u32_rcvLen-3);
+				decode_frame(tempdata,u32_rcvLen-3,rx_id,net_ref_id);
+			}
 			else {
 				data_buf_proc[0]=CLR_TABLE;
 				HAL_BB_ComSendMsg(NET_COM,data_buf_proc,u32_rcvLen);

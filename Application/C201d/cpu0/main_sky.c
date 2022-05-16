@@ -41,7 +41,8 @@
 #include "hal_norflash.h"
 #include "usr_protocol.h"
 #include "XC7027/xc7027.h"
-#include "test_net_repeater_sky.h"
+#include "tranceiver.h"
+
 
 //#define USE_HDMI_CH7038
 //#define SENSOR_XC7027
@@ -166,7 +167,7 @@ static void USB1_init(void)
 static void net_repeaterTask(){
 	HAL_Delay(4000);
 	DLOG_Critical("begin run net repeater\n");
-	command_TestNetRepeaterSky();
+	app_net(1);
 }
 #endif
 

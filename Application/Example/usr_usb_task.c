@@ -342,7 +342,7 @@ static void BB_Com_Rcv_Data_Handler(void *p)
     }
 }
 
-#define CMD_HANDLER_CNT 12
+#define CMD_HANDLER_CNT 14
 
 STRU_WIRELESS_USER_HANDLER   Cmd_Handler[CMD_HANDLER_CNT] = {
     {CMD_VIDEO_BUF_DEEP, cmd_ack_handle},
@@ -357,6 +357,9 @@ STRU_WIRELESS_USER_HANDLER   Cmd_Handler[CMD_HANDLER_CNT] = {
     {CMD_MTP_VIDEO_STREAM, mtp_rev_stream_video},
     {CMD_MANUL_RC_PATTEN,set_rc_patten_by_manul},
     {CMD_MANUL_SET_BW,set_bw_by_manul},
+	{CMD_MANUL_START_LOG,cmd_ack_handle},
+	{CMD_MANUL_STOP_LOG,cmd_ack_handle},
+
 };
 
 void bitrate_change_callback(void* p)

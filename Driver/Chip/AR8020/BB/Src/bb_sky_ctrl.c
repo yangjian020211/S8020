@@ -509,7 +509,7 @@ static void wimax_vsoc_rx_isr(uint32_t u32_vectorNum)
     if(context.bandedge_enable && context.delay_it_flag)
     {
         context.delay_it_flag = 0;
-        DLOG_Warning("it ch %d -> %d",context.cur_IT_ch,context.delay_it_ch);
+        DLOG_Info("it ch %d -> %d",context.cur_IT_ch,context.delay_it_ch);
         context.vtFreqTime[context.cur_IT_ch] = SysTicks_GetTickCount();//save last main ch time value
     
         context.cur_IT_ch = context.delay_it_ch;
@@ -790,7 +790,7 @@ static void sky_do_rf_bw(void)
 				sky_handle_mcs_mode_cmd((uint8_t*)&mode);
 			}
 			BB_softTxReset(BB_SKY_MODE);
-			DLOG_Critical("bandwidth=%d",context.st_bandMcsOpt.e_bandwidth);	
+			DLOG_Info("bandwidth=%d",context.st_bandMcsOpt.e_bandwidth);	
         }
     }
 }
@@ -1025,7 +1025,7 @@ static void process_lock_state()
 	if (1==stru_skystatus.flag_errorConnect)
 	{
 		context.dev_state = CHECK_LOCK;
-		DLOG_Warning("rc_set_unlock_patten£¬flag_errorConnect=1");
+		DLOG_Info("rc_set_unlock_patten£¬flag_errorConnect=1");
 		rc_set_unlock_patten(1);
 		//sky_notify_grd_goto_unlock_patten();
 		sky_soft_reset();
@@ -1037,12 +1037,12 @@ static void process_lock_state()
 	{
 		u32_contiousUnlock = 0;
 		context.dev_state  = CHECK_LOCK;
-		DLOG_Warning("rc_set_unlock_patten");
+		DLOG_Info("rc_set_unlock_patten");
 		rc_set_unlock_patten(1);
 		BB_SetTrxMode(BB_RECEIVE_ONLY_MODE);
 		sky_switchSetPower(context.e_curBand);
 		sky_soft_reset();
-		DLOG_Warning("LOCK->CHECK_LOCK reset");
+		DLOG_Info("LOCK->CHECK_LOCK reset");
 	}
 	else if (sky_checkRcLock(stru_skystatus.u8_rcStatus))
 	{
@@ -1115,7 +1115,7 @@ static void sky_notify_rc_patten()
 		buf[0]= context.rcChgPatten.timeout_cnt;
 		buf[1]= context.rf_info.rc_patten_set_by_usr;
 		BB_Session0SendMsg(DT_NUM_SKY_RC_PATTEN, buf, context.rf_info.rc_ch_patten_need_id_size+2);
-		DLOG_Warning("sky notify grd :cnt=%d,aim_cnt=%d", context.sync_cnt, context.rcChgPatten.timeout_cnt);
+		DLOG_Info("sky notify grd :cnt=%d,aim_cnt=%d", context.sync_cnt, context.rcChgPatten.timeout_cnt);
 	}
 }
 
@@ -1361,7 +1361,7 @@ void BB_sky_requestVtSkip(void)
 skip_sky_select:
     context.sky_sel_vt_ch = ch;
     BB_WriteReg(PAGE2, SKY_NON_LBT_VT_CH,ch | 0x80);
-    DLOG_Warning("req vtskip %d,time %d,cvt:%d -> vt:%d,",get,SysTicks_GetTickCount(),context.cur_IT_ch,ch);
+    DLOG_Info("req vtskip %d,time %d,cvt:%d -> vt:%d,",get,SysTicks_GetTickCount(),context.cur_IT_ch,ch);
 }
 
 void sky_SetSaveRCId(uint8_t *pu8_id, uint8_t *pu8_vtId, uint8_t flag)
@@ -1544,10 +1544,10 @@ static void sky_handle_rc_patten_cmd(uint8_t *arg)
 			context.rcChgPatten.en_flag=1;
 			context.rcChgPatten.valid=1;
 			context.rcChgPatten.timeout_cnt=context.sync_cnt+STATUS_CHG_DELAY;
-			DLOG_Critical("sky begin  to start update rc patten,aim cnt=%d",context.rcChgPatten.timeout_cnt);
+			DLOG_Info("sky begin  to start update rc patten,aim cnt=%d",context.rcChgPatten.timeout_cnt);
 		}else{
 			
-			DLOG_Critical("sky get  grd set rc patten to be auto mode,aim cnt=%d",context.rcChgPatten.timeout_cnt);
+			DLOG_Info("sky get  grd set rc patten to be auto mode,aim cnt=%d",context.rcChgPatten.timeout_cnt);
 		}
 	}
 }
@@ -1634,7 +1634,7 @@ static void sky_handle_auto_bandwitdh_cmd(uint8_t *arg)
 		context.rf_bw.autobw = arg[3];
 		context.rf_info.rf_bw_cg_info.en_auto=context.rf_bw.autobw;
 	    context.rf_bw.en_flag = 1;
-	    DLOG_Warning("sky get: bw=%d ldpc=%d,auto=%d",arg[0],arg[2],arg[3]);
+	    DLOG_Info("sky get: bw=%d ldpc=%d,auto=%d",arg[0],arg[2],arg[3]);
 	}
 }
 
@@ -1869,7 +1869,7 @@ static void sky_handle_it_ch_sync_cmd(void)
         
         if(!context.bandedge_enable)
         {
-            DLOG_Warning("it ch %d -> %d",context.cur_IT_ch,data0);
+            DLOG_Info("it ch %d -> %d",context.cur_IT_ch,data0);
             context.vtFreqTime[context.cur_IT_ch] = SysTicks_GetTickCount();//save last main ch time value
 
             context.cur_IT_ch = data0;
@@ -1880,7 +1880,7 @@ static void sky_handle_it_ch_sync_cmd(void)
             if(context.vtskip_stat == 1)
             {
                 context.vtskip_stat = 0;
-                DLOG_Warning("not vt-ch skip");
+                DLOG_Info("not vt-ch skip");
             }
         }
         else
@@ -2116,7 +2116,7 @@ static void sky_handle_all_grd_cmds(uint8_t *arg, uint8_t len)
 		case DT_NUM_SKY_RC_PATTEN:
 		{
 			context.rcChgPatten.valid=0;
-			DLOG_Warning("sky get rc_patten_ack,cnt=%d",context.sync_cnt);
+			DLOG_Info("sky get rc_patten_ack,cnt=%d",context.sync_cnt);
 			break;
 
 		}
@@ -3060,7 +3060,7 @@ static void sky_handle_agc_gear_chg_cmd( uint8_t gear)
     stru_skystatus.agc_auto_chg_flag = FLAG_VALID;
     BB_SetAgcGain(context.e_curBand, AAGC_GAIN_FAR);
     stru_skystatus.fct_agc_gear = (ENUM_AGC_GEAR)gear;
-    DLOG_Warning("agc-gain:%d", stru_skystatus.fct_agc_gear);
+    DLOG_Info("agc-gain:%d", stru_skystatus.fct_agc_gear);
 }
 
 static void sky_agc_set_init(void)
