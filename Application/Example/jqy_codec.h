@@ -133,27 +133,28 @@ typedef enum{
    DATA_MAX,
 } ENUM_CODEC_BUFFER_DATA_ID;   
 typedef enum{
-	
    ENC_INPUT_BUF=0,
    DEC_INPUT_BUF,
    ENC_OUTPUT_BUF,
    DEC_OUTPUT_BUF,
-   REF_BUF,
-   REF_BUF_TEMP,
+   ENC_REF_BUF,
+   DEC_REF_BUF,
    MAX_BUF_CNT,
+
 } ENUM_BUF_T;
 
 typedef struct _update_state
 {	
-	unsigned char have_eq 	: 1;
-	unsigned char have 		: 1;
-	unsigned char timeout 	: 1; 
-	unsigned char sent  	: 1;
-	unsigned char no_ref 	: 1; 
-	unsigned char not_as_ref: 1;
-	unsigned char reserve	: 2;
-	unsigned int  id_in_table  ;
-	unsigned int  best_rid	   ;
+	unsigned char have_eq 			: 1;
+	unsigned char have 				: 1;
+	unsigned char reqtimeout 		: 1; 
+	unsigned char no_ref 			: 1; 
+	unsigned char not_as_ref		: 1;
+	unsigned char reserve			: 3;
+	unsigned int  best_rid_in_table    ;
+	unsigned int  best_rid	   		   ;
+	unsigned int  last_time	   		   ;
+
 } update_state_t;  
 typedef struct _sync_head
 {	
@@ -219,6 +220,8 @@ unsigned int codec_get_buf_cnt(void* arg1,void* arg2);
 void codec_set_max_bag_thd(void* arg1,unsigned int thd);
 int codec_set_data_head_tag(void* arg1,unsigned char tag,unsigned char len);
 void codec_set_max_buf_cnt(void* arg1,unsigned int arg2);
+void codec_set_buf_max_cnt(void* arg1,void* arg2,unsigned int arg3);
+
 void codec_set_max_buf_size(void* arg1,unsigned int arg2);
 void codec_set_max_refbuf_thd(void* arg1,unsigned int argl,unsigned int argh);
 void codec_set_update_refbuf_time(void* arg1,unsigned int arg2);
