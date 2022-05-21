@@ -3,7 +3,7 @@
 
 #define Linuxsimulation 0
 
-#define MAX_BUFFER (64)
+#define MAX_BUFFER (128)
 
 #if Linuxsimulation
 #include <assert.h>
@@ -150,7 +150,8 @@ typedef struct _update_state
 	unsigned char reqtimeout 		: 1; 
 	unsigned char no_ref 			: 1; 
 	unsigned char not_as_ref		: 1;
-	unsigned char reserve			: 3;
+	unsigned char id_in_ref			: 1;
+	unsigned char reserve			: 2;
 	unsigned int  best_rid_in_table    ;
 	unsigned int  best_rid	   		   ;
 	unsigned int  last_time	   		   ;

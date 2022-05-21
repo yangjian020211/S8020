@@ -112,15 +112,15 @@ static void codec_data_dump_callback(void* data,unsigned int size,int id)
 		//if(id==DATA_ENC_2) printf_data(data,size,id);
 		//if(id==DATA_ENC_3) printf_data(data,size,id);
 		//if(id==DATA_ENC_4) printf_data(data,size,id);
-		if(id==DATA_ENC_7) printf_data(data,size,id);
-		if(id==DATA_ENC_8) printf_data(data,size,id);
+		//if(id==DATA_ENC_7) printf_data(data,size,id);
+		//if(id==DATA_ENC_8) printf_data(data,size,id);
 		//if(id==DATA_DEC_20) printf_data(data,size,id);
 		//if(id==DATA_DEC_21) printf_data(data,size,id);
 		//if(id==DATA_DEC_22) printf_data(data,size,id);
-		if(id==DATA_DEC_24) printf_data(data,size,id);
+		//if(id==DATA_DEC_24) printf_data(data,size,id);
 		//if(id==DATA_DEC_23) printf_data(data,size,id);
-		if(id==DATA_DEC_28) printf_data(data,size,id);
-		if(id==DATA_DEC_29) printf_data(data,size,id);
+		//if(id==DATA_DEC_28) printf_data(data,size,id);
+		//if(id==DATA_DEC_29) printf_data(data,size,id);
 		//if(id==DATA_DEC_31) printf_data(data,size,id);
 		//if(id==DATA_DEC_32) printf_data(data,size,id);
 		//if(id==DATA_DEC_35) printf_data(data,size,id);
@@ -166,7 +166,7 @@ static void codec_data_dump_callback(void* data,unsigned int size,int id)
 			//if(id==DATA_DEC_24) app_usb_log(gdata,size+7);
 			//if(id==DATA_DEC_25) app_usb_log(gdata,size+7);
 			if(id==DATA_DEC_26) app_usb_log(gdata,size+7);
-			//if(id==DATA_DEC_27) app_usb_log(gdata,size+7);
+			if(id==DATA_DEC_27) app_usb_log(gdata,size+7);
 		}
 	}
 }
@@ -213,7 +213,9 @@ int app_rx_ack_op(void* data,unsigned int size){
 		codec_push_data(tx_codec,buf,data,size);
 		return 1;
 	#else
+		osSemaphoreWait(rx_semaphore_id,1);
 		HAL_RET_T ret = HAL_BB_ComSendMsg(NET_COM, (unsigned char *)data, size);
+		osSemaphoreRelease(rx_semaphore_id);
 		if (HAL_OK == ret)
 	    {
 	    	return 1;
@@ -408,7 +410,7 @@ void app_rx(void)
 			filter_ip_collection[i][3]=0;
 		}
 	    ipcamera_mac_address_valid = 0;
-	    HAL_BB_UpgradeMode(0);
+	    HAL_BB_UpgradeMode(3);
 	    HAL_SRAM_ChannelConfig(ENUM_HAL_SRAM_CHANNEL_TYPE_RTSP_BYPASS,  1);   
 		
 		if (HAL_OK != HAL_BB_ComRegisterSession( \
@@ -436,11 +438,15 @@ static int app_tx_decode_data_to_net(void* data,unsigned int size){
 		if (HAL_OK == ret)
 	    {
 	    	static unsigned int totalsize=0;
+			static unsigned int pretime=0;
+			pretime=app_get_curtime();
 			static int k=0;
 			totalsize+=size;
 			k++;
-			if(k==300){
-				printf("tx_out: %d,avr_package=%d \n",totalsize,totalsize/300);
+			if(k==200){
+				int now = app_get_curtime();
+				printf("org: %d,avr_package=%d rate=%d B/s\n",totalsize,totalsize/200,totalsize*1000*8/(now-pretime));
+				pretime=now;
 				k=0;
 				totalsize=0;
 			}
@@ -480,7 +486,9 @@ static void app_tx_session_event(void *p)
 	static unsigned char data_buf_proc[1600];
     uint32_t u32_rcvLen = 0;
 	static unsigned int totalsize=0;
-	static int k=0;
+	static unsigned int pretime=0;
+	pretime=app_get_curtime();
+	static int k=0,j=0;
 	osSemaphoreWait(tx_semaphore_id,1);
     HAL_RET_T ret=HAL_BB_ComReceiveMsg(NET_COM, data_buf_proc, sizeof(data_buf_proc), &u32_rcvLen);
 	if(ret == HAL_OK)
@@ -489,12 +497,14 @@ static void app_tx_session_event(void *p)
 		codec_push_data(tx_codec,buf,data_buf_proc,u32_rcvLen);
 		totalsize+=u32_rcvLen;
 		k++;
-		if(k==300){
-			printf("tx_in: %d,avr_package=%d \n",totalsize,totalsize/300);
+		if(k==200){
+			int now = app_get_curtime();
+			printf("enc: %d,avr_package=%d rate=%d B/s\n",totalsize,totalsize/200,totalsize*1000*8/(now-pretime));
+			pretime=now;
 			k=0;
 			totalsize=0;
 		}
-		
+	
 	}
 	osSemaphoreRelease(tx_semaphore_id);
 	#endif

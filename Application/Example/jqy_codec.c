@@ -118,7 +118,7 @@ void codec_push_data(void* arg1,void* arg2,void* datai,unsigned int size)
 	 }
 	 if ( (wr_idx + 1) % buf->max_buffer_cnt == rd_idx)
 	 {
-		 printf("\n codec_push_data:No ring buffer !!!\n");
+		 printf("\n codec_push_data:No ring buffer id=%d!!!\n",buf->bufferid);
 		 return ;
 	 }
 	 if (size > codec->trcontext->max_frame_size)
@@ -483,22 +483,6 @@ static void codec_nec_update_ref_frameid(jqy_codec_t* codec , unsigned char *si,
 {
 	jqyring_buf_t *enc_refbuf = &codec->trcontext->buf[ENC_REF_BUF];
 	memset(dec_preframe, 0, MAX_BUF_SIZE_TEMP);
-	sync_head_t *head_ack = (sync_head_t *)si;
-	int tid=enc_refbuf->rd_ptr;
-	while(tid != enc_refbuf->wr_ptr)
-	{
-		ref_frame_head_t *head_ref = (ref_frame_head_t *)enc_refbuf->buffer[tid];
-		if(head_ref->sync.id==head_ack->id)
-		{
-			head_ref->sync.id=0;
-			head_ref->frequency++;
-			codec->codec_data_dump_callback(enc_refbuf->buffer[tid],size+8,DATA_ENC_8);//
-			break;
-		}
-		tid = (tid + 1) % (enc_refbuf->max_buffer_cnt);
-		if(tid==0)tid=enc_refbuf->buffer_offset;
-	}
-	
 	struct _ref_frame_head refhead={0};
 	refhead.frequency=1;
 	refhead.last_time=codec->codec_get_curtime_ms();
@@ -523,13 +507,13 @@ static void codec_update_table_exist_ref_frame(jqy_codec_t* codec,jqyring_buf_t 
 	unsigned int rd_idx2 = inbuf->rd_ptr;
 	unsigned int size2 =  inbuf->buffer_size[rd_idx2];
 	sync_head_t *head2 = (sync_head_t *)inbuf->buffer[rd_idx2];
-
+	
 	int cnt=0;
 	int precnt=20000;
 	int len = find_data_head_len(codec,head2->usser_type);
-	memset(enc_frame, 0, MAX_BUF_SIZE_TEMP);
-
+	
 	//1 update the ref_buf to find the have ,eq, rid param
+	memset(enc_frame, 0, MAX_BUF_SIZE_TEMP);
 	int tid=rd_idx1;
 	while(tid !=wr_idx1)
 	{
@@ -568,6 +552,7 @@ static void codec_update_table_exist_ref_frame(jqy_codec_t* codec,jqyring_buf_t 
 			}
 
 		}
+		if(head4->sync.id==head2->id) codec->trcontext->ref_state.id_in_ref=1;
 		tid = (tid+1)% (nec_refbuf->max_buffer_cnt);
 		if(tid==0)tid=nec_refbuf->buffer_offset;
 	}
@@ -611,8 +596,8 @@ static void codec_enc_get_ref_frame_id(jqy_codec_t* codec,jqyring_buf_t *enc_inp
 		head->rid=codec->trcontext->ref_state.best_rid;
 	else
 		head->rid=1;
-	unsigned int now_time = codec->codec_get_curtime_ms();
-	if(now_time- lasttime > codec->trcontext->update_ref_time) 
+		unsigned int now_time = codec->codec_get_curtime_ms();
+	if(now_time- lasttime > codec->trcontext->update_ref_time && codec->trcontext->ref_state.id_in_ref==0) 
 	{
 		codec->trcontext->ref_state.reqtimeout=1;
 		head->codec_type=RM_ZERO_REF_UPDATE;
@@ -710,6 +695,8 @@ static int codec_xor_rm_zero( jqy_codec_t* codec,jqyring_buf_t *enc_input_buf,jq
 	}
 	codec_push_data(codec,&codec->trcontext->buf[ENC_OUTPUT_BUF],enc_encout_frame,len+4);
 	codec->codec_data_dump_callback(enc_encout_frame,len+4,DATA_ENC_4);// 
+
+	
 	return 1;	
 }
 void codec_enc_task(void const *argument)
@@ -738,7 +725,11 @@ void codec_enc_task(void const *argument)
 			codec->codec_data_dump_callback(enc_input_buf->buffer[enc_input_buf->rd_ptr],size,DATA_ENC_0);//
 			codec_xor_rm_zero(codec,enc_input_buf,enc_refbuf,enc_input_buf->rd_ptr,size);
 			codec_modify_buf_rd(enc_input_buf);
-			//codec->codec_delayms(1);
+			int ref_buf_cnt = codec_get_buf_cnt(codec,enc_refbuf);
+			if(ref_buf_cnt>=enc_refbuf->max_buffer_cnt){
+				enc_refbuf->rd_ptr = (enc_refbuf->rd_ptr+1)%enc_refbuf->max_buffer_cnt;
+				if(enc_refbuf->rd_ptr==0) enc_refbuf->rd_ptr=enc_refbuf->buffer_offset;
+			}
 		}
         else codec->codec_delayms(5);
     }
@@ -773,26 +764,14 @@ static int find_ref_id_by_rid(jqy_codec_t* codec,int rid){
 }
 static void codec_dec_update_ref_frameid(jqy_codec_t* codec ,unsigned char *si,unsigned int size)
 {
-	
 	jqyring_buf_t *decrefbuf =&codec->trcontext->buf[DEC_REF_BUF];
-	sync_head_t *head_new = (sync_head_t *)si;
-
-	int tid=decrefbuf->rd_ptr;
-	while(tid != decrefbuf->wr_ptr)
-	{
-		ref_frame_head_t *head = (ref_frame_head_t *)decrefbuf->buffer[tid];
-		
-		if(head->sync.id==head_new->id)
-		{
-			head->sync.id=0;
-			head->frequency++;
-			codec->codec_data_dump_callback(decrefbuf->buffer[tid],size+8,DATA_DEC_29);//
-			break;
-		}
-		tid = (tid + 1) % (decrefbuf->max_buffer_cnt);
-		if(tid==0)tid=decrefbuf->buffer_offset;
+	int ref_buf_cnt = codec_get_buf_cnt(codec, decrefbuf);
+	if(ref_buf_cnt>=decrefbuf->max_buffer_cnt){
+		decrefbuf->rd_ptr = (decrefbuf->rd_ptr+1)%decrefbuf->max_buffer_cnt;
+		if(decrefbuf->rd_ptr==0) decrefbuf->rd_ptr=decrefbuf->buffer_offset;
 	}
 
+	sync_head_t *head_new = (sync_head_t *)si;
 	memset(dec_preframe, 0, MAX_BUF_SIZE_TEMP);
 	memcpy(&dec_preframe[8], si, size);
 	struct _ref_frame_head refhead={0};
@@ -805,16 +784,6 @@ static void codec_dec_update_ref_frameid(jqy_codec_t* codec ,unsigned char *si,u
 	memcpy(dec_preframe, &refhead,11);
 	codec_push_data(codec,decrefbuf,dec_preframe,size+8);
 	codec->codec_data_dump_callback(dec_preframe,size+8,DATA_DEC_28);
-
-	#if 0
-	while(tid != decrefbuf->wr_ptr)
-	{
-		codec->codec_data_dump_callback(decrefbuf->buffer[tid],size+8,100);//
-		tid = (tid + 1) % (decrefbuf->max_buffer_cnt);
-		if(tid==0)tid=decrefbuf->buffer_offset;
-	}
-	#endif
-	
 }
 static int decode_one_frame(jqy_codec_t* codec,unsigned char *si,jqyring_buf_t *dec_refbuf,unsigned int size){
 	sync_head_t *head = (sync_head_t *)si;
@@ -849,7 +818,7 @@ static int decode_one_frame(jqy_codec_t* codec,unsigned char *si,jqyring_buf_t *
 	else if(head->codec_type==ACK_RM_ZERO_REF_HAVE_NOT){
 		jqyring_buf_t *enc_refbuf =&codec->trcontext->buf[ENC_REF_BUF];
 		enc_refbuf->rd_ptr=enc_refbuf->wr_ptr;
-		printf("ack have not ref \n");
+		printf("\nack have not ref \n");
 		return 1;
 	}
 	else if(head->codec_type==ACK_RM_ZERO_REF){
@@ -857,7 +826,7 @@ static int decode_one_frame(jqy_codec_t* codec,unsigned char *si,jqyring_buf_t *
 		memcpy(dec_frame,head,3);
 		memcpy(&dec_frame[3],dec_preframe,len);
 		codec_nec_update_ref_frameid(codec,dec_frame,3+len);
-		printf("get ack rm zero ref \n");
+		printf("\nget ack rm zero ref \n");
 		return 1;
 	}
 	else if(head->codec_type==RM_ZERO_REF_UPDATE || head->codec_type==RM_ZERO_REF){	
@@ -992,7 +961,7 @@ void codec_dec_task(void const *argument)
 	jqy_codec_t* codec = (jqy_codec_t*) argument;
 	jqyring_buf_t *buf = &codec->trcontext->buf[DEC_INPUT_BUF];
 	jqyring_buf_t *dec_refbuf = &codec->trcontext->buf[DEC_REF_BUF];
-	 while(1)
+	while(1)
    	{
 	   if(0==codec->trcontext->can_run)
 	   {
@@ -1045,12 +1014,12 @@ void codec_dec_task(void const *argument)
 		   if(head->codec_type==RM_ZERO_HUGE)
 		   {
 				int ok=codec->codec_dec_pop_data(&dec_need_buf[index],size2);
-				if(ok){
+				if(ok)
+				{
 					codec->codec_data_dump_callback(&dec_need_buf[index],size2,DATA_DEC_35);// 
 					codec_modify_buf_rd(buf);
 				}
 				else  codec->codec_delayms(size2 *14/50);
-				
 		   		continue;
 		   }
 		   else if(head->codec_type>0x00)
@@ -1072,7 +1041,6 @@ void codec_dec_task(void const *argument)
 		   codec_modify_buf_rd(buf);
 	   }
 	   else codec->codec_delayms(5);
-	  
    }
 }
 //************************************end decode************************************************************
