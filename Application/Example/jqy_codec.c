@@ -476,6 +476,133 @@ int codec_dec_find_non_zero_plus(unsigned char *si,int in_len,unsigned char *so,
 	return 1;
 
 }
+static int codec_devide2_sort(unsigned char *si,int len,unsigned char *so,unsigned int* lout,int maxlen){
+
+	int i=0;
+	int j=0;
+	unsigned char* sortH =(unsigned char*)malloc(32);
+	unsigned char* sortL =(unsigned char*)malloc(32);
+	if(len==2)
+	{
+		if(si[0]>si[1]){ so[* lout]=si[0];so[*lout+1]=si[1];}
+		else { so[*lout]=si[1];so[*lout+1]=si[0];}
+		*lout+=2;
+		/*
+		for(i=0;i<*lout;i++)
+		{
+			printf("%2x ",so[i]);
+		}
+		printf("\n");
+		*/
+		return 1;
+	}
+	if(*lout >=maxlen) return 1;
+	for(i=0;i<len-1;)
+	{
+		if(si[i]>si[i+1]) { sortH[j]=si[i];sortL[j]=si[i+1]; }
+		else { sortH[j]=si[i+1];sortL[j]=si[i];}
+		i+=2;
+		j++;
+	}
+	codec_devide2_sort(sortH,len/2,so,lout,maxlen);
+	codec_devide2_sort(sortL,len/2,so,lout,maxlen);
+	
+	if(sortH!=NULL)free(sortH);
+	if(sortL!=NULL)free(sortL);
+	return 1;
+}
+static int check_is_sort(unsigned char *si,int len){
+	int i=0;
+	for(i=0;i<len-1;i++){
+		if(si[i]<si[i+1]) return 0;
+	}
+	return 1;
+}
+static void codec_do_finarlly_encode(unsigned char *si,int len,unsigned char *sot,unsigned char *times,unsigned char *so){
+	static int lout=0;
+	int i=0;
+	unsigned char sit[128]={0};
+	static unsigned char soo[128]={0};
+	codec_devide2_sort(si,len,sot,&lout,len);
+	if(check_is_sort(si,len-*times))
+	{
+		//printf("------------0\n");
+		memcpy(&so[*times], sot, len-*times);
+		return;
+	}
+	else
+	{
+		soo[*times]=sot[0];
+		*times=*times+1;
+		lout=0;
+		memset(sit, 0, len);
+		/*
+		printf("---sot\n");
+		for(i=0;i<len;i++){
+			printf("%2x ",sot[i]);
+		}
+		printf("\n---so\n");
+		for(i=0;i<len;i++){
+			printf("%2x ",soo[i]);
+		}
+		printf("\n");
+		*/
+		memcpy(sit,&sot[1],len-*times);
+		memset(sot, 0, len);
+		
+		if(check_is_sort(sit,len-*times))
+		{
+			memcpy(so, soo, *times);
+			memcpy(&so[*times], sit, len-*times);
+			memset(soo, 0, 128);
+			
+			printf("--so\n");
+			for(i=0;i<len;i++){
+				printf("%2x ",so[i]);
+			}
+			printf("\n");
+			
+			return;
+		}
+		
+		printf("do loop again times=%d\n",*times);
+		for(i=0;i<len;i++){
+			printf("%2x ",sit[i]);
+		}
+		printf("\n");
+		
+		//printf("---do loop again times=%d\n",*times);
+		codec_do_finarlly_encode(sit,len,sot,times,so);
+	}
+}
+
+void codec_sort_core(unsigned char *si,int len,unsigned char *so,unsigned char *htimes,unsigned char *ltimes){
+	if(len !=2 && len !=4 && len!=8 && len!=16 && len!=32 && len !=64 && len !=128  && len !=256) return;
+	int i=0;
+	static unsigned char siH[64]={0};
+	static unsigned char siL[64]={0};
+	static unsigned char soH[64]={0};
+	static unsigned char soL[64]={0};
+	static unsigned char soHR[64]={0};
+	static unsigned char soLR[64]={0};
+	
+	for(i=0;i<len;i++) siH[i] = (si[i] & 0xf0)>>4;
+	for(i=0;i<len;i++) siL[i] = si[i] & 0x0f;
+
+	//
+	codec_do_finarlly_encode(siH,len,soH,htimes,soHR);
+	printf("---htimes=%d--soH[0]=%x-------2----\n",*htimes,soH[0]);
+	codec_do_finarlly_encode(siL,len,soL,ltimes,soLR);
+	printf("---ltimes=%d--soL[0]=%x-------3----\n",*ltimes,soL[0]);
+
+	for(i=0;i<len;i++){
+		so[i]=soHR[i]<<4;
+		so[i] |=soLR[i];
+	}
+	
+	return;
+}
+
 //*********************************end core***************************************************************
 
 //*********************************encode*****************************************************************
@@ -818,7 +945,7 @@ static int decode_one_frame(jqy_codec_t* codec,unsigned char *si,jqyring_buf_t *
 	else if(head->codec_type==ACK_RM_ZERO_REF_HAVE_NOT){
 		jqyring_buf_t *enc_refbuf =&codec->trcontext->buf[ENC_REF_BUF];
 		enc_refbuf->rd_ptr=enc_refbuf->wr_ptr;
-		printf("\nack have not ref \n");
+		printf("ack have not ref \n");
 		return 1;
 	}
 	else if(head->codec_type==ACK_RM_ZERO_REF){
@@ -826,7 +953,7 @@ static int decode_one_frame(jqy_codec_t* codec,unsigned char *si,jqyring_buf_t *
 		memcpy(dec_frame,head,3);
 		memcpy(&dec_frame[3],dec_preframe,len);
 		codec_nec_update_ref_frameid(codec,dec_frame,3+len);
-		printf("\nget ack rm zero ref \n");
+		printf("get ack rm zero ref \n");
 		return 1;
 	}
 	else if(head->codec_type==RM_ZERO_REF_UPDATE || head->codec_type==RM_ZERO_REF){	

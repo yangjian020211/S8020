@@ -1,7 +1,7 @@
 #ifndef __JQY_CODEC_H__
 #define __JQY_CODEC_H__
 
-#define Linuxsimulation 0
+#define Linuxsimulation 1
 
 #define MAX_BUFFER (128)
 
@@ -233,6 +233,7 @@ void codec_dec_pop_task(void const *argument);
 void codec_log_task(void const *argument);
 void codec_enc_find_non_zero_plus(unsigned char *si,unsigned int in_len ,unsigned char *so,unsigned int *len_out);
 int codec_dec_find_non_zero_plus(unsigned char *si,int in_len,unsigned char *so,int *len_out,int max_lout);
+void codec_sort_core(unsigned char *si,int len,unsigned char *so,unsigned char *htimes,unsigned char *ltimes);
 
 #ifdef __cplusplus
 }
