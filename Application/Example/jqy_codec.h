@@ -1,7 +1,7 @@
 #ifndef __JQY_CODEC_H__
 #define __JQY_CODEC_H__
 
-#define Linuxsimulation 1
+#define Linuxsimulation 0
 
 #define MAX_BUFFER (128)
 
@@ -63,22 +63,24 @@ extern "C"
 typedef enum{
 
    RM_ZERO_REF=0x01,
-   RM_ZERO_REF_UPDATE,//2
-   RM_ZERO_REF_EQ,
-   RM_ZERO_HUGE,
-   ACK_RM_ZERO_REF,
-   ACK_RM_ZERO_REF_HAVE_NOT,
-   CMD_MAX_CNT,
+   RM_ZERO_REF_ORDER2,//2
+   RM_ZERO_REF_ORDER2_UPDATE,//3
+   RM_ZERO_REF_UPDATE,//4
+   RM_ZERO_REF_EQ,//5
+   RM_ZERO_HUGE,//6
+   ACK_RM_ZERO_REF,//7
+   ACK_RM_ZERO_REF_HAVE_NOT,//8
+   CMD_MAX_CNT,//9
 } ENUM_ENC_TYPE;
 typedef enum{
 	
    ERROR_TAG_VALUE_INVALID=0,
-   ERROR_NO_DATA_TAG,
-   ERROR_FRAME_LEN,
-   ERROR_FRAME_FORMAT,
-   ERROR_FRAME_TYPE,
-   ERROR_FRAME_NCNT_NOT_MATCH_FRAME_LEN,
-   ERROR_FRAME_NOT_IN_REFBUF,
+   ERROR_NO_DATA_TAG,//1
+   ERROR_FRAME_LEN,//2
+   ERROR_FRAME_FORMAT,//3
+   ERROR_FRAME_TYPE,//4
+   ERROR_FRAME_NCNT_NOT_MATCH_FRAME_LEN,//5
+   ERROR_FRAME_NOT_IN_REFBUF,//6
    ERROR_FRAME_DEC_LENGTH_LONG_THAN2000,
    ERROR_FRAME_IN_FRAME_LEN_LESS_0,
    ERROR_MAX,
@@ -139,6 +141,8 @@ typedef enum{
    DEC_OUTPUT_BUF,
    ENC_REF_BUF,
    DEC_REF_BUF,
+   ENC_UNION_BUF,
+   DEC_UNION_BUF,
    MAX_BUF_CNT,
 
 } ENUM_BUF_T;
@@ -199,6 +203,9 @@ typedef struct _context{
 	unsigned int buffer_offset;
 	unsigned int max_ref_frame_thd[2];
 	unsigned int max_bag_thd;
+	unsigned char max_union_packege;
+	unsigned char enc_frame_cnt;
+	unsigned char pre_ref_frame_id;
 }context_t;
 typedef struct _jqy_codec
 {
@@ -222,6 +229,7 @@ void codec_set_max_bag_thd(void* arg1,unsigned int thd);
 int codec_set_data_head_tag(void* arg1,unsigned char tag,unsigned char len);
 void codec_set_max_buf_cnt(void* arg1,unsigned int arg2);
 void codec_set_buf_max_cnt(void* arg1,void* arg2,unsigned int arg3);
+void codec_set_union_max_cnt(void* arg1,unsigned char arg2);
 
 void codec_set_max_buf_size(void* arg1,unsigned int arg2);
 void codec_set_max_refbuf_thd(void* arg1,unsigned int argl,unsigned int argh);
@@ -234,6 +242,7 @@ void codec_log_task(void const *argument);
 void codec_enc_find_non_zero_plus(unsigned char *si,unsigned int in_len ,unsigned char *so,unsigned int *len_out);
 int codec_dec_find_non_zero_plus(unsigned char *si,int in_len,unsigned char *so,int *len_out,int max_lout);
 void codec_sort_core(unsigned char *si,int len,unsigned char *so,unsigned char *htimes,unsigned char *ltimes);
+void codec_desort_core(unsigned char *si,int len,unsigned char *so,unsigned char htimes,unsigned char ltimes);
 
 #ifdef __cplusplus
 }

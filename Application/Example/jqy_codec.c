@@ -6,11 +6,13 @@ static  unsigned char dec_so[MAX_BUF_SIZE_TEMP]={0};
 static  unsigned char dec_frame[MAX_BUF_SIZE_TEMP]={0};
 static  unsigned char dec_preframe[MAX_BUF_SIZE_TEMP]={0};
 static  unsigned char dec_xor_frame[MAX_BUF_SIZE_TEMP]={0};
+static  unsigned char pre_dec_union_frame[MAX_BUF_SIZE_TEMP]={0};
 
 static  unsigned char enc_encout_frame[MAX_BUF_SIZE_TEMP]={0};
 static  unsigned char enc_xor_frame[MAX_BUF_SIZE_TEMP]={0};
 static  unsigned char enc_frame[MAX_BUF_SIZE_TEMP]={0};
-
+static  unsigned char enc_union_frame[MAX_BUF_SIZE_TEMP]={0};
+static  unsigned char preenc_union_frame[MAX_BUF_SIZE_TEMP]={0};
 
 void codec_init(void* arg){
 	jqy_codec_t* codec = (jqy_codec_t*)arg;
@@ -60,7 +62,6 @@ void codec_pause(void    * arg){
 	jqy_codec_t* codec = (jqy_codec_t*)arg;
 	codec->trcontext->can_run=0;
 }
-
 static void codec_modify_buf_rd(void const *arg){
 	jqyring_buf_t* buf = (jqyring_buf_t*)arg;
 	buf->rd_ptr = (buf->rd_ptr+1)%buf->max_buffer_cnt;
@@ -78,7 +79,6 @@ static int codec_check_buf_bussy(void const *arg){
 		   return 1;
 	    }
 	 return 0;
-	
 }
 
 unsigned int codec_get_buf_cnt(void* arg1,void* arg2)
@@ -192,6 +192,11 @@ void codec_set_max_buf_cnt(void* arg1,unsigned int arg2){
 	jqy_codec_t* codec = (jqy_codec_t*) arg1;
 	codec->trcontext->max_buffer_cnt=arg2;
 }
+void codec_set_union_max_cnt(void* arg1,unsigned char arg2){
+	jqy_codec_t* codec = (jqy_codec_t*) arg1;
+	codec->trcontext->max_union_packege=arg2;
+}
+
 void codec_set_buf_max_cnt(void* arg1,void* arg2,unsigned int arg3){
 	jqy_codec_t* codec = (jqy_codec_t*) arg1;
 	jqyring_buf_t* buf = (jqyring_buf_t*)arg2;
@@ -270,7 +275,7 @@ static void codec_serial_xor(unsigned char *s1,unsigned char *s2,unsigned char *
 					state =4;
 				}
 		#if debug1
-						printf("0 n=%d i=%d si[%d]=%x,j=%d,sj[%d]=%2x addr=%d sj[%d]=%2x zero_cnt=%d\n",n,i,i,si[i],j,j,so[j],addr,addr,so[addr],zero_cnt);
+				printf("0 n=%d i=%d si[%d]=%x,j=%d,sj[%d]=%2x addr=%d sj[%d]=%2x zero_cnt=%d\n",n,i,i,si[i],j,j,so[j],addr,addr,so[addr],zero_cnt);
 		#endif
 			}
 			else if(state==1)
@@ -312,7 +317,7 @@ static void codec_serial_xor(unsigned char *s1,unsigned char *s2,unsigned char *
 					state=6;
 				}
 				else{
-					
+					//if(n_is_15 !=1)
 					j++;
 					addr =j;
 					//j++;
@@ -329,7 +334,6 @@ static void codec_serial_xor(unsigned char *s1,unsigned char *s2,unsigned char *
 				{
 					state=5;
 					zero_cnt=0;
-					j++;
 					n=0;
 					
 				}
@@ -337,6 +341,7 @@ static void codec_serial_xor(unsigned char *s1,unsigned char *s2,unsigned char *
 				{
 					if(n>0)
 					{
+						//addr=j; 
 						so[addr] +=n;
 					}
 					i++;
@@ -355,14 +360,20 @@ static void codec_serial_xor(unsigned char *s1,unsigned char *s2,unsigned char *
 			}
 			else if(state==5)
 			{
-				addr=j; 
-				so[addr]=0xFF;
+				if(n_is_15 ==1){
+					addr=j; 
+					so[addr]=0xFF;
+					n_is_15=0;
+				}else{
+					j++;
+					addr=j; 
+					so[addr]=0xFF;
+				}
 				i++;
 				if(i>=in_len){
 					state=6;
 				}
 				else{
-					
 					state=0;
 				}
 		#if debug1
@@ -371,16 +382,23 @@ static void codec_serial_xor(unsigned char *s1,unsigned char *s2,unsigned char *
 			}
 			else if(state==6)
 			{
-				if(so[addr] !=0)
-				j++;
-				
-				if(n>0)so[addr]+=n; 
-				else if(zero_cnt>15){
+				if(n>0)
+				{
+					if(so[addr]!=0x0f)j++;
+					else if(addr!=0 && zero_cnt!=0){j++;zero_cnt=0;}
+					so[addr]+=n; 
+					if(addr==0 && zero_cnt!=0){j++;zero_cnt=0;}
+				}
+				else if(zero_cnt>=15){
+					if(n_is_15 !=1){j++;n_is_15=0;}
+					//if(addr!=0)j++;
 					addr=j;
 					so[addr]=0xf0 | (zero_cnt-15);
 					j++;
-					}
+				}
 				else if(zero_cnt>0){
+					if(n_is_15 !=1){j++;n_is_15=0;}
+					//else if(addr!=0)j++;
 					addr=j;
 					so[addr]=zero_cnt<<4;
 					j++;
@@ -480,8 +498,8 @@ static int codec_devide2_sort(unsigned char *si,int len,unsigned char *so,unsign
 
 	int i=0;
 	int j=0;
-	unsigned char* sortH =(unsigned char*)malloc(32);
-	unsigned char* sortL =(unsigned char*)malloc(32);
+	unsigned char* sortH =(unsigned char*)malloc(len);
+	unsigned char* sortL =(unsigned char*)malloc(len);
 	if(len==2)
 	{
 		if(si[0]>si[1]){ so[* lout]=si[0];so[*lout+1]=si[1];}
@@ -511,6 +529,10 @@ static int codec_devide2_sort(unsigned char *si,int len,unsigned char *so,unsign
 	if(sortL!=NULL)free(sortL);
 	return 1;
 }
+static void codec_devide2_desort(unsigned char *si,int len,unsigned char *so){
+	
+
+}
 static int check_is_sort(unsigned char *si,int len){
 	int i=0;
 	for(i=0;i<len-1;i++){
@@ -518,7 +540,7 @@ static int check_is_sort(unsigned char *si,int len){
 	}
 	return 1;
 }
-static void codec_do_finarlly_encode(unsigned char *si,int len,unsigned char *sot,unsigned char *times,unsigned char *so){
+static void codec_do_finanlly_encode(unsigned char *si,int len,unsigned char *sot,unsigned char *times,unsigned char *so){
 	static int lout=0;
 	int i=0;
 	unsigned char sit[128]={0};
@@ -536,7 +558,7 @@ static void codec_do_finarlly_encode(unsigned char *si,int len,unsigned char *so
 		*times=*times+1;
 		lout=0;
 		memset(sit, 0, len);
-		/*
+		
 		printf("---sot\n");
 		for(i=0;i<len;i++){
 			printf("%2x ",sot[i]);
@@ -546,7 +568,7 @@ static void codec_do_finarlly_encode(unsigned char *si,int len,unsigned char *so
 			printf("%2x ",soo[i]);
 		}
 		printf("\n");
-		*/
+		
 		memcpy(sit,&sot[1],len-*times);
 		memset(sot, 0, len);
 		
@@ -555,7 +577,7 @@ static void codec_do_finarlly_encode(unsigned char *si,int len,unsigned char *so
 			memcpy(so, soo, *times);
 			memcpy(&so[*times], sit, len-*times);
 			memset(soo, 0, 128);
-			
+			printf("do loop again times=%d\n",*times);
 			printf("--so\n");
 			for(i=0;i<len;i++){
 				printf("%2x ",so[i]);
@@ -564,20 +586,25 @@ static void codec_do_finarlly_encode(unsigned char *si,int len,unsigned char *so
 			
 			return;
 		}
-		
-		printf("do loop again times=%d\n",*times);
-		for(i=0;i<len;i++){
-			printf("%2x ",sit[i]);
-		}
-		printf("\n");
-		
-		//printf("---do loop again times=%d\n",*times);
-		codec_do_finarlly_encode(sit,len,sot,times,so);
+		codec_do_finanlly_encode(sit,len,sot,times,so);
 	}
 }
-
+static void codec_do_finanlly_decode(unsigned char *si,int len,unsigned char times,unsigned char *so){
+	
+	int i=0;
+	unsigned char sit[128]={0};
+	static unsigned char soo[128]={0};
+	memset(sit, 0, len);
+	memcpy(so, si, len-times);
+	for(i=0;i<times;i++)
+	{
+		sit[0] = si[i];
+		memcpy(&sit[1], so,len-1);
+		codec_devide2_desort(sit,len,so);
+	}
+}
 void codec_sort_core(unsigned char *si,int len,unsigned char *so,unsigned char *htimes,unsigned char *ltimes){
-	if(len !=2 && len !=4 && len!=8 && len!=16 && len!=32 && len !=64 && len !=128  && len !=256) return;
+	if(len !=4 && len!=8 && len!=16 && len!=32 && len !=64 && len !=128  && len !=256) return;
 	int i=0;
 	static unsigned char siH[64]={0};
 	static unsigned char siL[64]={0};
@@ -590,16 +617,41 @@ void codec_sort_core(unsigned char *si,int len,unsigned char *so,unsigned char *
 	for(i=0;i<len;i++) siL[i] = si[i] & 0x0f;
 
 	//
-	codec_do_finarlly_encode(siH,len,soH,htimes,soHR);
-	printf("---htimes=%d--soH[0]=%x-------2----\n",*htimes,soH[0]);
-	codec_do_finarlly_encode(siL,len,soL,ltimes,soLR);
-	printf("---ltimes=%d--soL[0]=%x-------3----\n",*ltimes,soL[0]);
+	codec_do_finanlly_encode(siH,len,soH,htimes,soHR);
+	printf("---htimes=%d\n",*htimes);
+	codec_do_finanlly_encode(siL,len,soL,ltimes,soLR);
+	printf("---ltimes=%d\n",*ltimes);
 
 	for(i=0;i<len;i++){
 		so[i]=soHR[i]<<4;
 		so[i] |=soLR[i];
 	}
 	
+	return;
+}
+void codec_desort_core(unsigned char *si,int len,unsigned char *so,unsigned char htimes,unsigned char ltimes){
+	if(len !=4 && len!=8 && len!=16 && len!=32 && len !=64 && len !=128  && len !=256) return;
+	int i=0;
+	static unsigned char siH[64]={0};
+	static unsigned char siL[64]={0};
+	static unsigned char soH[64]={0};
+	static unsigned char soL[64]={0};
+	static unsigned char soHR[64]={0};
+	static unsigned char soLR[64]={0};
+	memset(soHR, 0, 64);
+	memset(soLR, 0, 64);
+	for(i=0;i<len;i++) siH[i] = (si[i] & 0xf0)>>4;
+	for(i=0;i<len;i++) siL[i] = si[i] & 0x0f;
+
+	codec_do_finanlly_decode(siH,len,htimes,soHR);
+	printf("---Hbits\n");
+	codec_do_finanlly_decode(siL,len,ltimes,soLR);
+	printf("---Lbits\n");
+
+	for(i=0;i<len;i++){
+		so[i]=soHR[i]<<4;
+		so[i] |=soLR[i];
+	}
 	return;
 }
 
@@ -745,16 +797,77 @@ static void send_eq_id(jqy_codec_t* codec,sync_head_t* head){
 	enc_encout_frame[3]=0;
 	codec->codec_data_dump_callback(enc_encout_frame,4,DATA_ENC_6);
 	codec_push_data(codec,&codec->trcontext->buf[ENC_OUTPUT_BUF],enc_encout_frame,4);
-
 }
-static int codec_xor_rm_zero( jqy_codec_t* codec,jqyring_buf_t *enc_input_buf,jqyring_buf_t *enc_refbuf,unsigned int enc_rd,unsigned int size)
+
+static void pop_union_buf(jqy_codec_t* codec,jqyring_buf_t *enc_union_buf,jqyring_buf_t *enc_refbuf)
+{
+	memset(enc_union_frame, 0, MAX_BUF_SIZE_TEMP);
+	memset(enc_frame, 0, MAX_BUF_SIZE_TEMP);
+	unsigned int rd_idx1 = enc_union_buf->rd_ptr;
+	unsigned int wr_idx1 = enc_union_buf->wr_ptr;
+	unsigned int size =  enc_union_buf->buffer_size[rd_idx1];
+	unsigned int tid;
+	unsigned char head_len=sizeof(struct _sync_head);
+	unsigned int len=0;
+	unsigned int currntlen=0;
+	tid = rd_idx1;
+	while(tid !=wr_idx1)
+	{
+		size =  enc_union_buf->buffer_size[tid];
+		if(tid==rd_idx1)
+		{
+			sync_head_t *head = (sync_head_t *)enc_union_buf->buffer[tid];
+			head->codec_type=RM_ZERO_REF_ORDER2;
+			memcpy(enc_union_frame, head,3);
+			enc_union_frame[3]=size-4;
+			currntlen = 4;
+			memcpy(&enc_union_frame[currntlen], &enc_union_buf->buffer[tid][3], size-3);
+			currntlen=size;
+			codec->codec_data_dump_callback(enc_union_frame,currntlen,94);
+			memset(preenc_union_frame, 0, MAX_BUF_SIZE_TEMP);
+			memcpy(preenc_union_frame, &enc_union_frame[4], size-4);
+			codec->codec_data_dump_callback(preenc_union_frame,size-4,95);
+		}
+		else
+		{
+			
+			codec->codec_data_dump_callback(&enc_union_buf->buffer[tid][3],size-4,96);
+			codec_serial_xor(preenc_union_frame,&enc_union_buf->buffer[tid][3],enc_xor_frame,size-4);
+			codec->codec_data_dump_callback(enc_xor_frame,size-4,97);
+			codec_enc_find_non_zero_plus(enc_xor_frame,size-4,enc_frame,&len);
+			codec->codec_data_dump_callback(enc_frame,len,98);
+			enc_union_frame[currntlen]=len;
+			currntlen+=1;
+			memcpy(&enc_union_frame[currntlen], enc_frame, len);
+			currntlen+=len;
+			codec->codec_data_dump_callback(enc_frame,len,99);// 
+			memset(preenc_union_frame, 0, MAX_BUF_SIZE_TEMP);
+			memcpy(preenc_union_frame, &enc_union_buf->buffer[tid][3], size-4);
+			codec->codec_data_dump_callback(preenc_union_frame,size-4,100);
+		}
+		
+		
+		tid = (tid+1) % (enc_union_buf->max_buffer_cnt);
+		if(tid==0)tid=enc_union_buf->buffer_offset;
+	}
+	enc_union_frame[currntlen]=0;
+	currntlen+=1;
+	codec_push_data(codec,&codec->trcontext->buf[ENC_OUTPUT_BUF],enc_union_frame,currntlen);
+	codec->codec_data_dump_callback(enc_union_frame,currntlen,122);// 
+	enc_union_buf->rd_ptr = wr_idx1;
+	codec->trcontext->enc_frame_cnt=0;
+}
+static int codec_xor_rm_zero( jqy_codec_t* codec,jqyring_buf_t *enc_input_buf,jqyring_buf_t *enc_union_buf,jqyring_buf_t *enc_refbuf,unsigned int enc_rd,unsigned int size)
 {
 	unsigned int len=0;
 	int ref_cnt =0;
+	int count_in_union_buf=0;
 	memset(enc_encout_frame, 0, MAX_BUF_SIZE_TEMP);
 	memset(enc_xor_frame, 0, MAX_BUF_SIZE_TEMP);
 	memset(enc_frame, 0, MAX_BUF_SIZE_TEMP);
 	if(size>MAX_BUF_SIZE_TEMP-3){
+		codec_modify_buf_rd(enc_input_buf);
+		codec->trcontext->pre_ref_frame_id=0;
 		return 1;
 	}
 	int frame_len= size-3;
@@ -763,7 +876,8 @@ static int codec_xor_rm_zero( jqy_codec_t* codec,jqyring_buf_t *enc_input_buf,jq
 	memcpy(&newh,enc_input_buf->buffer[enc_rd], 3);
 	newh.id= enc_rd;
 	newh.rid= enc_rd;
-	ref_cnt=codec_get_buf_cnt(codec,enc_refbuf);	
+	ref_cnt=codec_get_buf_cnt(codec,enc_refbuf);
+	
 	memset(&codec->trcontext->ref_state, 0 ,sizeof(struct _update_state));
 	codec_update_table_exist_ref_frame(codec,enc_input_buf,enc_refbuf);
 	codec_enc_get_ref_frame_id(codec,enc_input_buf,&newh);
@@ -774,25 +888,37 @@ static int codec_xor_rm_zero( jqy_codec_t* codec,jqyring_buf_t *enc_input_buf,jq
 	#endif
 	if(newh.codec_type==RM_ZERO_REF_EQ)
 	{
+		count_in_union_buf=codec_get_buf_cnt(codec,enc_union_buf);
+		if(count_in_union_buf>0) pop_union_buf(codec,enc_union_buf,enc_refbuf);
 		send_eq_id(codec,&newh);
+		codec_modify_buf_rd(enc_input_buf);
+		codec->trcontext->pre_ref_frame_id=0;
 		return 1;
 	}
 	else if(newh.codec_type==RM_ZERO_HUGE)
 	{
+		count_in_union_buf=codec_get_buf_cnt(codec,enc_union_buf);
+		if(count_in_union_buf>0) pop_union_buf(codec,enc_union_buf,enc_refbuf);
 		memcpy(enc_encout_frame, &newh, 3);
 		memcpy(&enc_encout_frame[3],&enc_input_buf->buffer[enc_rd][3], frame_len);
 		codec_push_data(codec,&codec->trcontext->buf[ENC_OUTPUT_BUF],enc_encout_frame,size);
 		codec->codec_data_dump_callback(enc_encout_frame,size,DATA_ENC_5);
+		codec_modify_buf_rd(enc_input_buf);
+		codec->trcontext->pre_ref_frame_id=0;
 		return 1;
 	}
 	//1 pre encode ,do xor to find diff
 	//else if(ref_cnt>0 && newh.rid>1 && enc_refbuf->buffer[codec->trcontext->ref_state.best_rid_in_table]!=NULL)
 	else if(ref_cnt>0 && newh.rid>1)
 	{
-		if(enc_refbuf->buffer_size[codec->trcontext->ref_state.best_rid_in_table] >= frame_len){
+		if(enc_refbuf->buffer_size[codec->trcontext->ref_state.best_rid_in_table] >= frame_len)
+		{
+			
 			codec->codec_data_dump_callback(enc_refbuf->buffer[codec->trcontext->ref_state.best_rid_in_table],size+8,DATA_ENC_1);// 
 			codec_serial_xor(&enc_refbuf->buffer[codec->trcontext->ref_state.best_rid_in_table][11],&enc_input_buf->buffer[enc_rd][3],enc_xor_frame,frame_len);
-		}else{
+		}
+		else
+		{
 			newh.codec_type=RM_ZERO_REF;
 			memcpy(enc_xor_frame,&enc_input_buf->buffer[enc_rd][3], frame_len);
 		}
@@ -804,9 +930,28 @@ static int codec_xor_rm_zero( jqy_codec_t* codec,jqyring_buf_t *enc_input_buf,jq
 	}
 	//2 do enc
 	codec->codec_data_dump_callback(enc_xor_frame,frame_len,DATA_ENC_2);// 
-	if(size-3 >MAX_BUF_SIZE_TEMP) return 1;
+	if(size-3 >MAX_BUF_SIZE_TEMP)
+	{
+		codec_modify_buf_rd(enc_input_buf);
+		codec->trcontext->pre_ref_frame_id=0;
+		return 1;
+	}
 	
 	codec_enc_find_non_zero_plus(enc_xor_frame,frame_len,enc_frame,&len);
+
+	#if 1
+	unsigned char buf[2000]={0};
+	int ltest=0;
+	int j=0;
+	
+	//codec_dec_find_non_zero_plus(enc_frame,len,buf,&ltest,MAX_BUF_SIZE_TEMP);
+
+	for(j=0;j<len;j++) if(enc_frame[j]==0 && j<len){
+		codec->codec_data_dump_callback(enc_xor_frame,frame_len,500);// 
+		codec->codec_data_dump_callback(enc_frame,len,501);// 
+	}
+	#endif
+	
 	codec->codec_data_dump_callback(enc_frame,len,DATA_ENC_3);// 
 	//3 add head
 	memcpy(enc_encout_frame, &newh, 3);
@@ -816,14 +961,46 @@ static int codec_xor_rm_zero( jqy_codec_t* codec,jqyring_buf_t *enc_input_buf,jq
 	//5 add end tag to frame end
 	enc_encout_frame[len+3]=0;
 	//6 push to enc_output_buffer
-	if(len+4 >MAX_BUF_SIZE_TEMP){
-		printf("\n----len=%d----\n",len);
+	if(len+4 >MAX_BUF_SIZE_TEMP)
+	{
+		//printf("\n----len=%d----\n",len);
+		codec_modify_buf_rd(enc_input_buf);
+		codec->trcontext->pre_ref_frame_id=0;
 		return 1;
 	}
-	codec_push_data(codec,&codec->trcontext->buf[ENC_OUTPUT_BUF],enc_encout_frame,len+4);
-	codec->codec_data_dump_callback(enc_encout_frame,len+4,DATA_ENC_4);// 
-
-	
+	if(codec->trcontext->pre_ref_frame_id==newh.rid)
+	{
+		codec_push_data(codec,&codec->trcontext->buf[ENC_UNION_BUF],enc_encout_frame,len+4);
+		codec->codec_data_dump_callback(enc_encout_frame,len+4,DATA_ENC_4);// 
+		codec->trcontext->enc_frame_cnt++;
+		codec_modify_buf_rd(enc_input_buf);
+		if(codec->trcontext->enc_frame_cnt >=codec->trcontext->max_union_packege)
+		{
+			pop_union_buf(codec,enc_union_buf,enc_refbuf);
+		}
+	}
+	else
+	{
+		count_in_union_buf=codec_get_buf_cnt(codec,enc_union_buf);
+		if(count_in_union_buf>0) pop_union_buf(codec,enc_union_buf,enc_refbuf);
+		//printf("\n--rid=%d--\n",newh.rid);
+		if(newh.rid ==1)
+		{
+			
+			codec_push_data(codec,&codec->trcontext->buf[ENC_OUTPUT_BUF],enc_encout_frame,len+4);
+			codec->codec_data_dump_callback(enc_encout_frame,len+4,DATA_ENC_4);// 
+			codec->trcontext->pre_ref_frame_id=0;
+			codec->trcontext->enc_frame_cnt=0;
+		}
+		else if(newh.rid >1)
+		{
+			codec_push_data(codec,&codec->trcontext->buf[ENC_UNION_BUF],enc_encout_frame,len+4);
+			codec->trcontext->pre_ref_frame_id=newh.rid;
+			codec->codec_data_dump_callback(enc_encout_frame,len+4,DATA_ENC_4);// 
+			codec->trcontext->enc_frame_cnt++;
+		}
+		codec_modify_buf_rd(enc_input_buf);
+	}
 	return 1;	
 }
 void codec_enc_task(void const *argument)
@@ -831,6 +1008,7 @@ void codec_enc_task(void const *argument)
 	jqy_codec_t* codec = (jqy_codec_t*) argument;
 	jqyring_buf_t *enc_input_buf = &codec->trcontext->buf[ENC_INPUT_BUF];
 	jqyring_buf_t *enc_refbuf = &codec->trcontext->buf[ENC_REF_BUF];
+	jqyring_buf_t *enc_union_buf = &codec->trcontext->buf[ENC_UNION_BUF];
 	while(1)
     {
     	if(0==codec->trcontext->can_run)
@@ -850,8 +1028,7 @@ void codec_enc_task(void const *argument)
 			sync_head_t *head = (sync_head_t *)enc_input_buf->buffer[enc_input_buf->rd_ptr];
 			head->id=enc_input_buf->rd_ptr;
 			codec->codec_data_dump_callback(enc_input_buf->buffer[enc_input_buf->rd_ptr],size,DATA_ENC_0);//
-			codec_xor_rm_zero(codec,enc_input_buf,enc_refbuf,enc_input_buf->rd_ptr,size);
-			codec_modify_buf_rd(enc_input_buf);
+			codec_xor_rm_zero(codec,enc_input_buf,enc_union_buf,enc_refbuf,enc_input_buf->rd_ptr,size);
 			int ref_buf_cnt = codec_get_buf_cnt(codec,enc_refbuf);
 			if(ref_buf_cnt>=enc_refbuf->max_buffer_cnt){
 				enc_refbuf->rd_ptr = (enc_refbuf->rd_ptr+1)%enc_refbuf->max_buffer_cnt;
@@ -912,6 +1089,104 @@ static void codec_dec_update_ref_frameid(jqy_codec_t* codec ,unsigned char *si,u
 	codec_push_data(codec,decrefbuf,dec_preframe,size+8);
 	codec->codec_data_dump_callback(dec_preframe,size+8,DATA_DEC_28);
 }
+static void do_union_frame_decode(jqy_codec_t* codec,jqyring_buf_t *dec_refbuf)
+{
+	jqyring_buf_t *dec_union_buf= &codec->trcontext->buf[DEC_UNION_BUF];
+	unsigned int rd_idx1 = dec_union_buf->rd_ptr;
+	unsigned int wr_idx1 = dec_union_buf->wr_ptr;
+	unsigned int size =  dec_union_buf->buffer_size[rd_idx1];
+	int tid = rd_idx1;
+	int len=0;
+	while(tid !=wr_idx1)
+	{
+		memset(dec_frame, 0, MAX_BUF_SIZE_TEMP);
+		size =  dec_union_buf->buffer_size[tid];
+		sync_head_t *head = (sync_head_t *)dec_union_buf->buffer[tid];
+		codec->codec_data_dump_callback(&dec_union_buf->buffer[tid][3],size-3,152);
+		codec_dec_find_non_zero_plus(&dec_union_buf->buffer[tid][3],size-3,dec_preframe,&len,MAX_BUF_SIZE_TEMP);
+		codec->codec_data_dump_callback(dec_preframe,len,151);
+		if(tid==rd_idx1)
+		{
+			memset(pre_dec_union_frame, 0, MAX_BUF_SIZE_TEMP);
+			memcpy(pre_dec_union_frame, &dec_union_buf->buffer[tid][3], size-3);
+			codec->codec_data_dump_callback(pre_dec_union_frame,size-3,153);
+			int id_inrefbuf = find_ref_id_by_rid(codec,head->rid);
+			if(id_inrefbuf==0)
+			{
+				//have not the rid frame in the ref_buf,neet to update table
+				//printf("\n 2---id=%d rid=%d \n ",head->id,head->rid);
+				int error = ERROR_FRAME_NOT_IN_REFBUF;
+				codec->codec_error_callback(&error);
+				struct _sync_head head2 ={0};
+				memcpy(&head2, head, 3);
+				head2.codec_type=ACK_RM_ZERO_REF_HAVE_NOT;
+				unsigned char buf[10]={0};
+				memcpy(buf, &head2, 3);
+				buf[3]=0;
+				codec_push_data(codec,&codec->trcontext->buf[DEC_OUTPUT_BUF],buf,4);
+				codec->codec_data_dump_callback(buf,4,DATA_DEC_35);//
+				return ;
+			}
+			else
+			{
+				//if(len > dec_refbuf->buffer_size[id_inrefbuf]) return ;
+				codec_serial_xor(&dec_refbuf->buffer[id_inrefbuf][11],dec_preframe,dec_xor_frame,len);
+				codec->codec_data_dump_callback(dec_refbuf->buffer[id_inrefbuf],len,DATA_DEC_36);
+			}
+			memcpy(dec_frame,head,3);
+			memcpy(&dec_frame[3],dec_xor_frame,len);
+			codec_push_data(codec,&codec->trcontext->buf[DEC_OUTPUT_BUF],dec_frame,len+3);
+			codec->codec_data_dump_callback(dec_frame,3+len,DATA_DEC_40);
+		}
+		else
+		{
+			codec->codec_data_dump_callback(dec_union_buf->buffer[tid],size,149);
+			memset(dec_xor_frame, 0, MAX_BUF_SIZE_TEMP);
+			codec_serial_xor(pre_dec_union_frame,dec_preframe,dec_xor_frame,len);
+			codec->codec_data_dump_callback(dec_xor_frame,len,154);
+			memset(pre_dec_union_frame, 0, MAX_BUF_SIZE_TEMP);
+			memcpy(pre_dec_union_frame, dec_xor_frame, len);
+			codec->codec_data_dump_callback(pre_dec_union_frame,len,155);
+			int len2 = len;
+			int len3=0;
+			memset(dec_preframe, 0, MAX_BUF_SIZE_TEMP);
+			codec_dec_find_non_zero_plus(dec_xor_frame,len2,dec_preframe,&len3,MAX_BUF_SIZE_TEMP);
+			codec->codec_data_dump_callback(dec_preframe,len3,156);
+			int id_inrefbuf = find_ref_id_by_rid(codec,head->rid);
+			if(id_inrefbuf==0)
+			{
+				//have not the rid frame in the ref_buf,neet to update table
+				//printf("\n 3---id=%d rid=%d \n ",head->id,head->rid);
+				int error = ERROR_FRAME_NOT_IN_REFBUF;
+				codec->codec_error_callback(&error);	
+				struct _sync_head head2 ={0};
+				memcpy(&head2, head, 3);
+				head2.codec_type=ACK_RM_ZERO_REF_HAVE_NOT;
+				unsigned char buf[10]={0};
+				memcpy(buf, &head2, 3);
+				buf[3]=0;
+				codec_push_data(codec,&codec->trcontext->buf[DEC_OUTPUT_BUF],buf,4);
+				codec->codec_data_dump_callback(buf,4,DATA_DEC_35);//
+				return ;
+			}
+			else
+			{
+				//if(len > dec_refbuf->buffer_size[id_inrefbuf]) return 0;
+				memset(dec_xor_frame, 0, MAX_BUF_SIZE_TEMP);
+				codec_serial_xor(&dec_refbuf->buffer[id_inrefbuf][11],dec_preframe,dec_xor_frame,len3);
+				codec->codec_data_dump_callback(dec_refbuf->buffer[id_inrefbuf],len3,DATA_DEC_42);
+			}
+			memcpy(dec_frame,head,3);
+			memcpy(&dec_frame[3],dec_xor_frame,len3);
+			codec_push_data(codec,&codec->trcontext->buf[DEC_OUTPUT_BUF],dec_frame,len3+3);
+			codec->codec_data_dump_callback(dec_frame,3+len3,DATA_DEC_43);
+		}
+		tid = (tid+1) % (dec_union_buf->max_buffer_cnt);
+		if(tid==0)tid=dec_union_buf->buffer_offset;
+		
+	}
+	dec_union_buf->rd_ptr = wr_idx1;
+}
 static int decode_one_frame(jqy_codec_t* codec,unsigned char *si,jqyring_buf_t *dec_refbuf,unsigned int size){
 	sync_head_t *head = (sync_head_t *)si;
 	int insize = size-3;
@@ -945,7 +1220,7 @@ static int decode_one_frame(jqy_codec_t* codec,unsigned char *si,jqyring_buf_t *
 	else if(head->codec_type==ACK_RM_ZERO_REF_HAVE_NOT){
 		jqyring_buf_t *enc_refbuf =&codec->trcontext->buf[ENC_REF_BUF];
 		enc_refbuf->rd_ptr=enc_refbuf->wr_ptr;
-		printf("ack have not ref \n");
+		//printf("ack have not ref \n");
 		return 1;
 	}
 	else if(head->codec_type==ACK_RM_ZERO_REF){
@@ -953,10 +1228,11 @@ static int decode_one_frame(jqy_codec_t* codec,unsigned char *si,jqyring_buf_t *
 		memcpy(dec_frame,head,3);
 		memcpy(&dec_frame[3],dec_preframe,len);
 		codec_nec_update_ref_frameid(codec,dec_frame,3+len);
-		printf("get ack rm zero ref \n");
+		//printf("get ack rm zero ref \n");
 		return 1;
 	}
-	else if(head->codec_type==RM_ZERO_REF_UPDATE || head->codec_type==RM_ZERO_REF){	
+	else if(head->codec_type==RM_ZERO_REF_UPDATE || head->codec_type==RM_ZERO_REF)
+	{	
 		if(insize<0){
 			int error = ERROR_FRAME_IN_FRAME_LEN_LESS_0;
 			codec->codec_error_callback(&error);
@@ -984,6 +1260,7 @@ static int decode_one_frame(jqy_codec_t* codec,unsigned char *si,jqyring_buf_t *
 			if(id_inrefbuf==0)
 			{
 				//have not the rid frame in the ref_buf,neet to update table
+				//printf("\n 1---id=%d rid=%d \n ",head->id,head->rid);
 				int error = ERROR_FRAME_NOT_IN_REFBUF;
 				codec->codec_error_callback(&error);
 				
@@ -999,7 +1276,7 @@ static int decode_one_frame(jqy_codec_t* codec,unsigned char *si,jqyring_buf_t *
 			}
 			else
 			{
-				if(len > dec_refbuf->buffer_size[id_inrefbuf]) return 0;
+				//if(len > dec_refbuf->buffer_size[id_inrefbuf]) return 0;
 				codec_serial_xor(&dec_refbuf->buffer[id_inrefbuf][11],dec_preframe,dec_xor_frame,len);
 				codec->codec_data_dump_callback(dec_refbuf->buffer[id_inrefbuf],len,DATA_DEC_22);
 			}
@@ -1012,7 +1289,8 @@ static int decode_one_frame(jqy_codec_t* codec,unsigned char *si,jqyring_buf_t *
 		memcpy(&dec_frame[3],dec_xor_frame,len);
 		codec->codec_data_dump_callback(dec_frame,3+len,DATA_DEC_23);
 		codec_push_data(codec,&codec->trcontext->buf[DEC_OUTPUT_BUF],dec_frame,3+len);
-		if(head->codec_type==RM_ZERO_REF_UPDATE){
+		if(head->codec_type==RM_ZERO_REF_UPDATE)
+		{
 			codec->codec_data_dump_callback(dec_frame,3+len,DATA_DEC_24);//
 			codec_dec_update_ref_frameid(codec,dec_frame,3+len);
 			memset(dec_frame, 0, MAX_BUF_SIZE_TEMP);
@@ -1023,7 +1301,49 @@ static int decode_one_frame(jqy_codec_t* codec,unsigned char *si,jqyring_buf_t *
 			codec->codec_data_dump_callback(dec_frame,size+1,DATA_DEC_25);//
 		}
 	}
-	else 
+	else if(head->codec_type==RM_ZERO_REF_ORDER2_UPDATE || head->codec_type==RM_ZERO_REF_ORDER2)
+	{
+		if(insize<0){
+			int error = ERROR_FRAME_IN_FRAME_LEN_LESS_0;
+			codec->codec_error_callback(&error);
+			return 0;
+		}
+		if(insize>=MAX_BUF_SIZE_TEMP){
+			
+			int error = ERROR_FRAME_DEC_LENGTH_LONG_THAN2000;
+			codec->codec_error_callback(&error);
+			return 0;
+		}
+		codec->codec_data_dump_callback(si,size,DATA_DEC_37);//
+		int firstlen = si[3];
+		//printf("1 firstlen=%d\n",firstlen);
+		int id=0;
+		memcpy(dec_frame,head,3);
+		if(firstlen<size){
+			memcpy(&dec_frame[3],&si[4],firstlen);
+			codec_push_data(codec,&codec->trcontext->buf[DEC_UNION_BUF],dec_frame,firstlen+3);
+			id = firstlen+4;
+			codec->codec_data_dump_callback(dec_frame,firstlen+3,DATA_DEC_38);//
+		}
+		int nextframe_size = si[id];
+		//printf("2 nextframe_size=%d id=%d\n",nextframe_size,id);
+		id++;
+		while(id<size){
+			
+			head->id++;
+			memcpy(dec_frame,head,3);
+			memcpy(&dec_frame[3],&si[id],nextframe_size);
+			codec_push_data(codec,&codec->trcontext->buf[DEC_UNION_BUF],dec_frame,nextframe_size+3);
+			codec->codec_data_dump_callback(dec_frame,nextframe_size+3,DATA_DEC_39);//
+			id +=nextframe_size;
+			if(id<size)
+			nextframe_size = si[id];
+			id++;
+			//printf("3 nextframe_size=%d id=%d\n",nextframe_size,id);
+		}
+		do_union_frame_decode(codec,dec_refbuf);
+	}
+	else
 	{
 		int error = ERROR_FRAME_TYPE;
 		codec->codec_error_callback(&error);
