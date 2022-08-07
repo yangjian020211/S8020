@@ -418,7 +418,7 @@ static void  __attribute__ ((section(".h264"))) BB_regs_init(ENUM_BB_MODE en_mod
         for(addr_cnt = 0; addr_cnt < 256; addr_cnt++)
         {
             //PAGE1 reg[0xa1] reg[0xa2] reg[0xa4] reg[0xa5] are PLL setting for cpu0, cpu1, cpu2, set in the sysctrl.c when system init
-            if(page==PAGE1 && (addr_cnt==0xa1||addr_cnt==0xa2||addr_cnt==0xa4||addr_cnt==0xa5))
+            if(page==PAGE1 && (addr_cnt==0xa1||addr_cnt==0xa2||addr_cnt==0xa4||addr_cnt==0xa5||addr_cnt==0xad||addr_cnt==0xae))
             {}
             else
             {

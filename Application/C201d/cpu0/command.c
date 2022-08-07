@@ -46,6 +46,7 @@
 #include "hal_bb.h"
 #include "test_hal_adc.h"
 #include "hal_sram_ground.h"
+#include "test_hal_nv.h"
 
 static void command_send_usb(char *len, char *ep);
 static void command_set_usb_video_priority(char *port_id);
@@ -133,6 +134,8 @@ STRU_CMD_ENTRY_T g_cmdArray[] =
     {0, (f_cmdline)command_get_chipId, "command_get_chipId", ""},
     {2, (f_cmdline)command_TestHalAdRead, "TestHalAdRead", "<ch> <nch>"},
     {1, (f_cmdline)command_set_usb_video_priority, "set_usb_video_priority", "<0/1>"},
+    {0, (f_cmdline)command_TestUsrDataWrite, "TestUsrDataWrite", ""},
+    {0, (f_cmdline)command_TestUsrDataRead, "TestUsrDataRead", ""},
     END_OF_CMD_ENTRY
 };
 

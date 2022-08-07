@@ -4,8 +4,8 @@
 #include <stdint.h>
 #include "cpu_info.h"
 
-#define CPU0_CPU1_CORE_PLL_CLK       200                                       /* unit: MHz */
-#define CPU2_CORE_PLL_CLK            166                                       /* unit: MHz */
+#define CPU0_CPU1_CORE_PLL_CLK       160                                     /* unit: MHz */
+#define CPU2_CORE_PLL_CLK            166                                     /* unit: MHz */
 #define SPI_UART_SEL                 (*(volatile unsigned int *)0xA003009C)
 
 #define SRAM_CPU_PLL_INIT_FLAG_VALUE 0x20A5A502

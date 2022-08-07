@@ -52,14 +52,14 @@ int get_vedio_deep(int *len)
         return -1;
 
     *len = *(int *)(wir_info.vedio_space);
-    DLOG_Info("len = %x",*len);
+    //DLOG_Info("len = %x",*len);
 
     return 0;
 }
 int get_vedio_deep1(int *len)
 {
     *len = *(int *)(wir_info.vedio_space1);
-    DLOG_Info("len = %x",*len);
+   // DLOG_Info("len = %x",*len);
     return 0;
 }
 

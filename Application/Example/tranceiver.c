@@ -151,14 +151,14 @@ static void codec_data_dump_callback(void* data,unsigned int size,int id)
 		//if(id==DATA_ENC_2) printf_data(data,size,id);
 		//if(id==DATA_ENC_3) printf_data(data,size,id);
 		//if(id==DATA_ENC_4) printf_data(data,size,id);
-		//if(id==DATA_ENC_7) printf_data(data,size,id);
+		if(id==DATA_ENC_7) printf_data(data,size,id);
 		//if(id==DATA_ENC_8) printf_data(data,size,id);
 		//if(id==DATA_DEC_20) printf_data(data,size,id);
 		//if(id==DATA_DEC_21) printf_data(data,size,id);
 		//if(id==DATA_DEC_22) printf_data(data,size,id);
 		//if(id==DATA_DEC_24) printf_data(data,size,id);
 		//if(id==DATA_DEC_23) printf_data(data,size,id);
-		//if(id==DATA_DEC_28) printf_data(data,size,id);
+		if(id==DATA_DEC_28) printf_data(data,size,id);
 		//if(id==DATA_DEC_29) printf_data(data,size,id);
 		//if(id==DATA_DEC_31) printf_data(data,size,id);
 		//if(id==DATA_DEC_32) printf_data(data,size,id);
@@ -482,9 +482,9 @@ static int app_tx_decode_data_to_net(void* data,unsigned int size){
 			static int k=0;
 			totalsize+=size;
 			k++;
-			if(k==200){
+			if(k>=200){
 				int now = app_get_curtime();
-				printf("org: %d,avr_package=%d rate=%d B/s\n",totalsize,totalsize/200,totalsize*1000*8/(now-pretime));
+				printf("org: %d,avr_package=%d rate=%d B/s\n",totalsize,totalsize/k,totalsize*1000*8/(now-pretime));
 				pretime=now;
 				k=0;
 				totalsize=0;
@@ -526,7 +526,7 @@ static void app_tx_session_event(void *p)
     uint32_t u32_rcvLen = 0;
 	static unsigned int totalsize=0;
 	static unsigned int pretime=0;
-	pretime=app_get_curtime();
+	//pretime=app_get_curtime();
 	static int k=0,j=0;
 	osSemaphoreWait(tx_semaphore_id,1);
     HAL_RET_T ret=HAL_BB_ComReceiveMsg(NET_COM, data_buf_proc, sizeof(data_buf_proc), &u32_rcvLen);
@@ -534,11 +534,16 @@ static void app_tx_session_event(void *p)
 	{
 		jqyring_buf_t *buf = &tx_codec->trcontext->buf[DEC_INPUT_BUF];
 		codec_push_data(tx_codec,buf,data_buf_proc,u32_rcvLen);
-		totalsize+=u32_rcvLen;
+		
+		sync_head_t *head = (sync_head_t *)buf;
+		if(head->codec_type==RM_ZERO_REF_ORDER2){
+			totalsize+=u32_rcvLen/4;
+		}
+		else totalsize+=u32_rcvLen;
 		k++;
-		if(k==200){
-			int now = app_get_curtime();
-			printf("enc: %d,avr_package=%d rate=%d B/s\n",totalsize,totalsize/200,totalsize*1000*8/(now-pretime));
+		if(k>=200){
+			unsigned int now = app_get_curtime();
+			printf("enc: %d,avr_package=%d time=%d ms\n",totalsize,totalsize/k,(now-pretime)/k);
 			pretime=now;
 			k=0;
 			totalsize=0;
@@ -686,11 +691,11 @@ void init_codec(void* arg1,RX_TX t)
 	codec_set_max_buf_size(codec,2000);
 	codec_set_max_buf_cnt(codec,64);
 	codec_set_max_refbuf_thd(codec,60,65);
-	codec_set_update_refbuf_time(codec,10000);
+	codec_set_update_refbuf_time(codec,40000);
 	codec_set_max_bag_thd(codec,65);
 	codec_init(codec);
-	codec_set_buf_max_cnt(codec,&codec->trcontext->buf[ENC_REF_BUF],10);
-	codec_set_buf_max_cnt(codec,&codec->trcontext->buf[DEC_REF_BUF],10);
+	codec_set_buf_max_cnt(codec,&codec->trcontext->buf[ENC_REF_BUF],64);
+	codec_set_buf_max_cnt(codec,&codec->trcontext->buf[DEC_REF_BUF],64);
 	codec_set_union_max_cnt(codec,4);
 	for(int i=0;i<data_tag_len;i++)
 	{

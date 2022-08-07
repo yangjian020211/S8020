@@ -30,6 +30,10 @@ void PLLCTRL_SetCoreClk(uint16_t u16_pllClk, ENUM_CPU_ID e_cpuId)
     {
         BB_SPI_WriteByte(PAGE1, 0xA1, clk_low);
         BB_SPI_WriteByte(PAGE1, 0xA2, clk_high);
+		//BB_SPI_WriteByte(PAGE1, 0xAd, 0xc8);//200
+        //BB_SPI_WriteByte(PAGE1, 0xAe, 0x00);
+		BB_SPI_WriteByte(PAGE1, 0xAd, clk_low);
+        BB_SPI_WriteByte(PAGE1, 0xAe, clk_high);
         *((uint32_t *)SRAM_MODULE_SHARE_PLL_CPU0CPU1) = u16_pllClk;
         s_u8_cpuClkInitFlag |= 0x1;
     }

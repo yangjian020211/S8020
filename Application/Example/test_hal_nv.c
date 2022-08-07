@@ -53,8 +53,8 @@ void command_TestNvSetChipId(uint8_t *id1, uint8_t *id2, uint8_t *id3, uint8_t *
 
 
 
-#define LEN_PER_WR       (4567)
-#define MAX_LEN          (60*1024)
+#define LEN_PER_WR       (1024)
+#define MAX_LEN          (6*1024)
 
 static uint8_t wData[LEN_PER_WR];
 
@@ -76,7 +76,7 @@ void command_TestUsrDataWrite(void)
         wLen += LEN_PER_WR;
     }
 
-    DLOG_Info("finished %d", (wLen - LEN_PER_WR));
+    DLOG_Warning("finished %d", (wLen - LEN_PER_WR));
 }
 
 void command_TestUsrDataRead(void)
@@ -94,23 +94,24 @@ void command_TestUsrDataRead(void)
     while((rLen + LEN_PER_WR) < MAX_LEN)
     {
         memset(rData, 0x00, LEN_PER_WR);
+		DLOG_Warning("begin to read ");
         if (HAL_NV_ERR == HAL_NV_UsrDataRead(rLen, rData, LEN_PER_WR))
-
         {
-            DLOG_Info("read err %d:\t0x%x", cnt, rLen);
+            DLOG_Error("read err %d:\t0x%x", cnt, rLen);
             break;
         }
+		DLOG_Warning("end to read and begin to compare ");
         if (0 != memcmp(wData, rData, LEN_PER_WR))
         {
-            DLOG_Info("cmp err %d:\t0x%x", cnt, rLen);
+            DLOG_Error("cmp err %d:\t0x%x", cnt, rLen);
             break;
         }
-        DLOG_Info("%d:\t0x%x", cnt++, rLen);
+        //DLOG_Warning("%d:\t0x%x", cnt++, rLen);
         rLen += LEN_PER_WR;
-        HAL_Delay(500);
+        HAL_Delay(1);
     }
 
-    DLOG_Info("finished %d", (rLen - LEN_PER_WR));
+    DLOG_Warning("finished %d", (rLen - LEN_PER_WR));
 }
 
 

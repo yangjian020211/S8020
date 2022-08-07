@@ -17,6 +17,7 @@ static  unsigned char preenc_union_frame[MAX_BUF_SIZE_TEMP]={0};
 void codec_init(void* arg){
 	jqy_codec_t* codec = (jqy_codec_t*)arg;
 	context_t* trcontext = codec->trcontext;
+	trcontext->tx_have_not_frame=0;
 	int ok=0,ok1=0,ok2=0,ok3=0;
 	int i=0,j=0;
 	if(trcontext->max_buffer_cnt>0){
@@ -1028,12 +1029,17 @@ void codec_enc_task(void const *argument)
 			sync_head_t *head = (sync_head_t *)enc_input_buf->buffer[enc_input_buf->rd_ptr];
 			head->id=enc_input_buf->rd_ptr;
 			codec->codec_data_dump_callback(enc_input_buf->buffer[enc_input_buf->rd_ptr],size,DATA_ENC_0);//
-			codec_xor_rm_zero(codec,enc_input_buf,enc_union_buf,enc_refbuf,enc_input_buf->rd_ptr,size);
+			
 			int ref_buf_cnt = codec_get_buf_cnt(codec,enc_refbuf);
 			if(ref_buf_cnt>=enc_refbuf->max_buffer_cnt){
 				enc_refbuf->rd_ptr = (enc_refbuf->rd_ptr+1)%enc_refbuf->max_buffer_cnt;
 				if(enc_refbuf->rd_ptr==0) enc_refbuf->rd_ptr=enc_refbuf->buffer_offset;
 			}
+			if(codec->trcontext->tx_have_not_frame==1){
+				enc_refbuf->rd_ptr=enc_refbuf->wr_ptr;
+				codec->trcontext->tx_have_not_frame=0;
+			}
+			codec_xor_rm_zero(codec,enc_input_buf,enc_union_buf,enc_refbuf,enc_input_buf->rd_ptr,size);	
 		}
         else codec->codec_delayms(5);
     }
@@ -1114,7 +1120,7 @@ static void do_union_frame_decode(jqy_codec_t* codec,jqyring_buf_t *dec_refbuf)
 			if(id_inrefbuf==0)
 			{
 				//have not the rid frame in the ref_buf,neet to update table
-				//printf("\n 2---id=%d rid=%d \n ",head->id,head->rid);
+				printf("\n 2---id=%d rid=%d \n ",head->id,head->rid);
 				int error = ERROR_FRAME_NOT_IN_REFBUF;
 				codec->codec_error_callback(&error);
 				struct _sync_head head2 ={0};
@@ -1125,6 +1131,7 @@ static void do_union_frame_decode(jqy_codec_t* codec,jqyring_buf_t *dec_refbuf)
 				buf[3]=0;
 				codec_push_data(codec,&codec->trcontext->buf[DEC_OUTPUT_BUF],buf,4);
 				codec->codec_data_dump_callback(buf,4,DATA_DEC_35);//
+				dec_union_buf->rd_ptr = wr_idx1;
 				return ;
 			}
 			else
@@ -1156,7 +1163,7 @@ static void do_union_frame_decode(jqy_codec_t* codec,jqyring_buf_t *dec_refbuf)
 			if(id_inrefbuf==0)
 			{
 				//have not the rid frame in the ref_buf,neet to update table
-				//printf("\n 3---id=%d rid=%d \n ",head->id,head->rid);
+				printf("\n 3---id=%d rid=%d \n ",head->id,head->rid);
 				int error = ERROR_FRAME_NOT_IN_REFBUF;
 				codec->codec_error_callback(&error);	
 				struct _sync_head head2 ={0};
@@ -1167,6 +1174,7 @@ static void do_union_frame_decode(jqy_codec_t* codec,jqyring_buf_t *dec_refbuf)
 				buf[3]=0;
 				codec_push_data(codec,&codec->trcontext->buf[DEC_OUTPUT_BUF],buf,4);
 				codec->codec_data_dump_callback(buf,4,DATA_DEC_35);//
+				dec_union_buf->rd_ptr = wr_idx1;
 				return ;
 			}
 			else
@@ -1218,9 +1226,10 @@ static int decode_one_frame(jqy_codec_t* codec,unsigned char *si,jqyring_buf_t *
 		}
 	}
 	else if(head->codec_type==ACK_RM_ZERO_REF_HAVE_NOT){
-		jqyring_buf_t *enc_refbuf =&codec->trcontext->buf[ENC_REF_BUF];
-		enc_refbuf->rd_ptr=enc_refbuf->wr_ptr;
-		//printf("ack have not ref \n");
+		//jqyring_buf_t *enc_refbuf =&codec->trcontext->buf[ENC_REF_BUF];
+		//enc_refbuf->rd_ptr=enc_refbuf->wr_ptr;
+		codec->trcontext->tx_have_not_frame=1;
+		printf("ack have not ref \n");
 		return 1;
 	}
 	else if(head->codec_type==ACK_RM_ZERO_REF){
@@ -1260,7 +1269,7 @@ static int decode_one_frame(jqy_codec_t* codec,unsigned char *si,jqyring_buf_t *
 			if(id_inrefbuf==0)
 			{
 				//have not the rid frame in the ref_buf,neet to update table
-				//printf("\n 1---id=%d rid=%d \n ",head->id,head->rid);
+				printf("\n 1---id=%d rid=%d \n ",head->id,head->rid);
 				int error = ERROR_FRAME_NOT_IN_REFBUF;
 				codec->codec_error_callback(&error);
 				

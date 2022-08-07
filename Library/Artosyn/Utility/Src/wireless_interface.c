@@ -31,6 +31,7 @@
 #include "driver_mutex.h"
 #include "driver_module_init.h"
 #include "systicks.h"
+#include "pll_ctrl.h"
 
 //#define C201S_UAV
 
@@ -982,6 +983,9 @@ uint8_t WIRELESS_INTERFACE_UPGRADE_Handler(void *param, uint8_t id)
     if (packet_index == 0)
     {
         DLOG_Critical("packet_index == 0");
+
+		// HAL_SYS_CTL_SetCpuClk(200, 166);
+		// HAL_UART_Init(0, 4, NULL);
 		//
 		//HAL_USB_DeInitDevice(HAL_USB_PORT_0);
 		//DLOG_Critical("HAL_USB_DeInitDevice usb 0");

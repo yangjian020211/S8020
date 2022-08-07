@@ -99,7 +99,7 @@ void HAL_USB_Init(ENUM_HAL_USB_PORT e_usbPort, ENUM_HAL_USB_DR_MODE e_usbDrMode)
 
 HAL_RET_T HAL_USB_SendCtrl(uint8_t *buff, uint32_t u32_len, uint8_t u8_portId)
 {
-    DLOG_Info("PortId: %d", u8_portId);
+   // DLOG_Info("PortId: %d", u8_portId);
     if(HAL_USB_DR_MODE_DEVICE == HAL_INIT_USB_MODE[u8_portId])
     {
         return HAL_USB_DeviceSendCtrl(buff, u32_len, u8_portId);

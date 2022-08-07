@@ -136,13 +136,13 @@ typedef enum{
 } ENUM_CODEC_BUFFER_DATA_ID;   
 typedef enum{
    ENC_INPUT_BUF=0,
-   DEC_INPUT_BUF,
-   ENC_OUTPUT_BUF,
-   DEC_OUTPUT_BUF,
-   ENC_REF_BUF,
-   DEC_REF_BUF,
-   ENC_UNION_BUF,
-   DEC_UNION_BUF,
+   DEC_INPUT_BUF,//1
+   ENC_OUTPUT_BUF,//2
+   DEC_OUTPUT_BUF,//3
+   ENC_REF_BUF,//4
+   DEC_REF_BUF,//5
+   ENC_UNION_BUF,//6
+   DEC_UNION_BUF,//7
    MAX_BUF_CNT,
 
 } ENUM_BUF_T;
@@ -206,6 +206,7 @@ typedef struct _context{
 	unsigned char max_union_packege;
 	unsigned char enc_frame_cnt;
 	unsigned char pre_ref_frame_id;
+	unsigned char tx_have_not_frame;
 }context_t;
 typedef struct _jqy_codec
 {
