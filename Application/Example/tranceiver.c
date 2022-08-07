@@ -1,4 +1,5 @@
 #include "jqy_codec.h"
+
  #if Linuxsimulation
 pthread_mutex_t mutex;
 

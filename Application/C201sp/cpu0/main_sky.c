@@ -42,6 +42,7 @@
 #include "hal_mfi.h"
 #include "hal_norflash.h"
 #include "usr_protocol.h"
+#include "lo_io.h"
 
 
 //#define USE_HDMI_CH7038
@@ -240,6 +241,8 @@ int main(void)
     usr_usb0_interface();
 
     c201d_pt(testmode);
+
+	Initial_Lo_GPIO();
 
     if(!testmode)
     {

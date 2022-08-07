@@ -36,6 +36,8 @@
 #include "hal_norflash.h"
 #include "usr_protocol.h"
 #include "test_nv_grd_slave.h"
+#include "lo_io.h"
+
 
 //#define ENABLE_NV_GRD_SLAVE
 
@@ -246,6 +248,8 @@ int main(void)
 
     usr_cmd_uart_task(pst_cfg->u8_workMode);
 	usr_cmd_status_uart_task(pst_cfg->u8_workMode);
+
+	Initial_Lo_GPIO();
 
     //osThreadDef(UsbIDTask, USB_ID_Task, osPriorityNormal, 0, 16 * 128);
 	//osThreadCreate(osThread(UsbIDTask), NULL);

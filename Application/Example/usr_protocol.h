@@ -24,6 +24,9 @@ extern uint8_t usb_send_packet_start;
 #define CMD_MANUL_START_LOG		0x96
 #define CMD_MANUL_STOP_LOG		0x97
 
+#define CMD_SET_RF_BAND		0x98
+
+
 
 uint8_t cmd_ack_handle(void *msg, uint8_t port_id);
 

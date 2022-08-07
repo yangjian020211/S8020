@@ -23,9 +23,9 @@ void read_lo(unsigned char count, unsigned char *buf);
 
 static unsigned char GET_DATA()
 {
-	unsigned char data=0;
+	uint32_t data=0;
 	HAL_GPIO_GetPin(HAL_GPIO_NUM50,&data);
-	return data;
+	return (unsigned char)data;
 }
 typedef struct _rfband{
   int band;
@@ -37,7 +37,7 @@ typedef struct _rfband{
    unsigned	int R5;  
 } rfband;
 
-static _rfband myrfband[Maxband]
+rfband myrfband[Maxband]=
 {
 	
 	{200,0x6B8000,0x8008011,0x8E42,0x4B3,0x9A003C,0x580005},//2350-200=2150
@@ -54,7 +54,7 @@ static _rfband myrfband[Maxband]
 	{1300,0x690000,0x8008011,0x8E42,0x4B3,0xAA003C,0x580005},//2350-1300=1050
 	{1400,0x5F0000,0x8008011,0x8E42,0x4B3,0xAA003C,0x580005},//2350-1400=950
 	{1500,0x550000,0x8008011,0x8E42,0x4B3,0xAA003C,0x580005},//2350-1500=850
-}	
+};
 
 void Initial_Lo_GPIO()
 {

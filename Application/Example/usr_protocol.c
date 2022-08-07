@@ -14,6 +14,7 @@
 #include "usr_uart3_task.h"
 #include "hal_sram_ground.h"
 #include "tranceiver.h"
+#include "lo_io.h"
 
 #define DATA_RDY    0
 #define DATA_NORDY  1
@@ -277,9 +278,15 @@ uint8_t cmd_ack_handle(void *msg, uint8_t port_id)
 			app_log_ctrl(1,port_id);
 		   	printf("open the log record buf[10]=%d,port_id=%d \n",1,port_id);
 			break;
+			
 			case CMD_MANUL_STOP_LOG:
 			app_log_ctrl(0,port_id);
 		   	printf("close the log record buf[10]=%d,port_id=%d \n",0,port_id);
+			break;
+
+			case CMD_SET_RF_BAND:
+			Set_Lo(pmsg[10]);
+		   	printf("select band %d \n",pmsg[10]);
 			break;
 			
         default:
